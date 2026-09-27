@@ -5,7 +5,7 @@ import { Dashboard, List, Calendar, Team, Approvals, Report, Users, Alerts, Audi
 import { Toasts, TaskDetail, CreateTask, UserForm, ChangePassword } from './overlays.jsx';
 
 const badge = { fontSize: 11, fontFamily: MONO, background: '#B83A32', color: '#fff', borderRadius: 99 };
-const MANUAL_URL = 'https://claude.ai/artifact/Q4PqkNdvXLAFMeENX9Fgo3';
+const MANUAL_URL = '/manual.html';
 
 function Sidebar({ V }) {
   const glass = { background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: 14 };

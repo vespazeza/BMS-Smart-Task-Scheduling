@@ -1,0 +1,592 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>คู่มือ Smart Task Scheduling</title>
+<meta name="description" content="คู่มือการใช้งานระบบจัดตารางงานและแจ้งเตือนอัจฉริยะ พร้อมภาพหน้าจอจริงทุกขั้นตอน สำหรับเลขานุการ ผู้บริหาร พยาบาล/พนักงาน บุคคลทั่วไป และผู้ดูแลระบบ">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F3F6FC; --surface:#FFFFFF; --surface2:#F8FAFE; --border:#E2E8F2; --border2:#D3DBEA;
+  --ink:#0F1B34; --ink2:#4A5578; --muted:#6B7690; --muted2:#8E98B5;
+  --navy:#0B1636; --navy2:#123072; --primary:#2563EB; --primary2:#4F8DF5;
+  --grad:linear-gradient(120deg,#0B1636 0%,#173A8C 55%,#2F7BF0 100%);
+  --chip:#EAF0FE;
+  --yellow:#8A6500; --yellow-bg:#FBF0C3; --orange:#B4540F; --orange-bg:#FDE3CC;
+  --green:#2E7040; --green-bg:#DDF0E1; --grey:#4E4C47; --grey-bg:#E4E3E0;
+  --red:#B83A32; --red-bg:#FAE8E5;
+  --shadow:0 1px 2px rgba(15,27,52,.04),0 10px 28px -16px rgba(15,27,52,.16);
+  --radius:16px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0A0F1E; --surface:#131B30; --surface2:#0E1527; --border:#232D48; --border2:#2E3958;
+    --ink:#E8EEFB; --ink2:#C3CDE6; --muted:#98A5C4; --muted2:#7E8BAC;
+    --navy:#060A16; --navy2:#0E1F4D; --primary:#5B8DEF; --primary2:#7BA6F7;
+    --grad:linear-gradient(120deg,#060A16 0%,#12295E 55%,#2F63C4 100%);
+    --chip:#182446;
+    --yellow-bg:#3A3222; --orange-bg:#3A2B1E; --green-bg:#1B3324; --grey-bg:#2A2E38; --red-bg:#3A2530;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0A0F1E; --surface:#131B30; --surface2:#0E1527; --border:#232D48; --border2:#2E3958;
+  --ink:#E8EEFB; --ink2:#C3CDE6; --muted:#98A5C4; --muted2:#7E8BAC;
+  --navy:#060A16; --navy2:#0E1F4D; --primary:#5B8DEF; --primary2:#7BA6F7;
+  --grad:linear-gradient(120deg,#060A16 0%,#12295E 55%,#2F63C4 100%);
+  --chip:#182446;
+  --yellow-bg:#3A3222; --orange-bg:#3A2B1E; --green-bg:#1B3324; --grey-bg:#2A2E38; --red-bg:#3A2530;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'IBM Plex Sans Thai',-apple-system,sans-serif;line-height:1.7;-webkit-font-smoothing:antialiased}
+::selection{background:var(--primary);color:#fff}
+img{max-width:100%}
+a{color:var(--primary)}
+h1,h2,h3,h4{font-weight:700;letter-spacing:-.01em;text-wrap:balance;color:var(--ink)}
+code,.mono{font-family:'IBM Plex Mono',monospace}
+.wrap{display:flex;min-height:100%}
+
+/* ---------- sidebar / TOC ---------- */
+#navtoggle{display:none}
+.toc{
+  position:sticky;top:0;align-self:flex-start;height:100vh;width:280px;flex:none;
+  background:var(--grad);color:#E8EEFC;overflow-y:auto;padding:22px 16px 28px;
+}
+.toc .brand{display:flex;align-items:center;gap:11px;padding:0 8px 20px}
+.toc .brand .mark{width:38px;height:38px;flex:none;border-radius:11px;background:linear-gradient(145deg,#1e293b,#020617);box-shadow:0 6px 14px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.14);display:grid;place-items:center;font-weight:900;font-size:15px;letter-spacing:-.04em}
+.toc .brand .mark span:first-child{color:#fff}
+.toc .brand .mark span:last-child{color:#5B9CFF}
+.toc .brand .t1{font-size:13.5px;font-weight:700;color:#fff;line-height:1.3}
+.toc .brand .t2{font-size:11px;color:#9FB0DB;margin-top:1px}
+.toc .kicker{font-size:10.5px;letter-spacing:.09em;color:#8FA2CC;padding:14px 10px 6px}
+.toc nav{display:flex;flex-direction:column;gap:1px}
+.toc a{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:9px;color:#C4D0EC;text-decoration:none;font-size:13px}
+.toc a .num{font-family:'IBM Plex Mono';font-size:10.5px;color:#7C8FC2;width:18px;flex:none}
+.toc a:hover{background:rgba(255,255,255,.07);color:#fff}
+.toc a.on{background:rgba(255,255,255,.14);color:#fff;font-weight:600}
+.toc a.on .num{color:#BFD3FF}
+
+/* ---------- main ---------- */
+main{flex:1;min-width:0;padding:48px clamp(20px,4vw,64px) 96px;max-width:900px}
+.hero{background:var(--grad);color:#fff;border-radius:22px;padding:34px 32px;position:relative;overflow:hidden;box-shadow:0 22px 44px -24px rgba(37,99,235,.55);margin-bottom:36px}
+.hero::after{content:"";position:absolute;right:-70px;top:-90px;width:260px;height:260px;border-radius:50%;background:rgba(255,255,255,.08)}
+.hero .eyebrow{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:#BFD3FF;background:rgba(255,255,255,.12);border-radius:99px;padding:4px 12px;margin-bottom:14px}
+.hero h1{color:#fff;font-size:clamp(26px,3.6vw,34px);margin:0 0 10px}
+.hero p{color:#D9E3FA;font-size:15px;max-width:56ch;margin:0}
+.hero .meta{display:flex;gap:18px;flex-wrap:wrap;margin-top:22px;font-size:12.5px;color:#AFC2EF}
+.hero .meta b{color:#fff;font-weight:600}
+
+section{scroll-margin-top:20px;padding-top:20px;margin-bottom:8px}
+section+section{border-top:1px solid var(--border);padding-top:40px;margin-top:32px}
+.section-head{display:flex;align-items:baseline;gap:10px;margin-bottom:6px}
+.section-head .idx{font-family:'IBM Plex Mono';font-size:13px;color:var(--primary);font-weight:600}
+h2{font-size:23px;margin:0}
+h3{font-size:16.5px;margin:26px 0 10px}
+.lede{color:var(--ink2);font-size:15px;margin:6px 0 22px;max-width:64ch}
+p{color:var(--ink2);font-size:14.5px;margin:0 0 12px;max-width:66ch}
+ul,ol{color:var(--ink2);font-size:14.5px;padding-left:22px;margin:0 0 14px;max-width:64ch}
+li{margin-bottom:6px}
+li b, p b, strong{color:var(--ink);font-weight:600}
+.subtle{color:var(--muted);font-size:13px}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px 22px;margin:16px 0}
+.card h4{margin:0 0 8px;font-size:14.5px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:16px 0}
+
+.steps{counter-reset:step;list-style:none;padding:0;margin:16px 0;display:flex;flex-direction:column;gap:10px}
+.steps li{counter-increment:step;display:flex;gap:13px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin:0}
+.steps li::before{content:counter(step);flex:none;width:24px;height:24px;border-radius:50%;background:var(--chip);color:var(--primary);font-family:'IBM Plex Mono';font-size:12.5px;font-weight:600;display:grid;place-items:center}
+
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13.5px}
+th{text-align:left;color:var(--muted);font-weight:600;font-size:12px;letter-spacing:.02em;padding:0 12px 8px;border-bottom:1px solid var(--border)}
+td{padding:11px 12px;border-bottom:1px solid var(--border);color:var(--ink2);vertical-align:top}
+tr:last-child td{border-bottom:none}
+td b{color:var(--ink)}
+.twrap{overflow-x:auto;margin:16px 0;border:1px solid var(--border);border-radius:14px}
+.twrap table{margin:0}
+.twrap th:first-child,.twrap td:first-child{padding-left:16px}
+
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;padding:3px 11px;border-radius:99px;white-space:nowrap}
+.p-yellow{background:var(--yellow-bg);color:var(--yellow)}
+.p-orange{background:var(--orange-bg);color:var(--orange)}
+.p-green{background:var(--green-bg);color:var(--green)}
+.p-grey{background:var(--grey-bg);color:var(--grey)}
+.p-red{background:var(--red-bg);color:var(--red)}
+.dot{width:9px;height:9px;border-radius:3px;display:inline-block}
+
+.legend{display:flex;flex-wrap:wrap;gap:10px 22px;margin:16px 0}
+.legend .row{display:flex;align-items:center;gap:9px;font-size:13.5px;color:var(--ink2)}
+.legend b{color:var(--ink)}
+
+kbd{font-family:'IBM Plex Mono';font-size:12px;background:var(--chip);color:var(--primary);border-radius:6px;padding:2px 7px;border:1px solid var(--border2)}
+.btn-mock{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;border-radius:9px;padding:6px 13px;background:var(--grad);color:#fff}
+.btn-mock.ghost{background:var(--surface);color:var(--primary);border:1px solid var(--primary)}
+
+.callout{border-radius:14px;padding:14px 16px;margin:16px 0;font-size:14px;display:flex;gap:11px}
+.callout .ic{flex:none;width:20px;height:20px;margin-top:1px}
+.callout p,.callout li{margin:0;font-size:13.5px}
+.c-info{background:var(--chip);border:1px solid color-mix(in srgb,var(--primary) 30%,var(--border))}
+.c-info .ic{color:var(--primary)}
+.c-warn{background:var(--orange-bg);border:1px solid color-mix(in srgb,var(--orange) 35%,transparent)}
+.c-warn .ic{color:var(--orange)}
+.c-danger{background:var(--red-bg);border:1px solid color-mix(in srgb,var(--red) 30%,transparent)}
+.c-danger .ic{color:var(--red)}
+
+.roles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:16px 0}
+.role{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;box-shadow:var(--shadow)}
+.role .tag{display:inline-block;font-size:11.5px;font-weight:700;letter-spacing:.02em;padding:2px 10px;border-radius:99px;margin-bottom:10px}
+.role p{font-size:13px;margin:0}
+.role ul{font-size:13px;padding-left:18px;margin:8px 0 0}
+.role li{margin-bottom:4px}
+
+.shot{margin:16px 0;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);background:var(--surface2)}
+.shot img{display:block;width:100%}
+.shot figcaption{font-size:12.5px;color:var(--muted);padding:9px 14px;border-top:1px solid var(--border)}
+
+footer{max-width:900px;padding:0 clamp(20px,4vw,64px) 60px;color:var(--muted);font-size:12.5px}
+
+.menu-btn{display:none}
+@media (max-width:880px){
+  .toc{position:fixed;inset:0 auto 0 0;transform:translateX(-104%);transition:transform .22s ease;z-index:40;box-shadow:0 0 0 100vmax rgba(6,10,22,0);width:82vw;max-width:300px}
+  #navtoggle:checked ~ .wrap .toc{transform:translateX(0);box-shadow:0 0 0 100vmax rgba(6,10,22,.45)}
+  main{padding:64px 18px 80px}
+  .menu-btn{display:flex;position:fixed;top:14px;left:14px;z-index:41;align-items:center;gap:8px;background:var(--navy);color:#fff;border:none;border-radius:11px;padding:9px 14px;font-size:13px;font-weight:600;box-shadow:0 8px 18px rgba(0,0,0,.28)}
+  .toc-close{display:block!important;margin-left:auto}
+}
+.toc-close{display:none;background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:8px;width:28px;height:28px;font-size:14px;cursor:pointer}
+</style>
+
+<input type="checkbox" id="navtoggle">
+<label class="menu-btn" for="navtoggle"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 4h12M2 8h12M2 12h12"/></svg>สารบัญ</label>
+
+<div class="wrap">
+  <aside class="toc">
+    <div class="brand">
+      <span class="mark"><span>S</span><span>T</span></span>
+      <span><span class="t1" style="display:block">Smart Task Scheduling</span><span class="t2">คู่มือการใช้งาน</span></span>
+      <label class="toc-close" for="navtoggle">✕</label>
+    </div>
+    <div class="kicker">เริ่มต้น</div>
+    <nav>
+      <a href="#intro"><span class="num">00</span>เกี่ยวกับระบบ</a>
+      <a href="#start"><span class="num">01</span>เข้าสู่ระบบครั้งแรก</a>
+      <a href="#roles"><span class="num">02</span>บทบาทและสิทธิ์</a>
+      <a href="#screen"><span class="num">03</span>ส่วนต่าง ๆ ของหน้าจอ</a>
+    </nav>
+    <div class="kicker">ใช้งานหลัก</div>
+    <nav>
+      <a href="#dashboard"><span class="num">04</span>ภาพรวม (Dashboard)</a>
+      <a href="#quickadd"><span class="num">05</span>เพิ่มงานด่วน</a>
+      <a href="#nownext"><span class="num">06</span>ตอนนี้ / ถัดไป &amp; ไทม์ไลน์</a>
+      <a href="#create"><span class="num">07</span>สร้างงานใหม่</a>
+      <a href="#status"><span class="num">08</span>สถานะและสี</a>
+      <a href="#reschedule"><span class="num">09</span>เลื่อน/แก้ไขตารางงาน</a>
+      <a href="#cancel"><span class="num">10</span>ยกเลิกงาน</a>
+      <a href="#files"><span class="num">11</span>ไฟล์แนบผลงาน</a>
+      <a href="#calendar"><span class="num">12</span>ปฏิทิน</a>
+      <a href="#list"><span class="num">13</span>รายการ Schedule</a>
+    </nav>
+    <div class="kicker">แจ้งเตือน &amp; ทีม</div>
+    <nav>
+      <a href="#notify"><span class="num">14</span>การแจ้งเตือน</a>
+      <a href="#rsvp"><span class="num">15</span>ตอบรับคำเชิญประชุม</a>
+      <a href="#team"><span class="num">16</span>ภาพรวมทีม (ผู้บริหาร)</a>
+      <a href="#approvals"><span class="num">17</span>รออนุมัติ (ผู้บริหาร)</a>
+    </nav>
+    <div class="kicker">เฉพาะบทบาท</div>
+    <nav>
+      <a href="#role-sec"><span class="num">18</span>สำหรับเลขานุการ</a>
+      <a href="#role-nur"><span class="num">19</span>สำหรับพยาบาล</a>
+      <a href="#role-gen"><span class="num">20</span>สำหรับบุคคลทั่วไป</a>
+    </nav>
+    <div class="kicker">เชื่อมต่อ &amp; รายงาน</div>
+    <nav>
+      <a href="#sync"><span class="num">21</span>ซิงก์ปฏิทินภายนอก</a>
+      <a href="#digest"><span class="num">22</span>สรุปงานประจำวัน</a>
+      <a href="#report"><span class="num">23</span>รายงานและส่งออก</a>
+    </nav>
+    <div class="kicker">ระบบ</div>
+    <nav>
+      <a href="#settings"><span class="num">24</span>การตั้งค่า</a>
+      <a href="#admin"><span class="num">25</span>สำหรับผู้ดูแลระบบ</a>
+      <a href="#security"><span class="num">26</span>ความปลอดภัย</a>
+      <a href="#faq"><span class="num">27</span>คำถามที่พบบ่อย</a>
+    </nav>
+  </aside>
+
+  <main>
+    <div class="hero" id="intro">
+      <span class="eyebrow">คู่มือการใช้งาน · v2.0 · ภาพหน้าจอจริงทุกขั้นตอน</span>
+      <h1>Smart Task Scheduling<br>&amp; Alert System</h1>
+      <p>ระบบจัดตารางงานและแจ้งเตือนอัจฉริยะสำหรับหน่วยงาน — วางแผนงาน ติดตามสถานะ แจ้งเตือนอัตโนมัติ และดูภาพรวมทีม ในที่เดียว คู่มือนี้อธิบายทุกฟังก์ชันตามบทบาทผู้ใช้ พร้อมภาพหน้าจอจริงประกอบแต่ละขั้นตอน เปิดได้จากเมนู <b>“คู่มือการใช้งาน”</b> ต่อจาก “การตั้งค่า” ในแถบเมนูซ้ายของระบบทุกเมื่อ</p>
+      <div class="meta">
+        <span>สำหรับ: <b>เลขานุการ · ผู้บริหาร · พยาบาล/พนักงาน · บุคคลทั่วไป · ผู้ดูแลระบบ</b></span>
+        <span>ใช้งานได้ทั้งเดสก์ท็อปและมือถือ</span>
+      </div>
+    </div>
+
+    <section id="start">
+      <div class="section-head"><span class="idx">01</span><h2>เข้าสู่ระบบครั้งแรก</h2></div>
+      <p class="lede">บัญชีทุกคนสร้างโดยผู้ดูแลระบบ คุณจะได้รับ <b>ชื่อผู้ใช้</b> และ <b>รหัสผ่านชั่วคราว</b> จากผู้ดูแลระบบก่อนเริ่มใช้งาน</p>
+      <figure class="shot"><img src="/manual-assets/8fa9bc9f54d95f40fb01b0435d482b50.png" alt="หน้าจอเข้าสู่ระบบ มีช่องชื่อผู้ใช้และรหัสผ่านทางขวา พร้อมภาพรวมฟีเจอร์ทางซ้าย"><figcaption>หน้าจอเข้าสู่ระบบ — กรอกชื่อผู้ใช้และรหัสผ่านทางขวา</figcaption></figure>
+      <ol class="steps">
+        <li>เปิดลิงก์ระบบ แล้วกรอกชื่อผู้ใช้และรหัสผ่านชั่วคราวที่ได้รับ กด <span class="btn-mock" style="padding:2px 10px;font-size:12px">เข้าสู่ระบบ</span></li>
+        <li>ระบบจะให้ตั้ง <b>รหัสผ่านใหม่ของตัวเอง</b> ทันที — ต้องยาวอย่างน้อย 8 ตัวอักษร มีทั้งตัวอักษรและตัวเลข และห้ามซ้ำกับรหัสผ่านเดิม</li>
+        <li>เข้าสู่ระบบอีกครั้งด้วยรหัสผ่านใหม่ หน้าจอจะพาไปยังหน้าหลักตามบทบาทของคุณโดยอัตโนมัติ</li>
+      </ol>
+      <div class="callout c-info">
+        <svg class="ic" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="7.5"/><path d="M10 9v4.5M10 6.6v.1"/></svg>
+        <p>ติ๊ก <b>“จดจำการใช้งาน”</b> ไว้ที่หน้าเข้าสู่ระบบ เพื่อให้ระบบจำชื่อผู้ใช้ของคุณไว้ในครั้งถัดไป (ไม่ได้จำรหัสผ่าน)</p>
+      </div>
+    </section>
+
+    <section id="roles">
+      <div class="section-head"><span class="idx">02</span><h2>บทบาทและสิทธิ์</h2></div>
+      <p class="lede">หน้าจอ เมนู และสิ่งที่แก้ไขได้ จะเปลี่ยนไปตามบทบาทของบัญชีโดยอัตโนมัติ ไม่ต้องตั้งค่าเพิ่ม</p>
+      <div class="roles">
+        <div class="role"><span class="tag" style="background:var(--chip);color:var(--primary)">เลขานุการ</span><p>จัดการตารางของตนเอง และตารางผู้บริหารที่ได้รับมอบหมาย ลงนัด แก้ไข และรับการแจ้งเตือนแทนผู้บริหารได้ — นัดที่ลงให้ผู้บริหารต้องรอยืนยัน (ดูหัวข้อ <a href="#approvals">17</a>)</p></div>
+        <div class="role"><span class="tag" style="background:#ECE6F4;color:#5B3E8C">ผู้บริหาร</span><p>ดูภาพรวมทีมทั้งหมด แก้ไขได้เฉพาะงานของตนเอง และยืนยัน/ปฏิเสธนัดที่เลขานุการลงให้</p></div>
+        <div class="role"><span class="tag" style="background:var(--orange-bg);color:var(--orange)">พยาบาล / พนักงาน</span><p>เห็นและจัดการเฉพาะงานของตนเอง ตั้งเวรและขอสลับเวรกับเพื่อนร่วมงานได้</p></div>
+        <div class="role"><span class="tag" style="background:var(--grey-bg);color:var(--grey)">บุคคลทั่วไป</span><p>เห็นและจัดการเฉพาะงานของตนเอง</p></div>
+        <div class="role"><span class="tag" style="background:var(--red-bg);color:var(--red)">ผู้ดูแลระบบ</span><p>สร้างบัญชี กำหนดบทบาท และกำหนดเลขาที่ดูแลผู้บริหาร ไม่มีตารางงานของตนเอง</p></div>
+      </div>
+      <div class="callout c-info">
+        <svg class="ic" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="7.5"/><path d="M10 9v4.5M10 6.6v.1"/></svg>
+        <p>เลขานุการที่ดูแลผู้บริหารจะเห็นปุ่มสลับ <b>“งานของฉัน / ตารางผู้บริหาร / ทั้งหมด”</b> ที่หัวจอ เพื่อสลับมุมมองระหว่างตารางของตนเองกับตารางที่ดูแลแทน</p>
+      </div>
+    </section>
+
+    <section id="screen">
+      <div class="section-head"><span class="idx">03</span><h2>ส่วนต่าง ๆ ของหน้าจอ</h2></div>
+      <div class="twrap"><table>
+        <tr><th style="width:34%">ตำแหน่ง</th><th>ใช้ทำอะไร</th></tr>
+        <tr><td><b>เมนูซ้าย</b></td><td>สลับหน้า พร้อมนาฬิกาเวลาระบบและบัญชีของคุณด้านล่างสุด รายการเมนูจะต่างกันไปตามบทบาท เมนู <b>“คู่มือการใช้งาน”</b> (คู่มือฉบับนี้) อยู่ต่อจาก “การตั้งค่า” เสมอ เปิดในแท็บใหม่</td></tr>
+        <tr><td><b>ช่องค้นหา</b></td><td>ค้นหางานจากชื่อ ประเภท หรือชื่อผู้รับผิดชอบ ใช้ได้ทุกหน้า</td></tr>
+        <tr><td><b>ปุ่มสลับขอบเขต</b></td><td>เห็นเฉพาะบัญชีที่มีมากกว่าหนึ่งตาราง (เลขานุการ/ผู้บริหาร) สลับดูงานของตนเอง ของผู้อื่น หรือทั้งหมด</td></tr>
+        <tr><td><b>กระดิ่งแจ้งเตือน</b></td><td>เปิดประวัติการแจ้งเตือนล่าสุด ตัวเลขสีแดงคือจำนวนที่ยังไม่ได้อ่าน</td></tr>
+        <tr><td><b>ปุ่ม “+ สร้างงาน”</b></td><td>เปิดฟอร์มสร้างงานหรือกิจกรรมใหม่ (หน้าผู้ดูแลระบบจะเป็น “+ เพิ่มผู้ใช้” แทน)</td></tr>
+      </table></div>
+    </section>
+
+    <section id="dashboard">
+      <div class="section-head"><span class="idx">04</span><h2>ภาพรวม (Dashboard)</h2></div>
+      <p class="lede">หน้าแรกหลังเข้าสู่ระบบ สรุปสถานะงานของวันนี้ในมุมมองเดียว ตั้งแต่แบนเนอร์ต้อนรับไปจนถึงแผงเฉพาะบทบาทด้านล่าง</p>
+      <figure class="shot"><img src="/manual-assets/0c232d2beb51debd6667587dc769f8fc.png" alt="หน้าภาพรวม แสดงแบนเนอร์ต้อนรับ ช่องเพิ่มงานด่วน การ์ดตอนนี้/ถัดไป ไทม์ไลน์วันนี้ และการ์ดสถิติ 4 ช่อง"><figcaption>ส่วนบนของหน้าภาพรวม — แบนเนอร์ต้อนรับ เพิ่มงานด่วน ตอนนี้/ถัดไป และไทม์ไลน์</figcaption></figure>
+      <div class="grid2">
+        <div class="card"><h4>การ์ดสถิติ 4 ช่อง</h4><p style="margin:0">งานวันนี้ · ใกล้ถึงเวลา (ภายใน 60 นาที) · งานค้าง/เกินเวลา · เสร็จแล้ววันนี้ — แตะการ์ดเพื่อไปหน้ารายการที่กรองไว้แล้ว</p></div>
+        <div class="card"><h4>วงกลม % งานสำเร็จ</h4><p style="margin:0">สัดส่วนงานวันนี้แยกตามสถานะ เสร็จแล้ว / กำลังทำ / ยังไม่ทำ / ยกเลิก</p></div>
+        <div class="card"><h4>กราฟงานล่าช้า 7 วัน</h4><p style="margin:0">เปรียบเทียบงานที่ตรงเวลา (น้ำเงิน) กับล่าช้า/ค้าง (ส้ม) ย้อนหลัง 7 วัน</p></div>
+        <div class="card"><h4>แจ้งเตือนเชิงรุก</h4><p style="margin:0">รวมงานค้างเกินเวลา งานสำคัญยังไม่เริ่ม และคำแนะนำจาก AI ที่หาช่วงว่างในตารางให้อัตโนมัติ</p></div>
+      </div>
+      <p>ถัดลงมาคือ <b>ตารางวันนี้</b> (งานทั้งหมดของวันนี้เรียงตามเวลา) แล้วตามด้วย <b>7 วันข้างหน้า</b> และแผงเฉพาะบทบาทของคุณ — ดูรายละเอียดแต่ละส่วนในหัวข้อถัดไป</p>
+    </section>
+
+    <section id="quickadd">
+      <div class="section-head"><span class="idx">05</span><h2>เพิ่มงานด่วน</h2></div>
+      <p class="lede">พิมพ์เป็นประโยคภาษาพูดในช่อง “เพิ่มงานด่วน” บนหน้าภาพรวม แล้วกด <kbd>Enter</kbd> ระบบจะแยกวันที่ เวลา ประเภทงาน และความสำคัญให้เองจากข้อความ</p>
+      <div class="card">
+        <h4>ตัวอย่าง</h4>
+        <p style="margin:0 0 6px"><code class="mono">ประชุมทีม พรุ่งนี้ 9:30 ด่วน</code> → ชื่องาน “ประชุมทีม” · วันที่พรุ่งนี้ · เวลา 09:30 · ประเภทประชุม · ความสำคัญสูง</p>
+        <p style="margin:0"><code class="mono">ส่งเอกสารเบิกจ่าย จันทร์ บ่ายสองโมง</code> → วันจันทร์ถัดไป · เวลา 14:00 · ประเภทเอกสาร</p>
+      </div>
+      <ul>
+        <li>คำที่จับได้: ชื่อวัน (วันนี้ / พรุ่งนี้ / มะรืนนี้ / จันทร์–อาทิตย์), เวลา (<code class="mono">9:30</code>, <code class="mono">บ่ายสองโมง</code>, <code class="mono">เที่ยง</code>), ระยะเวลา (<code class="mono">2 ชม.</code>), คำบอกความสำคัญ (ด่วน/สำคัญ, ไม่ด่วน) และประเภทงานจากคำในประโยค (ประชุม เอกสาร นัดหมาย เคลม ตรวจสอบ ดูแลผู้ป่วย)</li>
+        <li><b>ไม่ใส่เวลา</b> — ระบบจะหาช่วงว่างถัดไปในตารางของคุณให้อัตโนมัติ</li>
+        <li>ก่อนกดยืนยัน จะมีแถบ “ตัวอย่างงานที่จะสร้าง” แสดงผลลัพธ์ที่ระบบตีความให้ตรวจสอบก่อนเสมอ</li>
+      </ul>
+    </section>
+
+    <section id="nownext">
+      <div class="section-head"><span class="idx">06</span><h2>ตอนนี้ / ถัดไป &amp; ไทม์ไลน์วันนี้</h2></div>
+      <p class="lede">สรุปว่า “ตอนนี้ควรทำอะไร” และ “งานถัดไปคืออะไร” โดยไม่ต้องไล่ดูทั้งตาราง</p>
+      <div class="grid2">
+        <div class="card"><h4>การ์ด “ตอนนี้”</h4><p style="margin:0">งานที่กำลังทำอยู่ พร้อมแถบความคืบหน้าและเวลาที่เหลือ มีปุ่ม <b>“เสร็จแล้ว”</b> — ถ้าถึงเวลาแล้วแต่ยังไม่ได้กดเริ่มงาน จะเปลี่ยนเป็นปุ่ม <b>“เริ่มงาน”</b> แทน</p></div>
+        <div class="card"><h4>การ์ด “ถัดไป”</h4><p style="margin:0">งานที่จะถึงคิวต่อไป นับถอยหลังให้ พร้อมปุ่ม <b>“เริ่มก่อนเวลา”</b> ถ้าต้องการเริ่มก่อนถึงเวลาจริง</p></div>
+      </div>
+      <figure class="shot"><img src="/manual-assets/9c3cb11d6f629fe1b09a7fec965e84e8.png" alt="ไทม์ไลน์วันนี้แบบแถบแนวนอน 08:00 ถึง 18:00 มีเส้นแดงบอกเวลาปัจจุบัน และการ์ดประชุมถัดไปด้านล่าง"><figcaption>ไทม์ไลน์วันนี้ (08:00–18:00) และการ์ดประชุมถัดไป</figcaption></figure>
+      <h3>ไทม์ไลน์วันนี้</h3>
+      <p>แถบแนวนอนตั้งแต่ 08:00–18:00 เส้นแดงคือเวลาปัจจุบัน งานที่เกินเวลาจะมีกรอบสีแดง มุมขวาบนบอก <b>เวลาว่างที่เหลือ</b> และ <b>ช่วงว่างถัดไป</b> ของวันนี้</p>
+      <h3>ประชุมถัดไป</h3>
+      <p>บอกเวลา รูปแบบการประชุม สถานที่ ผู้เข้าร่วม และนับถอยหลัง ป้ายจะเปลี่ยนเป็นสีแดงเมื่อเหลือไม่ถึง 30 นาที มีปุ่ม <b>“เข้าร่วม Zoom”</b> ถ้างานนั้นมีลิงก์ประชุมออนไลน์</p>
+      <h3>7 วันข้างหน้า</h3>
+      <p>แถบท้ายหน้าภาพรวม บอกจำนวนงานและงานแรกของแต่ละวันในสัปดาห์ข้างหน้า พร้อมป้ายจำนวนประชุมและงานสำคัญสูง กดวันไหนจะเปิดปฏิทินมุมมองเดือนไปที่วันนั้นให้ทันที</p>
+    </section>
+
+    <section id="create">
+      <div class="section-head"><span class="idx">07</span><h2>สร้างงานใหม่</h2></div>
+      <p class="lede">กดปุ่ม <span class="btn-mock" style="padding:2px 10px;font-size:12px">+ สร้างงาน</span> ที่หัวจอ หรือคลิกช่องว่างในปฏิทินโดยตรง (ดูหัวข้อ <a href="#calendar">ปฏิทิน</a>)</p>
+      <figure class="shot"><img src="/manual-assets/aa764d41ea606c7692f82e045ea1fb73.png" alt="หน้าต่างสร้างงานใหม่ มีช่องชื่องาน ประเภทงาน ความสำคัญ วันเวลา คำแนะนำจาก AI และการแจ้งเตือน"><figcaption>ฟอร์มสร้างงาน / กิจกรรมใหม่</figcaption></figure>
+      <div class="twrap"><table>
+        <tr><th style="width:26%">ช่อง</th><th>รายละเอียด</th></tr>
+        <tr><td><b>สร้างในตารางของ</b></td><td>เลขานุการที่ดูแลผู้บริหารเท่านั้นจะเห็นช่องนี้ เลือกได้ว่าจะลงในตารางของตนเองหรือของผู้บริหาร — ถ้าเลือกตารางผู้บริหาร งานนั้นจะรอผู้บริหารยืนยันก่อน (ดูหัวข้อ <a href="#approvals">17</a>)</td></tr>
+        <tr><td><b>ประเภทงาน</b></td><td>เอกสาร · นัดหมาย · เคลม · ตรวจสอบ · ประชุม · ดูแลผู้ป่วย — เลือก “ประชุม” จะเปิดช่องรายละเอียดเพิ่ม (ดูด้านล่าง)</td></tr>
+        <tr><td><b>ความสำคัญ</b></td><td>สูง / กลาง / ต่ำ — มีผลต่อความถี่และความดังของการแจ้งเตือน (ตั้งค่าได้ที่หน้าการตั้งค่า)</td></tr>
+        <tr><td><b>วันที่ / เวลาเริ่ม / ระยะเวลา</b></td><td>ระบบจะเตือนทันทีถ้าเวลาที่เลือกชนกับงานอื่นที่มีอยู่แล้ว (ดูหัวข้อ <a href="#reschedule">การตรวจเวลาชน</a>)</td></tr>
+        <tr><td><b>คำแนะนำจาก AI</b></td><td>ถ้าเปิดใช้ในการตั้งค่า ระบบจะเสนอช่วงเวลาว่างที่ใกล้เคียงที่สุดให้ กดปุ่ม “ใช้เวลานี้” เพื่อนำมาใช้ทันที</td></tr>
+        <tr><td><b>รูปแบบงาน</b></td><td>ครั้งเดียว / รายวัน / รายสัปดาห์ / รายเดือน — งานวนซ้ำจะปรากฏในปฏิทินล่วงหน้าเป็นกรอบเส้นประ</td></tr>
+        <tr><td><b>การแจ้งเตือนของงานนี้</b></td><td>เลือกเวลาที่เตือนล่วงหน้า ช่องทาง (เสียง/Push/Popup) และเปิด-ปิดการเตือนซ้ำถ้ายังไม่เริ่มงาน</td></tr>
+      </table></div>
+      <h3>รายละเอียดเมื่อเลือกประเภท “ประชุม”</h3>
+      <ul>
+        <li><b>รูปแบบ:</b> ในสถานที่ / ออนไลน์ / ผสม (Hybrid) — เลือกออนไลน์หรือผสมจะขอลิงก์ประชุม (Zoom/Meet/Teams)</li>
+        <li><b>ผู้เข้าร่วม:</b> พิมพ์ชื่อแล้วกด <kbd>Enter</kbd> เลือกจากรายชื่อในระบบ หรือพิมพ์ชื่อบุคคลภายนอกเพิ่มเองได้ ผู้เข้าร่วมภายในระบบจะได้รับคำเชิญให้ตอบรับ/ปฏิเสธ (ดูหัวข้อ <a href="#rsvp">RSVP</a>)</li>
+      </ul>
+    </section>
+
+    <section id="status">
+      <div class="section-head"><span class="idx">08</span><h2>สถานะและความหมายของสี</h2></div>
+      <p class="lede">สีเดียวกันนี้ใช้ทั้งในปฏิทิน รายการงาน และป้ายสถานะทุกจุดของระบบ</p>
+      <div class="legend">
+        <span class="row"><span class="pill p-yellow">○ ยังไม่ทำ</span> งานที่สร้างใหม่ ยังไม่ได้เริ่ม</span>
+        <span class="row"><span class="pill p-orange">▶ กำลังทำ</span> กดเริ่มงานแล้ว ระบบบันทึกเวลาเริ่มให้อัตโนมัติ</span>
+        <span class="row"><span class="pill p-green">✓ เสร็จแล้ว</span> บันทึกเวลาเสร็จให้อัตโนมัติเมื่อกดเสร็จสิ้น</span>
+        <span class="row"><span class="pill p-grey">✕ ยกเลิก</span> ต้องระบุเหตุผลทุกครั้ง (ดูหัวข้อ <a href="#cancel">ยกเลิกงาน</a>)</span>
+      </div>
+      <p>อัปเดตสถานะได้จากปุ่มลัดในรายการงาน (เช่น “เริ่มงาน” → “เสร็จแล้ว”) หรือเปิดรายละเอียดงานแล้วเลือกสถานะที่ต้องการโดยตรง งานที่ <b>เกินเวลา</b> จะมีป้ายสีแดงกำกับเพิ่มโดยไม่ต้องตั้งค่าอะไร</p>
+    </section>
+
+    <section id="reschedule">
+      <div class="section-head"><span class="idx">09</span><h2>เลื่อนและแก้ไขตารางงาน</h2></div>
+      <p class="lede">เปิดรายละเอียดงานแล้วกด <span class="btn-mock ghost" style="padding:2px 10px;font-size:12px">แก้ไขงาน</span> เพื่อแก้ไขทุกช่อง หรือใช้ปุ่มเลื่อนด่วนสำหรับเปลี่ยนแค่วัน-เวลา</p>
+      <figure class="shot"><img src="/manual-assets/e65385c615091bfa9b8c656e6e39a548.png" alt="หน้ารายละเอียดงาน แสดงปุ่มเลื่อนงานด่วน (+15 นาที, +1 ชม., พรุ่งนี้, +1 สัปดาห์) และปุ่มอัปเดตสถานะ 4 แบบ"><figcaption>หน้ารายละเอียดงาน — ปุ่มเลื่อนงานด่วนและอัปเดตสถานะ</figcaption></figure>
+      <div class="grid2">
+        <div class="card"><h4>ปุ่มเลื่อนด่วน</h4><p style="margin:0">+15 นาที · +1 ชม. · พรุ่งนี้ · +1 สัปดาห์ — กดจากหน้ารายละเอียดงานได้ทันทีโดยไม่ต้องเปิดฟอร์ม</p></div>
+        <div class="card"><h4>กำหนดวันที่/เวลาเอง</h4><p style="margin:0">ระบุวันที่ เวลาเริ่ม และเวลาสิ้นสุดได้อิสระ จากลิงก์ “กำหนดวันที่/เวลาเอง…” ใต้ปุ่มเลื่อนด่วน</p></div>
+      </div>
+      <h3>การตรวจเวลาชน</h3>
+      <p>ทุกครั้งที่สร้าง แก้ไข หรือเลื่อนงาน ระบบจะตรวจช่วงเวลาที่เลือกกับงานอื่นของผู้รับผิดชอบและผู้เข้าร่วมประชุมโดยอัตโนมัติ ถ้าชนกัน จะมีกรอบสีแดงแจ้งรายการที่ชนก่อนบันทึก — <b>ยังบันทึกต่อได้</b> ระบบแค่เตือน ไม่ได้ปิดกั้น (งานของผู้อื่นที่คุณไม่มีสิทธิ์ดูจะโชว์แค่คำว่า “ไม่ว่าง” ไม่เปิดเผยรายละเอียด)</p>
+    </section>
+
+    <section id="cancel">
+      <div class="section-head"><span class="idx">10</span><h2>ยกเลิกงาน</h2></div>
+      <p class="lede">เลือกสถานะ “ยกเลิก” จากหน้ารายละเอียดงาน ระบบจะขอให้ระบุเหตุผลทุกครั้ง</p>
+      <figure class="shot"><img src="/manual-assets/595230411e2e69646e167e55841d304d.png" alt="กล่องยกเลิกงาน มีช่องให้พิมพ์เหตุผล และปุ่มยืนยันยกเลิกงาน / ไม่ยกเลิก"><figcaption>ระบุเหตุผลก่อนยกเลิกงานทุกครั้ง</figcaption></figure>
+      <ol class="steps">
+        <li>กด <span class="pill p-grey">✕ ยกเลิก</span> ในส่วนอัปเดตสถานะ</li>
+        <li>พิมพ์เหตุผล (อย่างน้อย 3 ตัวอักษร) เช่น “ผู้บริหารติดภารกิจด่วน” แล้วกดยืนยัน</li>
+        <li>เหตุผลจะแสดงต่อในรายการงาน ปฏิทิน และรายงาน พร้อมเก็บ <b>ประวัติการยกเลิก</b> ไว้ในงานถาวร แม้จะเปิดงานกลับมาทำใหม่ภายหลัง</li>
+      </ol>
+    </section>
+
+    <section id="files">
+      <div class="section-head"><span class="idx">11</span><h2>ไฟล์แนบผลงาน</h2></div>
+      <p class="lede">แนบเอกสารผลลัพธ์ของงานได้จากหน้ารายละเอียดงาน</p>
+      <ul>
+        <li>ไฟล์ละไม่เกิน <b>15 MB</b> สูงสุด <b>10 ไฟล์ต่องาน</b></li>
+        <li>ไฟล์ประเภทโปรแกรม (.exe, .bat, .js ฯลฯ) ถูกระบบปฏิเสธเพื่อความปลอดภัย</li>
+        <li>ดาวน์โหลดหรือลบไฟล์ได้เฉพาะผู้ที่มีสิทธิ์เข้าถึงงานนั้น</li>
+      </ul>
+    </section>
+
+    <section id="calendar">
+      <div class="section-head"><span class="idx">12</span><h2>ปฏิทิน</h2></div>
+      <p class="lede">สลับมุมมอง <b>สัปดาห์</b> หรือ <b>เดือน</b> ได้จากปุ่มด้านบน</p>
+      <ul>
+        <li><b>คลิกช่องว่าง</b> ในมุมมองสัปดาห์ เพื่อสร้างงานที่วัน-เวลานั้นทันที</li>
+        <li><b>ดับเบิลคลิกวัน</b> ในมุมมองเดือน หรือกด “+ สร้างงานในวันนี้” เพื่อสร้างงานในวันที่เลือก</li>
+        <li><b>ชี้เมาส์ที่งาน</b> เพื่อดูรายละเอียดย่อแบบลอย (เวลา ประเภท ผู้รับผิดชอบ สถานะ) โดยไม่ต้องคลิกเปิด</li>
+        <li>เส้นแดงคือเวลาปัจจุบัน กรอบเส้นประคือรอบถัดไปของงานวนซ้ำที่ยังไม่ถึง</li>
+      </ul>
+    </section>
+
+    <section id="list">
+      <div class="section-head"><span class="idx">13</span><h2>รายการ Schedule</h2></div>
+      <p class="lede">มุมมองรายการทั้งหมด กรองและจัดกลุ่มตามวันที่โดยอัตโนมัติ</p>
+      <p>กรองได้ 4 มิติพร้อมกัน: <b>วันที่</b> (วันนี้ / สัปดาห์นี้ / 7 วันข้างหน้า / ย้อนหลัง / เลือกวันที่เอง) · <b>สถานะ</b> · <b>ความสำคัญ</b> · <b>ประเภทงาน</b> ระบบจะแสดงจำนวนเงื่อนไขที่กรองอยู่ พร้อมปุ่ม “ล้างตัวกรอง” ให้กดล้างทั้งหมดในคลิกเดียว</p>
+    </section>
+
+    <section id="notify">
+      <div class="section-head"><span class="idx">14</span><h2>การแจ้งเตือน</h2></div>
+      <p class="lede">ระบบแจ้งเตือนอัตโนมัติตามเวลาที่ตั้งไว้ในแต่ละงาน โดยไม่ต้องเปิดหน้าเว็บค้างไว้ก็ยังเห็นเมื่อกลับมาเปิด</p>
+      <div class="twrap"><table>
+        <tr><th style="width:26%">ประเภทการเตือน</th><th>เมื่อไร</th></tr>
+        <tr><td><b>เตือนล่วงหน้า</b></td><td>ตามเวลาที่ตั้งไว้ต่องาน (เช่น ก่อน 30 นาที, 5 นาที)</td></tr>
+        <tr><td><b>เตือนซ้ำ</b></td><td>เมื่อถึงเวลาแล้วแต่ยังไม่กดเริ่มงาน เตือนซ้ำเป็นระยะตามที่ตั้งไว้</td></tr>
+        <tr><td><b>งานสำคัญยังไม่เริ่ม</b></td><td>แจ้งทันทีที่ถึงเวลาเริ่มของงานความสำคัญสูง</td></tr>
+        <tr><td><b>งานค้างเกินเวลา</b></td><td>แจ้งเมื่องานเลยกำหนดเสร็จแต่ยังไม่เสร็จ</td></tr>
+      </table></div>
+      <p>การ์ดแจ้งเตือนที่มุมขวาล่างมีปุ่ม <b>“เริ่มงาน”</b> และ <b>“เลื่อน 5 นาที”</b> ให้ตอบสนองได้ทันทีโดยไม่ต้องเปิดรายละเอียด กดกระดิ่งที่หัวจอเพื่อดูประวัติย้อนหลังทั้งหมด</p>
+    </section>
+
+    <section id="rsvp">
+      <div class="section-head"><span class="idx">15</span><h2>ตอบรับคำเชิญประชุม</h2></div>
+      <p class="lede">เมื่อถูกเชิญเป็นผู้เข้าร่วมประชุม หน้ารายละเอียดงานจะมีปุ่มให้ตอบรับ</p>
+      <figure class="shot"><img src="/manual-assets/a373bc2618fa360a7e90a5c704bd4f6b.png" alt="หน้ารายละเอียดประชุมของผู้ถูกเชิญ แสดงรายชื่อผู้เข้าร่วมพร้อมสถานะรอตอบรับ และปุ่มตอบรับ/ปฏิเสธ"><figcaption>ผู้ถูกเชิญเห็นปุ่มตอบรับ/ปฏิเสธ พร้อมสถานะของทุกคนที่ถูกเชิญ</figcaption></figure>
+      <ul>
+        <li>กด <b>“✓ ตอบรับ”</b> หรือ <b>“✕ ปฏิเสธ”</b> (ระบุเหตุผลได้ถ้าปฏิเสธ) — ผู้จัดประชุมจะเห็นคำตอบของทุกคนที่ถูกเชิญ</li>
+        <li>ถ้าผู้จัดเลื่อนเวลาประชุม คำตอบเดิมของทุกคนจะถูกล้างและต้องตอบใหม่</li>
+        <li>รายการงานจะมีป้าย “รอตอบรับ / ตอบรับแล้ว / ปฏิเสธแล้ว” ให้เห็นสถานะโดยไม่ต้องเปิดดู</li>
+      </ul>
+    </section>
+
+    <section id="team">
+      <div class="section-head"><span class="idx">16</span><h2>ภาพรวมทีม (เฉพาะผู้บริหาร)</h2></div>
+      <p class="lede">เมนู “ภาพรวมทีม” แสดงเฉพาะบัญชีบทบาทผู้บริหาร เป็นมุมมองดูอย่างเดียว</p>
+      <p>แสดง KPI รวมของทีม การ์ดสรุปรายบุคคล (งานวันนี้ / เสร็จแล้ว / ค้าง / % ความคืบหน้า / อัตราตรงเวลา 7 วันล่าสุด) และตารางงานค้างเกินเวลาของทั้งทีม การแก้ไขตารางของสมาชิกยังต้องทำผ่านเลขานุการที่ดูแลอยู่</p>
+    </section>
+
+    <section id="approvals">
+      <div class="section-head"><span class="idx">17</span><h2>รออนุมัติ (เมนูใหม่สำหรับผู้บริหาร)</h2></div>
+      <p class="lede">งานที่เลขานุการสร้างหรือย้ายมาลงในตารางของผู้บริหาร จะเริ่มต้นเป็นสถานะ <b>“รอยืนยัน”</b> เสมอ — ผู้บริหารต้องยืนยันหรือปฏิเสธก่อนจึงจะถือว่าเป็นนัดที่ยืนยันแล้ว</p>
+      <p>เดิมรายการนี้อยู่ในหน้าภาพรวมเพียงอย่างเดียวทำให้พลาดง่าย จึงแยกเป็นเมนู <b>“รออนุมัติ”</b> ต่อจาก “ภาพรวม” ในแถบเมนูซ้าย พร้อมตัวเลขสีแดงแจ้งจำนวนที่รออยู่ตลอดเวลา ไม่ว่าจะอยู่หน้าไหนก็เห็น</p>
+      <figure class="shot"><img src="/manual-assets/d49a03343c24ebb371d1614cc9574f19.png" alt="หน้าจอรออนุมัติของผู้บริหาร แบ่งเป็นนัดหมาย/ประชุมที่รอยืนยัน เอกสารที่รอลงนาม และงานค้างของตนเอง พร้อมปุ่มยืนยัน/ปฏิเสธในแต่ละแถว"><figcaption>เมนู “รออนุมัติ” — แยกเป็นนัดหมาย/ประชุมที่รอยืนยัน และเอกสารที่รอลงนาม</figcaption></figure>
+      <ol class="steps">
+        <li>เปิดเมนู <b>“รออนุมัติ”</b> จะเห็นรายการแบ่งเป็น 2 กลุ่ม: <b>นัดหมาย/ประชุมที่รอยืนยัน</b> และ <b>เอกสารที่รอลงนาม</b> (แยกตามประเภทงาน)</li>
+        <li>กด <b>“ยืนยัน”</b> เพื่อยืนยันทันที หรือกด <b>“ปฏิเสธ”</b> เพื่อเปิดกล่องให้พิมพ์เหตุผล (อย่างน้อย 3 ตัวอักษร)</li>
+        <li>เมื่อยืนยันหรือปฏิเสธแล้ว เลขานุการจะเห็นสถานะและเหตุผล (ถ้ามี) ในแผงของตนเอง (ดูหัวขัด <a href="#role-sec">18</a>) และแก้ไขนัดใหม่ได้ทันที</li>
+      </ol>
+      <div class="callout c-warn">
+        <svg class="ic" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 3 2.5 16h15L10 3z"/><path d="M10 8v3.5M10 14v.1"/></svg>
+        <p>ถ้าเลขานุการแก้ไข <b>วันหรือเวลา</b> ของงานที่ยืนยันไปแล้ว งานนั้นจะกลับมาเป็น “รอยืนยัน” ใหม่โดยอัตโนมัติ ต้องยืนยันซ้ำอีกครั้ง — แก้ไขรายละเอียดอื่นที่ไม่ใช่วัน-เวลาจะไม่กระทบสถานะ</p>
+      </div>
+    </section>
+
+    <section id="role-sec">
+      <div class="section-head"><span class="idx">18</span><h2>สำหรับเลขานุการ</h2></div>
+      <p class="lede">หน้าภาพรวมของเลขานุการมีแผงเพิ่มเติมท้ายหน้า รวมทุกอย่างที่ต้องติดตามเกี่ยวกับตารางผู้บริหาร</p>
+      <figure class="shot"><img src="/manual-assets/807c3711267c14cd2527e27302df2095.png" alt="แผงสำหรับเลขานุการ แสดงตารางของตนเองคู่กับตารางผู้บริหาร พร้อมรายการนัดที่รอยืนยันและเอกสารที่รอลงนาม"><figcaption>แผง “สำหรับเลขานุการ” — ตารางคู่กัน และรายการที่รอผู้บริหารตัดสินใจ</figcaption></figure>
+      <ul>
+        <li><b>ตารางคู่กัน:</b> ตารางของตนเองวางเทียบกับตารางผู้บริหารแต่ละคนที่ดูแล ในวันเดียวกัน เห็นทั้งสองฝั่งพร้อมกัน</li>
+        <li><b>เตือนเวลาชนกัน:</b> ถ้านัดของตนเองชนกับนัดในตารางผู้บริหารในวันนั้น จะมีกรอบแดงแจ้งทันทีบนหน้าภาพรวม</li>
+        <li><b>นัดที่รอผู้บริหารยืนยัน / เอกสารที่รอเสนอลงนาม:</b> รายการที่ส่งไปแล้วแต่ยังไม่ได้รับคำตอบ ถ้าถูก<b>ปฏิเสธ</b>จะขึ้นเหตุผลให้เห็นตรงนี้ทันที เพื่อแก้ไขนัดใหม่ได้</li>
+      </ul>
+    </section>
+
+    <section id="role-nur">
+      <div class="section-head"><span class="idx">19</span><h2>สำหรับพยาบาล / พนักงาน</h2></div>
+      <p class="lede">แผงเฉพาะพยาบาล รวมงานประจำเวร บันทึกส่งเวร และการสลับเวรกับเพื่อนร่วมงาน</p>
+      <figure class="shot"><img src="/manual-assets/cb474c6569be308877a61ea688aa1775.png" alt="แผงสำหรับพยาบาล แสดงรอบยาถัดไป บันทึกส่งเวร เช็กลิสต์งานประจำเวร ปฏิทินสลับเวร และคำขอสลับเวรที่รอตอบรับ"><figcaption>แผง “สำหรับพยาบาล” — เช็กลิสต์ บันทึกส่งเวร และสลับเวร</figcaption></figure>
+      <ul>
+        <li><b>รอบยา / ตรวจถัดไป:</b> นับถอยหลังไปยังงานดูแลผู้ป่วย/ตรวจสอบชิ้นถัดไปของวันนี้ ป้ายจะเปลี่ยนสีเมื่อถึงเวลาแล้ว</li>
+        <li><b>เช็กลิสต์งานประจำเวร:</b> งานทั้งหมดของวันนี้เป็นรายการติ๊ก แตะที่แถวเพื่อสลับเสร็จ/ยังไม่เสร็จได้ทันที</li>
+        <li><b>บันทึกส่งเวร:</b> พิมพ์บันทึกอิสระ (เช่น อาการผู้ป่วยที่ต้องติดตามต่อ) แล้วกด “บันทึกส่งเวร” เก็บเป็นประวัติแยกตามวันและเวร ให้เวรถัดไปอ่านต่อได้</li>
+        <li><b>สลับเวร เช้า/บ่าย/ดึก:</b> เลือกเวรของตัวเองในแต่ละวันจากปุ่ม ช, บ, ด ใต้วันที่ แล้วเลือกวันที่เพื่อดูเวรของเพื่อนร่วมงาน กด “ขอสลับ” ที่ชื่อเพื่อนร่วมงานเพื่อส่งคำขอ</li>
+        <li>คำขอที่<b>ส่งไป</b>จะขึ้นสถานะ “รอตอบรับ / ตอบรับแล้ว / ถูกปฏิเสธ” คำขอที่<b>ได้รับ</b>จะมีปุ่มตอบรับ/ปฏิเสธในแผงเดียวกัน เมื่อตอบรับ ระบบจะสลับเวรของทั้งสองฝ่ายให้ทันที (ตรวจสอบก่อนว่าเวรของทั้งคู่ยังตรงกับตอนขอ ป้องกันข้อมูลเพี้ยน)</li>
+      </ul>
+    </section>
+
+    <section id="role-gen">
+      <div class="section-head"><span class="idx">20</span><h2>สำหรับบุคคลทั่วไป</h2></div>
+      <p class="lede">แผงเฉพาะบุคคลทั่วไป สรุปเรื่องที่ต้องติดตามในชีวิตประจำวัน</p>
+      <div class="twrap"><table>
+        <tr><th style="width:30%">หัวข้อ</th><th>แสดงอะไร</th></tr>
+        <tr><td><b>บิล / ค่าใช้จ่ายใกล้ครบกำหนด</b></td><td>งานประเภท “เอกสาร” ที่ยังไม่เสร็จ เรียงตามวันครบกำหนดใกล้สุดก่อน</td></tr>
+        <tr><td><b>นัดแพทย์ครั้งถัดไป</b></td><td>งานประเภท “นัดหมาย” ที่ใกล้ถึงที่สุดในอนาคต</td></tr>
+        <tr><td><b>สถานะเคลมที่ยื่นไว้</b></td><td>งานประเภท “เคลม” ล่าสุด พร้อมป้ายสถานะปัจจุบัน</td></tr>
+      </table></div>
+    </section>
+
+    <section id="sync">
+      <div class="section-head"><span class="idx">21</span><h2>ซิงก์ปฏิทินภายนอก</h2></div>
+      <p class="lede">การตั้งค่า → <b>ปฏิทินภายนอก</b> — แสดงตารางงานของคุณใน Google Calendar หรือ Outlook</p>
+      <ol class="steps">
+        <li>คัดลอกลิงก์ปฏิทินส่วนตัวจากหน้าตั้งค่า</li>
+        <li><b>Google Calendar:</b> ปฏิทินอื่น (+) → จาก URL → วางลิงก์ &nbsp;|&nbsp; <b>Outlook:</b> เพิ่มปฏิทิน → สมัครรับจากเว็บ → วางลิงก์</li>
+        <li>ปฏิทินภายนอกจะอัปเดตตามรอบที่แอปนั้นกำหนดเอง (มักหลายชั่วโมง) หรือดาวน์โหลดไฟล์ .ics เพื่อนำเข้าครั้งเดียวก็ได้</li>
+      </ol>
+      <div class="callout c-warn">
+        <svg class="ic" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 3 2.5 16h15L10 3z"/><path d="M10 8v3.5M10 14v.1"/></svg>
+        <p>ลิงก์นี้เป็นความลับส่วนตัว ใครมีลิงก์จะเห็นตารางงานของคุณ <b>ห้ามส่งต่อ</b> — ถ้าหลุดให้กด “สร้างลิงก์ใหม่” ทันที เพื่อทำให้ลิงก์เดิมใช้ไม่ได้</p>
+      </div>
+    </section>
+
+    <section id="digest">
+      <div class="section-head"><span class="idx">22</span><h2>สรุปงานประจำวัน</h2></div>
+      <p class="lede">การตั้งค่า → <b>สรุปงานประจำวัน</b> — ให้ระบบส่งสรุปงานของวันนั้น รวมงานค้างและคำเชิญที่รอตอบรับ ให้ทางอีเมลหรือ LINE ทุกเช้าตามเวลาที่ตั้ง (ค่าเริ่มต้น 07:30)</p>
+      <ul>
+        <li>เปิดสวิตช์ “ส่งสรุปงานประจำวัน” แล้วเลือกช่องทาง — อีเมล และ/หรือ LINE</li>
+        <li>ทาง LINE ต้องเพิ่มเพื่อน LINE Official Account ของหน่วยงานก่อน แล้วขอ LINE User ID จากผู้ดูแลระบบมากรอก</li>
+        <li>กด <b>“บันทึกและส่งทดสอบตอนนี้”</b> เพื่อตรวจว่าตั้งค่าถูกต้องก่อนใช้งานจริง</li>
+      </ul>
+    </section>
+
+    <section id="report">
+      <div class="section-head"><span class="idx">23</span><h2>รายงานและส่งออก</h2></div>
+      <p class="lede">หน้า “รายงาน” สรุปผลงานตามช่วงเวลา วันนี้ / 7 วัน / 30 วัน</p>
+      <figure class="shot"><img src="/manual-assets/e505b8ac79b25082b05a2277f217a850.png" alt="หน้ารายงานสรุปงาน แสดงตัวชี้วัด 5 ช่อง กราฟแยกตามประเภทงาน และปุ่ม Export PDF กับ Export Excel"><figcaption>หน้ารายงาน พร้อมปุ่ม Export PDF และ Export Excel</figcaption></figure>
+      <ul>
+        <li><b>ตัวชี้วัด:</b> งานทั้งหมด อัตราสำเร็จ ล่าช้า/ค้าง ยกเลิก เวลาเฉลี่ยต่องาน</li>
+        <li><b>แยกตามประเภทงาน / ผู้รับผิดชอบ:</b> แถบสัดส่วนงานที่เสร็จเทียบล่าช้า</li>
+        <li><b>Export PDF:</b> พิมพ์หรือบันทึกหน้ารายงานเป็น PDF</li>
+        <li><b>Export Excel:</b> ไฟล์ .xlsx 2 ชีต (สรุปตัวชี้วัด + รายการงานทั้งหมด) พร้อมสี สถานะ และหมายเหตุ/เหตุผลยกเลิก</li>
+      </ul>
+    </section>
+
+    <section id="settings">
+      <div class="section-head"><span class="idx">24</span><h2>การตั้งค่า</h2></div>
+      <p class="lede">เมนู “การตั้งค่า” แบ่งเป็นหัวข้อทางซ้าย คลิกหัวข้อเพื่อดูรายละเอียดทางขวา</p>
+      <figure class="shot"><img src="/manual-assets/201ac54caeddbf0437225663882c0c37.png" alt="หน้าการตั้งค่า หัวข้อธีมหน้าจอ มีตัวเลือกสว่าง มืด และตามอุปกรณ์ แสดงเป็นการ์ดตัวอย่าง"><figcaption>การตั้งค่า → ธีมหน้าจอ — สว่าง / มืด / ตามอุปกรณ์</figcaption></figure>
+      <div class="twrap"><table>
+        <tr><th style="width:26%">หัวข้อ</th><th>ตั้งค่าอะไร</th></tr>
+        <tr><td><b>บัญชีของฉัน</b></td><td>เปลี่ยนรหัสผ่าน</td></tr>
+        <tr><td><b>ธีมหน้าจอ</b></td><td>สว่าง / มืด / ตามอุปกรณ์ — เปลี่ยนทันทีทุกหน้า จำไว้ในบัญชีของคุณ</td></tr>
+        <tr><td><b>รูปแบบการแจ้งเตือน</b></td><td>เปิด-ปิดเสียง/Push/Popup เลือกโทนเสียง และระดับเสียง</td></tr>
+        <tr><td><b>ความเข้มของการเตือน</b></td><td>กำหนดความเข้ม (เงียบ/ปกติ/เร่งด่วน) แยกตามระดับความสำคัญของงาน</td></tr>
+        <tr><td><b>เวลาและการเตือนซ้ำ</b></td><td>ค่าเริ่มต้นการเตือนล่วงหน้าของงานใหม่ และรอบเวลาการเตือนซ้ำ</td></tr>
+        <tr><td><b>การแจ้งเตือนเชิงรุก</b></td><td>เปิด-ปิดการแจ้งงานค้าง งานสำคัญยังไม่เริ่ม และคำแนะนำจาก AI</td></tr>
+        <tr><td><b>ปฏิทินภายนอก / สรุปงานประจำวัน</b></td><td>ดูหัวข้อ <a href="#sync">21</a> และ <a href="#digest">22</a></td></tr>
+      </table></div>
+    </section>
+
+    <section id="admin">
+      <div class="section-head"><span class="idx">25</span><h2>สำหรับผู้ดูแลระบบ</h2></div>
+      <p class="lede">บัญชีบทบาท “ผู้ดูแลระบบ” มีเมนูเฉพาะ: จัดการผู้ใช้ · ประวัติการใช้งาน · การตั้งค่าบัญชี · คู่มือการใช้งาน</p>
+      <h3>จัดการผู้ใช้</h3>
+      <figure class="shot"><img src="/manual-assets/109d0f1729ea796bacbff1d968fcb31b.png" alt="หน้าจัดการผู้ใช้ แสดงการ์ดสรุปจำนวนบัญชีตามบทบาท และตารางรายชื่อผู้ใช้พร้อมปุ่มแก้ไข/ระงับ"><figcaption>หน้า “จัดการผู้ใช้” — รายชื่อบัญชีทั้งหมดและบทบาท</figcaption></figure>
+      <ol class="steps">
+        <li>กด <span class="btn-mock" style="padding:2px 10px;font-size:12px">+ เพิ่มผู้ใช้</span> กรอกชื่อ ตำแหน่ง ชื่อผู้ใช้ และตั้งรหัสผ่านชั่วคราว (หรือกด “สุ่มรหัสผ่าน”)</li>
+        <li>เลือกบทบาท — ถ้าเป็น “เลขานุการ” จะมีช่องเพิ่มให้เลือก “ผู้บริหารที่ดูแล” ทันที</li>
+        <li>ผู้ใช้ใหม่ต้องตั้งรหัสผ่านของตนเองทันทีที่เข้าสู่ระบบครั้งแรก</li>
+        <li>กด “ระงับ” เพื่อปิดการเข้าใช้งานชั่วคราวโดยไม่ต้องลบบัญชี หรือกด “แก้ไข” เพื่อรีเซ็ตรหัสผ่านให้ผู้ใช้ที่ลืมรหัส</li>
+      </ol>
+      <h3>ประวัติการใช้งาน (Audit log)</h3>
+      <figure class="shot"><img src="/manual-assets/ce0dbb1be157bc1e59972e6aaf627536.png" alt="หน้าประวัติการใช้งาน แสดงตารางบันทึกเวลา ผู้ใช้ การกระทำ และรายละเอียด เช่น เข้าสู่ระบบ สร้างงาน แก้ไขงาน" ><figcaption>หน้า “ประวัติการใช้งาน” — บันทึกทุกการกระทำในระบบ</figcaption></figure>
+      <p>บันทึกทุกการเข้าสู่ระบบ (สำเร็จ/ไม่สำเร็จ) การสร้าง แก้ไข ยกเลิก ลบงาน การยืนยัน/ปฏิเสธนัด การตั้ง/สลับเวรพยาบาล การแนบ/ลบไฟล์ การส่งออกรายงาน และการเปลี่ยนแปลงบัญชีผู้ใช้ — ค้นหาได้จากชื่อผู้ใช้ การกระทำ หรือชื่องาน แก้ไขหรือลบรายการไม่ได้</p>
+    </section>
+
+    <section id="security">
+      <div class="section-head"><span class="idx">26</span><h2>ความปลอดภัยที่ควรรู้</h2></div>
+      <ul>
+        <li>ระบบจะ <b>ออกจากระบบอัตโนมัติ</b> เมื่อไม่มีการใช้งานเกิน 15 นาที เพื่อป้องกันคนอื่นใช้เครื่องต่อจากที่คุณค้างไว้</li>
+        <li>ใส่รหัสผ่านผิดติดต่อกัน 5 ครั้ง บัญชีจะถูกล็อกชั่วคราว 10 นาที</li>
+        <li>รหัสผ่านต้องยาวอย่างน้อย 8 ตัวอักษร มีทั้งตัวอักษรและตัวเลข และไม่ซ้ำชื่อผู้ใช้</li>
+        <li>ลิงก์ปฏิทินภายนอก (.ics) เป็นความลับเฉพาะตัว ห้ามส่งต่อให้ผู้อื่น</li>
+        <li>ลืมรหัสผ่าน ให้ติดต่อผู้ดูแลระบบเพื่อรีเซ็ตให้ ไม่มีระบบรีเซ็ตด้วยตนเองผ่านอีเมล</li>
+      </ul>
+    </section>
+
+    <section id="faq">
+      <div class="section-head"><span class="idx">27</span><h2>คำถามที่พบบ่อย</h2></div>
+      <div class="card"><h4>ทำไมไม่เห็นปุ่ม “+ สร้างงาน”?</h4><p style="margin:0">บัญชีผู้ดูแลระบบไม่มีตารางงานของตนเอง ปุ่มนี้จะเปลี่ยนเป็น “+ เพิ่มผู้ใช้” เฉพาะในหน้าจัดการผู้ใช้เท่านั้น</p></div>
+      <div class="card"><h4>ทำไมสร้างงานให้ผู้บริหารไม่ได้?</h4><p style="margin:0">ต้องให้ผู้ดูแลระบบกำหนด “ผู้บริหารที่ดูแล” ในบัญชีเลขานุการของคุณก่อน (การตั้งค่า → จัดการผู้ใช้ → แก้ไขบัญชี)</p></div>
+      <div class="card"><h4>สร้างนัดให้ผู้บริหารแล้ว ทำไมยังไม่ขึ้นในปฏิทินของผู้บริหาร?</h4><p style="margin:0">นัดนั้นแสดงอยู่ แต่มีสถานะ “รอยืนยัน” จนกว่าผู้บริหารจะกดยืนยันในเมนู “รออนุมัติ” — ดูหัวข้อ <a href="#approvals">17</a></p></div>
+      <div class="card"><h4>ปฏิทินใน Google Calendar ไม่อัปเดตทันที</h4><p style="margin:0">เป็นเรื่องปกติ แอปปฏิทินภายนอกดึงข้อมูลตามรอบของตัวเอง มักใช้เวลาหลายชั่วโมง ไม่ใช่การซิงก์แบบเรียลไทม์</p></div>
+      <div class="card"><h4>ยังไม่ได้รับอีเมล/LINE สรุปงาน</h4><p style="margin:0">ตรวจว่าเปิดสวิตช์และกรอกอีเมล/LINE User ID ถูกต้องในหน้าตั้งค่าแล้ว และผู้ดูแลระบบได้ตั้งค่าเซิร์ฟเวอร์อีเมล/LINE ของหน่วยงานเรียบร้อยแล้ว</p></div>
+      <div class="card"><h4>ลบไฟล์หรือแก้เหตุผลยกเลิกที่บันทึกไปแล้วได้ไหม</h4><p style="margin:0">ลบไฟล์แนบได้ถ้ามีสิทธิ์แก้ไขงานนั้น แต่แก้ไขเหตุผลยกเลิกเดิมโดยตรงไม่ได้ — ต้องเปิดงานกลับมาทำใหม่แล้วยกเลิกอีกครั้งจึงจะบันทึกเหตุผลใหม่ได้ (ประวัติเก่ายังคงอยู่)</p></div>
+      <div class="card"><h4>ขอสลับเวรแล้ว ทำไมเวรยังไม่เปลี่ยน?</h4><p style="margin:0">เวรจะเปลี่ยนก็ต่อเมื่อเพื่อนร่วมงานกด “ตอบรับ” คำขอแล้วเท่านั้น ระหว่างรอ สถานะจะขึ้นว่า “รอตอบรับ” ในแผงของคุณ</p></div>
+    </section>
+  </main>
+</div>
+
+<script>
+(function(){
+  try{
+    var links = Array.prototype.slice.call(document.querySelectorAll('.toc a[href^="#"]'));
+    var secs = links.map(function(a){ return document.querySelector(a.getAttribute('href')); }).filter(Boolean);
+    var toggle = document.getElementById('navtoggle');
+    links.forEach(function(a){ a.addEventListener('click', function(){ if(toggle) toggle.checked = false; }); });
+    if('IntersectionObserver' in window){
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(e){
+          if(!e.isIntersecting) return;
+          var id = e.target.id;
+          links.forEach(function(a){ a.classList.toggle('on', a.getAttribute('href') === '#'+id); });
+        });
+      }, {rootMargin:'-15% 0px -70% 0px'});
+      secs.forEach(function(s){ io.observe(s); });
+    }
+  }catch(e){}
+})();
+</script>
+
+</body></html>
