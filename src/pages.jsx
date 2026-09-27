@@ -1,35 +1,60 @@
 import React from 'react';
-import { MONO, card, Toggle, ToggleRow, Seg, Chips, Kpi, Bar, TaskRow, Stack, selectStyle } from './ui.jsx';
+import { MONO, card, Toggle, ToggleRow, Seg, Chips, Kpi, Bar, TaskRow, Stack, Empty, selectStyle } from './ui.jsx';
 
 const grid = (min, gap = 12, extra) => ({ display: 'grid', gridTemplateColumns: `repeat(auto-fit,minmax(${min}px,1fr))`, gap, ...extra });
 const h1 = { margin: '4px 0 0', fontSize: 24, fontWeight: 600 };
 const muted = { fontSize: 13, color: 'var(--muted)' };
-const cardTitle = { fontWeight: 600, fontSize: 15 };
-const linkBtn = { border: 'none', background: 'none', color: '#1F5E5B', fontSize: 13, cursor: 'pointer' };
+const cardTitle = { fontWeight: 700, fontSize: 15, letterSpacing: '-0.005em' };
+const linkBtn = { border: 'none', background: 'none', color: 'var(--primary)', fontSize: 13, cursor: 'pointer' };
 const navBtn = { border: '1px solid var(--border2)', background: 'var(--surface)', borderRadius: 8, padding: '6px 12px', cursor: 'pointer', fontSize: 13, whiteSpace: 'nowrap' };
+
+const STAT_ICONS = [
+  'M4 5h16v15H4zM4 9.5h16M8 3v4M16 3v4M9 14.5l2 2 4-4',
+  'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2',
+  'M12 3 2.5 20h19L12 3zM12 10v4.5M12 17.2v.1',
+  'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM8 12.5l3 3 5-6',
+];
 
 export function Dashboard({ V }) {
   return (
     <Stack gap={18} style={{ maxWidth: 1280 }}>
-      <div>
-        <div style={muted}>{V.todayLabel}</div>
-        <h1 style={{ ...h1, letterSpacing: '-0.01em' }}>สวัสดี {V.user.name}</h1>
-        <div style={{ fontSize: 14, color: 'var(--muted)', marginTop: 2 }}>{V.user.role} · {V.scopeLabel}</div>
+      <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 22, padding: '26px 30px', color: '#fff', background: 'linear-gradient(120deg,#0B1636 0%,#173A8C 55%,#2F7BF0 100%)', boxShadow: '0 22px 44px -22px rgba(37,99,235,0.7)', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 20 }}>
+        <div style={{ position: 'absolute', right: -60, top: -80, width: 260, height: 260, borderRadius: '50%', background: 'rgba(255,255,255,0.08)' }} />
+        <div style={{ position: 'absolute', right: 90, bottom: -110, width: 200, height: 200, borderRadius: '50%', background: 'rgba(255,255,255,0.06)' }} />
+        <div style={{ position: 'relative', flex: '1 1 320px', minWidth: 0 }}>
+          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)' }}>{V.todayLabel}</div>
+          <h1 style={{ margin: '6px 0 0', fontSize: 28, fontWeight: 700, letterSpacing: '-0.015em', lineHeight: 1.25 }}>สวัสดี {V.user.name}</h1>
+          <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.8)', marginTop: 4 }}>{V.user.role} · {V.scopeLabel}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 18, maxWidth: 420 }}>
+            <div style={{ flex: 1, height: 8, borderRadius: 99, background: 'rgba(255,255,255,0.2)', overflow: 'hidden' }}>
+              <div style={{ width: V.pct + '%', height: '100%', borderRadius: 99, background: 'linear-gradient(90deg,#7DD3FC,#fff)', transition: 'width .6s ease' }} />
+            </div>
+            <span style={{ fontFamily: MONO, fontSize: 14, fontWeight: 600 }}>{V.pct}%</span>
+          </div>
+          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.72)', marginTop: 6 }}>ความคืบหน้าของวันนี้ · {V.pctSub}</div>
+        </div>
+        <div style={{ position: 'relative', display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          <button className="hero-btn" onClick={V.openCreate} style={{ height: 42, padding: '0 18px', border: 'none', borderRadius: 12, background: '#fff', color: '#173A8C', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>+ สร้างงาน</button>
+          <button className="hero-btn" onClick={V.goCal} style={{ height: 42, padding: '0 18px', border: '1px solid rgba(255,255,255,0.45)', borderRadius: 12, background: 'rgba(255,255,255,0.12)', color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>ดูปฏิทิน</button>
+        </div>
       </div>
 
-      <div style={grid(150)}>
+      <div style={grid(V.isMobile ? 140 : 190, 14)}>
         {V.stats.map((s, i) => (
-          <button key={i} onClick={s.onClick} style={{ ...card, textAlign: 'left', padding: '14px 16px', cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <span style={{ ...muted, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: s.c, flex: 'none' }} />{s.label}
+          <button key={i} className="lift" onClick={s.onClick} style={{ ...card, textAlign: 'left', padding: V.isMobile ? '12px 12px' : '16px 18px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: V.isMobile ? 10 : 14, color: 'var(--text)' }}>
+            <span style={{ width: V.isMobile ? 38 : 46, height: V.isMobile ? 38 : 46, flex: 'none', borderRadius: 14, display: 'grid', placeItems: 'center', background: 'color-mix(in srgb,' + s.c + ' 14%,transparent)' }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={s.c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={STAT_ICONS[i % 4]} /></svg>
             </span>
-            <span style={{ fontSize: 32, fontWeight: 500, fontFamily: MONO, color: 'var(--text)', lineHeight: 1.1 }}>{s.value}</span>
-            <span style={{ fontSize: 12, color: 'var(--muted)' }}>{s.sub}</span>
+            <span style={{ display: 'flex', flexDirection: 'column', gap: 1, minWidth: 0 }}>
+              <span style={{ fontSize: 13, color: 'var(--muted)' }}>{s.label}</span>
+              <span style={{ fontSize: 30, fontWeight: 600, fontFamily: MONO, lineHeight: 1.15 }}>{s.value}</span>
+              <span style={{ fontSize: 12, color: 'var(--muted2)' }}>{s.sub}</span>
+            </span>
           </button>
         ))}
       </div>
 
-      <div style={grid(290)}>
+      <div style={grid(290, 14, { alignItems: 'start' })}>
         <Stack gap={16} style={{ ...card, padding: 18 }}>
           <div style={cardTitle}>% งานสำเร็จวันนี้</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 22, flexWrap: 'wrap' }}>
@@ -57,7 +82,7 @@ export function Dashboard({ V }) {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <div style={cardTitle}>งานล่าช้า · 7 วัน</div>
             <div style={{ display: 'flex', gap: 12, fontSize: 12, color: 'var(--muted)' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 9, height: 9, borderRadius: 2, background: '#1F5E5B' }} />ตรงเวลา</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 9, height: 9, borderRadius: 2, background: 'var(--primary)' }} />ตรงเวลา</span>
               <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 9, height: 9, borderRadius: 2, background: '#D97A5E' }} />ล่าช้า/ค้าง</span>
             </div>
           </div>
@@ -67,7 +92,7 @@ export function Dashboard({ V }) {
                 <span style={{ fontSize: 11, fontFamily: MONO, color: 'var(--muted)' }}>{d.pctText}</span>
                 <div style={{ width: '100%', maxWidth: 26, height: 104, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', gap: 2 }}>
                   <div style={{ height: d.lateH, background: '#D97A5E', borderRadius: 3 }} />
-                  <div style={{ height: d.doneH, background: '#1F5E5B', borderRadius: 3 }} />
+                  <div style={{ height: d.doneH, background: 'var(--primary)', borderRadius: 3 }} />
                 </div>
                 <span style={{ fontSize: 12, color: d.c, fontWeight: d.w }}>{d.label}</span>
               </div>
@@ -87,7 +112,7 @@ export function Dashboard({ V }) {
               <span style={{ fontSize: 12, color: 'var(--text2)' }}>{p.msg}</span>
             </button>
           ))}
-          {V.noProactive && <div style={{ ...muted, padding: '12px 0' }}>ไม่มีงานที่ต้องจับตาในตอนนี้</div>}
+          {V.noProactive && <Empty compact icon="check" title="เรียบร้อยดี" sub="ไม่มีงานที่ต้องจับตาในตอนนี้" />}
         </Stack>
       </div>
 
@@ -97,7 +122,7 @@ export function Dashboard({ V }) {
           <button onClick={V.goCal} style={linkBtn}>ดูปฏิทิน →</button>
         </div>
         {V.todayTasks.map((t) => <TaskRow key={t.id} t={t} />)}
-        {V.todayEmpty && <div style={{ ...muted, padding: '16px 0' }}>ไม่มีงานวันนี้</div>}
+        {V.todayEmpty && <Empty icon="calendar" title="วันนี้ยังไม่มีงาน" sub="กด “สร้างงาน” เพื่อเพิ่มงานหรือนัดหมายแรกของวัน" />}
       </Stack>
     </Stack>
   );
@@ -147,7 +172,7 @@ export function List({ V }) {
           {g.items.map((t) => <TaskRow key={t.id} t={t} />)}
         </Stack>
       ))}
-      {V.listEmpty && <div style={{ background: 'var(--surface)', border: '1px dashed var(--border2)', borderRadius: 12, padding: 32, textAlign: 'center', color: 'var(--muted)', fontSize: 14 }}>ไม่พบงานตามเงื่อนไข</div>}
+      {V.listEmpty && <div style={{ ...card, borderStyle: 'dashed' }}><Empty icon="search" title="ไม่พบงานตามเงื่อนไข" sub="ลองเปลี่ยนตัวกรอง หรือล้างตัวกรองเพื่อดูงานทั้งหมด" /></div>}
     </Stack>
   );
 }
@@ -167,7 +192,7 @@ function TaskTip({ tip }) {
     t.note && ['บันทึก', t.note],
   ].filter(Boolean);
   return (
-    <div style={{ position: 'fixed', left, top, width: W, zIndex: 60, pointerEvents: 'none', background: 'var(--surface)', border: '1px solid var(--border)', borderLeft: `4px solid ${t.priC}`, borderRadius: 10, boxShadow: '0 14px 34px rgba(22,48,46,0.22)', padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+    <div style={{ position: 'fixed', left, top, width: W, zIndex: 60, pointerEvents: 'none', background: 'var(--surface)', border: '1px solid var(--border)', borderLeft: `4px solid ${t.priC}`, borderRadius: 10, boxShadow: '0 14px 34px rgba(11,22,54,0.22)', padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
       <div style={{ fontSize: 14, fontWeight: 600, lineHeight: 1.35, color: 'var(--text)' }}>{t.title}</div>
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', fontSize: 12 }}>
         <span style={{ background: t.priBg, color: t.priC, padding: '1px 8px', borderRadius: 99, fontWeight: 600 }}>ความสำคัญ{t.priLabel}</span>
@@ -279,7 +304,7 @@ export function Calendar({ V }) {
               <button onClick={() => V.createAt(V.selDayIso)} style={{ ...linkBtn, marginLeft: 'auto' }}>+ สร้างงานในวันนี้</button>
             </div>
             {V.selDayItems.map((t, i) => <TaskRow key={t.id + i} t={t} />)}
-            {V.selDayEmpty && <div style={{ ...muted, padding: '8px 0' }}>ไม่มีงานในวันนี้</div>}
+            {V.selDayEmpty && <Empty compact icon="calendar" title="ไม่มีงานในวันนี้" />}
           </Stack>
         </>
       )}
@@ -300,7 +325,7 @@ export function Team({ V }) {
         {V.team.map((m) => (
           <Stack key={m.id} gap={12} style={{ ...card, padding: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ width: 38, height: 38, borderRadius: '50%', background: '#16302E', color: '#E7EFEC', display: 'grid', placeItems: 'center', fontSize: 13, fontWeight: 600, flex: 'none' }}>{m.short}</span>
+              <span style={{ width: 38, height: 38, borderRadius: '50%', background: 'var(--navy)', color: '#E8EEFC', display: 'grid', placeItems: 'center', fontSize: 13, fontWeight: 600, flex: 'none' }}>{m.short}</span>
               <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
                 <span style={{ fontSize: 14, fontWeight: 600 }}>{m.name}</span>
                 <span style={{ fontSize: 12, color: 'var(--muted)' }}>{m.role}</span>
@@ -319,7 +344,7 @@ export function Team({ V }) {
                 <span>ความคืบหน้าวันนี้</span><span style={{ fontFamily: MONO }}>{m.pct}%</span>
               </div>
               <div style={{ height: 6, background: 'var(--track)', borderRadius: 99, overflow: 'hidden' }}>
-                <div style={{ height: '100%', width: m.pctW, background: '#1F5E5B', borderRadius: 99 }} />
+                <div style={{ height: '100%', width: m.pctW, background: 'var(--primary)', borderRadius: 99 }} />
               </div>
             </Stack>
             <div style={{ fontSize: 13, color: 'var(--text)', background: 'var(--bg2)', borderRadius: 8, padding: '8px 10px' }}>{m.curText}</div>
@@ -330,7 +355,7 @@ export function Team({ V }) {
       <Stack gap={10} style={{ ...card, padding: 16 }}>
         <div style={cardTitle}>งานค้างเกินเวลาของทีม</div>
         {V.teamOverdue.map((t) => <TaskRow key={t.id} t={t} />)}
-        {V.teamOverdueEmpty && <div style={{ ...muted, padding: '8px 0' }}>ไม่มีงานค้าง</div>}
+        {V.teamOverdueEmpty && <Empty compact icon="check" title="ไม่มีงานค้าง" sub="ทีมทำงานตามกำหนดทุกงาน" />}
       </Stack>
     </Stack>
   );
@@ -348,10 +373,10 @@ export function Report({ V }) {
           <div style={{ fontSize: 14, color: 'var(--muted)', marginTop: 2 }}>{V.rPeriod}</div>
         </div>
         <div data-noprint="1"><Seg items={V.rRanges} pad="6px 12px" /></div>
-        <button data-noprint="1" onClick={V.exportPdf} style={{ height: 36, border: 'none', borderRadius: 9, background: '#1F5E5B', color: '#fff', padding: '0 14px', fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+        <button data-noprint="1" onClick={V.exportPdf} style={{ height: 36, border: 'none', borderRadius: 9, background: 'var(--primary)', color: '#fff', padding: '0 14px', fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11" /></svg>Export PDF
         </button>
-        <button data-noprint="1" onClick={V.exportXlsx} style={{ height: 36, border: '1px solid #1F5E5B', borderRadius: 9, background: 'var(--surface)', color: '#1F5E5B', padding: '0 14px', fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+        <button data-noprint="1" onClick={V.exportXlsx} style={{ height: 36, border: '1px solid var(--primary)', borderRadius: 9, background: 'var(--surface)', color: 'var(--primary)', padding: '0 14px', fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M2.5 2.5h11v11h-11zM2.5 6.2h11M2.5 9.8h11M6.2 2.5v11" /></svg>Export Excel
         </button>
       </div>
@@ -420,7 +445,7 @@ export function Users({ V }) {
           {V.usersRows.map((r) => (
             <div key={r.id} style={{ display: 'grid', gridTemplateColumns: usersCols, gap: 12, padding: '10px 16px', borderBottom: '1px solid var(--soft)', alignItems: 'center', fontSize: 13, opacity: r.rowOp }}>
               <span style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
-                <span style={{ width: 34, height: 34, flex: 'none', borderRadius: '50%', background: '#16302E', color: '#E7EFEC', display: 'grid', placeItems: 'center', fontSize: 12, fontWeight: 600 }}>{r.short}</span>
+                <span style={{ width: 34, height: 34, flex: 'none', borderRadius: '50%', background: 'var(--navy)', color: '#E8EEFC', display: 'grid', placeItems: 'center', fontSize: 12, fontWeight: 600 }}>{r.short}</span>
                 <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
                   <span style={{ fontSize: 14, fontWeight: 500 }}>{r.name}</span>
                   <span style={{ fontSize: 12, color: 'var(--muted)' }}>{r.role}</span>
@@ -453,14 +478,14 @@ export function Users({ V }) {
 }
 
 const SETTING_SECTIONS = [
-  { k: 'appearance', title: 'ธีมหน้าจอ', sub: 'สว่าง · มืด · ตามอุปกรณ์', icon: 'M8 1.5v1.8M8 12.7v1.8M1.5 8h1.8M12.7 8h1.8M3.4 3.4l1.3 1.3M11.3 11.3l1.3 1.3M3.4 12.6l1.3-1.3M11.3 4.7l1.3-1.3M8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6z' },
-  { k: 'calendar', title: 'ปฏิทินภายนอก', sub: 'Google Calendar · Outlook', icon: 'M2 3h12v11H2zM2 6.5h12M5 1.5v3M11 1.5v3', tasks: true },
-  { k: 'digest', title: 'สรุปงานประจำวัน', sub: 'อีเมล · LINE', icon: 'M2 4h12v8H2zM2 4l6 5 6-5', tasks: true },
   { k: 'account', title: 'บัญชีของฉัน', sub: 'รหัสผ่านและการออกจากระบบ', icon: 'M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM2.5 14c0-3 2.5-5 5.5-5s5.5 2 5.5 5' },
+  { k: 'appearance', title: 'ธีมหน้าจอ', sub: 'สว่าง · มืด · ตามอุปกรณ์', icon: 'M8 1.5v1.8M8 12.7v1.8M1.5 8h1.8M12.7 8h1.8M3.4 3.4l1.3 1.3M11.3 11.3l1.3 1.3M3.4 12.6l1.3-1.3M11.3 4.7l1.3-1.3M8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6z' },
   { k: 'channels', title: 'รูปแบบการแจ้งเตือน', sub: 'เสียง · Push · Popup', icon: 'M4 11V7a4 4 0 0 1 8 0v4l1.2 1.5H2.8L4 11zM6.5 14a1.6 1.6 0 0 0 3 0', tasks: true },
   { k: 'intensity', title: 'ความเข้มของการเตือน', sub: 'ตามระดับความสำคัญของงาน', icon: 'M2 13V9M6 13V6M10 13V3M14 13V7', tasks: true },
   { k: 'timing', title: 'เวลาและการเตือนซ้ำ', sub: 'เตือนล่วงหน้า · เตือนซ้ำ', icon: 'M8 14A6 6 0 1 0 8 2a6 6 0 0 0 0 12zM8 4.5V8l2.5 1.5', tasks: true },
   { k: 'proactive', title: 'การแจ้งเตือนเชิงรุก', sub: 'งานค้าง · งานสำคัญ · AI', icon: 'M8 1.5 9.6 6l4.4.4-3.3 3 1 4.6L8 11.7 4.3 14l1-4.6-3.3-3L6.4 6 8 1.5z', tasks: true },
+  { k: 'calendar', title: 'ปฏิทินภายนอก', sub: 'Google Calendar · Outlook', icon: 'M2 3h12v11H2zM2 6.5h12M5 1.5v3M11 1.5v3', tasks: true },
+  { k: 'digest', title: 'สรุปงานประจำวัน', sub: 'อีเมล · LINE', icon: 'M2 4h12v8H2zM2 4l6 5 6-5', tasks: true },
 ];
 
 export function Alerts({ V }) {
@@ -477,7 +502,7 @@ export function Alerts({ V }) {
             const pv = (d) => ({ bg: d ? '#151A19' : '#F3F1EB', card: d ? '#1F2726' : '#FFFFFF', line: d ? '#333D3B' : '#E4E0D6', txt: d ? '#E7EEEC' : '#1C2826' });
             const a = pv(dark), b = pv(true);
             return (
-              <button key={o.k} onClick={o.onClick} style={{ textAlign: 'left', cursor: 'pointer', background: 'var(--surface)', color: 'var(--text)', border: o.on ? '2px solid #1F5E5B' : '2px solid var(--border)', borderRadius: 12, padding: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <button key={o.k} onClick={o.onClick} style={{ textAlign: 'left', cursor: 'pointer', background: 'var(--surface)', color: 'var(--text)', border: o.on ? '2px solid var(--primary)' : '2px solid var(--border)', borderRadius: 12, padding: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <div style={{ display: 'flex', height: 74, borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)' }}>
                   {[a].concat(sys ? [b] : []).map((c, i) => (
                     <div key={i} style={{ flex: 1, background: c.bg, padding: 8, display: 'flex', flexDirection: 'column', gap: 5 }}>
@@ -490,7 +515,7 @@ export function Alerts({ V }) {
                   ))}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ width: 14, height: 14, borderRadius: '50%', border: o.on ? '4px solid #1F5E5B' : '2px solid var(--border2)', flex: 'none' }} />
+                  <span style={{ width: 14, height: 14, borderRadius: '50%', border: o.on ? '4px solid var(--primary)' : '2px solid var(--border2)', flex: 'none' }} />
                   <span style={{ fontSize: 14, fontWeight: 600 }}>{o.label}</span>
                 </div>
                 <span style={{ fontSize: 12, color: 'var(--muted)' }}>{o.desc}</span>
@@ -505,10 +530,10 @@ export function Alerts({ V }) {
         <div style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.6 }}>แสดงตารางงานของคุณใน Google Calendar หรือ Outlook โดยสมัครรับปฏิทินจากลิงก์ด้านล่าง (ซิงก์ทางเดียว: ระบบนี้ → ปฏิทินภายนอก) อัปเดตตามรอบที่แอปปฏิทินกำหนด ซึ่งมักใช้เวลาหลายชั่วโมง</div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <input readOnly value={V.feedLoading ? 'กำลังโหลด…' : V.feedUrl} onFocus={(e) => e.target.select()} style={{ flex: 1, minWidth: 220, height: 38, border: '1px solid var(--border2)', borderRadius: 9, padding: '0 10px', fontSize: 12, fontFamily: MONO, background: 'var(--bg2)', color: 'var(--text)' }} />
-          <button onClick={V.copyFeed} style={{ height: 38, padding: '0 14px', border: 'none', borderRadius: 9, background: '#1F5E5B', color: '#fff', fontSize: 13, cursor: 'pointer' }}>คัดลอกลิงก์</button>
+          <button onClick={V.copyFeed} style={{ height: 38, padding: '0 14px', border: 'none', borderRadius: 9, background: 'var(--primary)', color: '#fff', fontSize: 13, cursor: 'pointer' }}>คัดลอกลิงก์</button>
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <button onClick={V.downloadIcs} style={{ padding: '8px 14px', borderRadius: 9, border: '1px solid #1F5E5B', background: 'var(--surface)', color: '#1F5E5B', fontSize: 13, cursor: 'pointer' }}>ดาวน์โหลดไฟล์ .ics</button>
+          <button onClick={V.downloadIcs} style={{ padding: '8px 14px', borderRadius: 9, border: '1px solid var(--primary)', background: 'var(--surface)', color: 'var(--primary)', fontSize: 13, cursor: 'pointer' }}>ดาวน์โหลดไฟล์ .ics</button>
           <button onClick={V.regenFeed} style={{ padding: '8px 14px', borderRadius: 9, border: '1px solid var(--border2)', background: 'var(--surface)', color: 'var(--text)', fontSize: 13, cursor: 'pointer' }}>สร้างลิงก์ใหม่</button>
         </div>
         <div style={{ fontSize: 13, background: 'var(--bg2)', borderRadius: 10, padding: '12px 14px', lineHeight: 1.7 }}>
@@ -537,8 +562,8 @@ export function Alerts({ V }) {
         {V.dg.err && <div style={{ fontSize: 13, color: '#B83A32', background: '#FAE8E5', borderRadius: 8, padding: '8px 12px' }}>{V.dg.err}</div>}
         {V.dg.msg && <div style={{ fontSize: 13, color: '#2E7040', background: '#DDF0E1', borderRadius: 8, padding: '8px 12px' }}>{V.dg.msg}</div>}
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <button onClick={V.dg.save} disabled={V.dg.busy} style={{ padding: '9px 16px', border: 'none', borderRadius: 9, background: '#1F5E5B', color: '#fff', fontSize: 13, cursor: 'pointer', opacity: V.dg.busy ? 0.7 : 1 }}>บันทึก</button>
-          <button onClick={V.dg.test} disabled={V.dg.busy} style={{ padding: '9px 16px', border: '1px solid #1F5E5B', borderRadius: 9, background: 'var(--surface)', color: '#1F5E5B', fontSize: 13, cursor: 'pointer', opacity: V.dg.busy ? 0.7 : 1 }}>บันทึกและส่งทดสอบตอนนี้</button>
+          <button onClick={V.dg.save} disabled={V.dg.busy} style={{ padding: '9px 16px', border: 'none', borderRadius: 9, background: 'var(--primary)', color: '#fff', fontSize: 13, cursor: 'pointer', opacity: V.dg.busy ? 0.7 : 1 }}>บันทึก</button>
+          <button onClick={V.dg.test} disabled={V.dg.busy} style={{ padding: '9px 16px', border: '1px solid var(--primary)', borderRadius: 9, background: 'var(--surface)', color: 'var(--primary)', fontSize: 13, cursor: 'pointer', opacity: V.dg.busy ? 0.7 : 1 }}>บันทึกและส่งทดสอบตอนนี้</button>
         </div>
         {V.dg.log.length > 0 && (
           <Stack gap={4}>
@@ -554,7 +579,7 @@ export function Alerts({ V }) {
       <>
         <div style={{ fontSize: 14 }}>{V.user.name}</div>
         <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: -8 }}>{V.user.role}</div>
-        <button onClick={V.openPw} style={{ alignSelf: 'flex-start', padding: '8px 14px', borderRadius: 9, border: '1px solid #1F5E5B', background: 'var(--surface)', color: '#1F5E5B', fontSize: 13, cursor: 'pointer' }}>เปลี่ยนรหัสผ่าน</button>
+        <button onClick={V.openPw} style={{ alignSelf: 'flex-start', padding: '8px 14px', borderRadius: 9, border: '1px solid var(--primary)', background: 'var(--surface)', color: 'var(--primary)', fontSize: 13, cursor: 'pointer' }}>เปลี่ยนรหัสผ่าน</button>
         <div style={{ fontSize: 12, color: 'var(--muted)' }}>ระบบจะออกจากระบบอัตโนมัติเมื่อไม่มีการใช้งานเกิน 15 นาที</div>
       </>
     ),
@@ -573,7 +598,7 @@ export function Alerts({ V }) {
             <span style={{ fontFamily: MONO, fontSize: 13, width: 36, textAlign: 'right' }}>{V.volume}</span>
           </div>
         </div>
-        <button onClick={V.testAlert} style={{ alignSelf: 'flex-start', padding: '8px 14px', borderRadius: 9, border: 'none', background: '#1F5E5B', color: '#fff', fontSize: 13, cursor: 'pointer' }}>ทดสอบการแจ้งเตือน</button>
+        <button onClick={V.testAlert} style={{ alignSelf: 'flex-start', padding: '8px 14px', borderRadius: 9, border: 'none', background: 'var(--primary)', color: '#fff', fontSize: 13, cursor: 'pointer' }}>ทดสอบการแจ้งเตือน</button>
       </>
     ),
     intensity: V.intensityRows.map((r, i) => (
@@ -608,8 +633,8 @@ export function Alerts({ V }) {
         {sections.map((s) => {
           const on = s.k === active.k;
           return (
-            <button key={s.k} onClick={() => V.setSettingsSec(s.k)} style={{ display: 'flex', alignItems: 'center', gap: 10, textAlign: 'left', border: 'none', borderRadius: 9, padding: '10px 12px', cursor: 'pointer', background: on ? '#DCEBE7' : 'transparent', color: on ? '#16302E' : 'var(--text)', flex: 'none' }}>
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke={on ? '#1F5E5B' : 'var(--muted)'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ flex: 'none' }}><path d={s.icon} /></svg>
+            <button key={s.k} onClick={() => V.setSettingsSec(s.k)} style={{ display: 'flex', alignItems: 'center', gap: 10, textAlign: 'left', border: 'none', borderRadius: 9, padding: '10px 12px', cursor: 'pointer', background: on ? 'var(--ptint)' : 'transparent', color: 'var(--text)', flex: 'none' }}>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke={on ? 'var(--primary)' : 'var(--muted)'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ flex: 'none' }}><path d={s.icon} /></svg>
               <span style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 <span style={{ fontSize: 14, fontWeight: on ? 600 : 500 }}>{s.title}</span>
                 {!V.isMobile && <span style={{ fontSize: 12, color: 'var(--muted)' }}>{s.sub}</span>}
@@ -628,10 +653,10 @@ export function Alerts({ V }) {
 
 const ACTIONS = {
   login: ['เข้าสู่ระบบ', '#2E7040'], 'login.fail': ['เข้าสู่ระบบไม่สำเร็จ', '#B83A32'], logout: ['ออกจากระบบ', 'var(--muted)'],
-  'logout.idle': ['ออกจากระบบอัตโนมัติ', '#9A6210'], 'password.change': ['เปลี่ยนรหัสผ่าน', '#1F5E5B'],
-  'task.create': ['สร้างงาน', '#1F5E5B'], 'task.update': ['แก้ไขงาน', '#9A6210'], 'task.delete': ['ลบงาน', '#B83A32'],
-  'file.upload': ['แนบไฟล์', '#1F5E5B'], 'file.download': ['ดาวน์โหลดไฟล์', 'var(--muted)'], 'file.delete': ['ลบไฟล์', '#B83A32'], 'task.cancel': ['ยกเลิกงาน', '#6B6963'], 'task.rsvp': ['ตอบรับคำเชิญ', '#1F5E5B'], 'report.export': ['ส่งออกรายงาน Excel', '#5E6966'], 'calendar.feed-regenerate': ['สร้างลิงก์ปฏิทินใหม่', '#9A6210'], 'digest.update': ['ตั้งค่าสรุปงานประจำวัน', '#5E6966'], 'digest.test': ['ทดสอบส่งสรุปงาน', '#5E6966'],
-  'user.create': ['เพิ่มผู้ใช้', '#1F5E5B'], 'user.update': ['แก้ไขผู้ใช้', '#9A6210'], 'user.reset-password': ['รีเซ็ตรหัสผ่านผู้ใช้', '#B83A32'],
+  'logout.idle': ['ออกจากระบบอัตโนมัติ', '#9A6210'], 'password.change': ['เปลี่ยนรหัสผ่าน', 'var(--primary)'],
+  'task.create': ['สร้างงาน', 'var(--primary)'], 'task.update': ['แก้ไขงาน', '#9A6210'], 'task.delete': ['ลบงาน', '#B83A32'],
+  'file.upload': ['แนบไฟล์', 'var(--primary)'], 'file.download': ['ดาวน์โหลดไฟล์', 'var(--muted)'], 'file.delete': ['ลบไฟล์', '#B83A32'], 'task.cancel': ['ยกเลิกงาน', '#6B6963'], 'task.rsvp': ['ตอบรับคำเชิญ', 'var(--primary)'], 'report.export': ['ส่งออกรายงาน Excel', '#5E6966'], 'calendar.feed-regenerate': ['สร้างลิงก์ปฏิทินใหม่', '#9A6210'], 'digest.update': ['ตั้งค่าสรุปงานประจำวัน', '#5E6966'], 'digest.test': ['ทดสอบส่งสรุปงาน', '#5E6966'],
+  'user.create': ['เพิ่มผู้ใช้', 'var(--primary)'], 'user.update': ['แก้ไขผู้ใช้', '#9A6210'], 'user.reset-password': ['รีเซ็ตรหัสผ่านผู้ใช้', '#B83A32'],
   'system.init': ['เริ่มระบบ', 'var(--muted)'],
 };
 const FIELD = { title: 'ชื่องาน', type: 'ประเภท', priority: 'ความสำคัญ', date: 'วันที่', start: 'เวลาเริ่ม', dur: 'ระยะเวลา', repeat: 'รูปแบบ', status: 'สถานะ', assignee: 'ผู้รับผิดชอบ', mode: 'รูปแบบประชุม', location: 'สถานที่', link: 'ลิงก์', note: 'บันทึก', name: 'ชื่อ', username: 'ชื่อผู้ใช้', rk: 'บทบาท', role: 'ตำแหน่ง', active: 'สถานะบัญชี', manages: 'ผู้บริหารที่ดูแล' };
@@ -664,7 +689,7 @@ export function Audit({ V }) {
       </div>
       <form onSubmit={(e) => { e.preventDefault(); V.onAuditGo(); }} style={{ display: 'flex', gap: 8 }}>
         <input value={V.auditQ} onChange={V.onAuditQ} placeholder="ค้นหา ชื่อผู้ใช้ การกระทำ หรือชื่องาน" style={{ flex: 1, height: 38, border: '1px solid var(--border2)', borderRadius: 9, padding: '0 12px', fontSize: 14, outline: 'none' }} />
-        <button type="submit" style={{ height: 38, border: 'none', borderRadius: 9, background: '#1F5E5B', color: '#fff', padding: '0 16px', fontSize: 14, cursor: 'pointer' }}>{V.auditLoading ? 'กำลังโหลด…' : 'ค้นหา / รีเฟรช'}</button>
+        <button type="submit" style={{ height: 38, border: 'none', borderRadius: 9, background: 'var(--primary)', color: '#fff', padding: '0 16px', fontSize: 14, cursor: 'pointer' }}>{V.auditLoading ? 'กำลังโหลด…' : 'ค้นหา / รีเฟรช'}</button>
       </form>
       <div style={{ ...card, overflow: 'auto' }}>
         <div style={{ minWidth: 820 }}>

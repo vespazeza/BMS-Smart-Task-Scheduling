@@ -3,8 +3,8 @@ import { MONO, Toggle, ToggleRow, Seg, Chips, Stack, fieldStyle, btnGhost, btnPr
 
 const lbl = { fontSize: 13, color: 'var(--muted)' };
 const closeBtn = { border: 'none', background: 'var(--bg)', width: 36, height: 36, borderRadius: 8, cursor: 'pointer' };
-const modal = (w) => ({ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: `min(${w}px,calc(100% - 20px))`, maxHeight: 'calc(100% - 24px)', overflow: 'auto', background: 'var(--surface)', borderRadius: 16, zIndex: 51, boxShadow: '0 30px 60px rgba(22,48,46,0.25)', display: 'flex', flexDirection: 'column' });
-const scrim = { position: 'fixed', inset: 0, background: 'rgba(22,48,46,0.32)', zIndex: 50 };
+const modal = (w) => ({ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: `min(${w}px,calc(100% - 20px))`, maxHeight: 'calc(100% - 24px)', overflow: 'auto', background: 'var(--surface)', borderRadius: 20, zIndex: 51, boxShadow: '0 30px 70px rgba(11,22,54,0.35)', display: 'flex', flexDirection: 'column' });
+const scrim = { position: 'fixed', inset: 0, background: 'rgba(11,22,54,0.42)', backdropFilter: 'blur(3px)', WebkitBackdropFilter: 'blur(3px)', zIndex: 50 };
 const modalHead = { display: 'flex', alignItems: 'center', padding: '16px 20px', borderBottom: '1px solid var(--soft)' };
 const modalFoot = { display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '14px 20px', borderTop: '1px solid var(--soft)' };
 const modalBody = { padding: '16px 20px', display: 'flex', flexDirection: 'column' };
@@ -13,7 +13,7 @@ export function Toasts({ V }) {
   return (
     <div data-noprint="1" style={{ position: 'fixed', bottom: V.toastBottom, right: 14, zIndex: 70, display: 'flex', flexDirection: 'column-reverse', gap: 10, width: 'min(340px,calc(100% - 28px))', maxHeight: 'calc(100% - 120px)', overflow: 'auto', pointerEvents: 'none' }}>
       {V.toasts.map((n) => (
-        <div key={n.id} style={{ pointerEvents: 'auto', background: 'var(--surface)', border: '1px solid var(--border)', borderLeft: `4px solid ${n.c}`, borderRadius: 10, boxShadow: '0 14px 34px rgba(22,48,46,0.2)', padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <div key={n.id} className="toast-in" style={{ pointerEvents: 'auto', background: 'var(--surface)', border: '1px solid var(--border)', borderLeft: `4px solid ${n.c}`, borderRadius: 10, boxShadow: '0 14px 34px rgba(11,22,54,0.2)', padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 6 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ fontSize: 12, fontWeight: 600, color: n.c }}>{n.tag}</span>
             <span style={{ fontSize: 12, color: 'var(--muted2)', fontFamily: MONO }}>{n.time}</span>
@@ -23,9 +23,9 @@ export function Toasts({ V }) {
           <div style={{ fontSize: 13, color: 'var(--text2)' }}>{n.title} · {n.msg}</div>
           {n.hasTask && (
             <div style={{ display: 'flex', gap: 6, marginTop: 4, flexWrap: 'wrap' }}>
-              <button onClick={n.start} style={{ border: 'none', background: '#1F5E5B', color: '#fff', borderRadius: 7, padding: '6px 10px', fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap' }}>เริ่มงาน</button>
+              <button onClick={n.start} style={{ border: 'none', background: 'var(--primary)', color: '#fff', borderRadius: 7, padding: '6px 10px', fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap' }}>เริ่มงาน</button>
               <button onClick={n.snooze} style={{ border: '1px solid var(--border2)', background: 'var(--surface)', borderRadius: 7, padding: '6px 10px', fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap' }}>เลื่อน 5 นาที</button>
-              <button onClick={n.open} style={{ border: 'none', background: 'none', color: '#1F5E5B', fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap' }}>รายละเอียด</button>
+              <button onClick={n.open} style={{ border: 'none', background: 'none', color: 'var(--primary)', fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap' }}>รายละเอียด</button>
             </div>
           )}
         </div>
@@ -47,14 +47,14 @@ export function TaskDetail({ V }) {
   ];
   return (
     <>
-      <div data-noprint="1" onClick={V.closeSel} style={{ position: 'fixed', inset: 0, background: 'rgba(22,48,46,0.28)', zIndex: 40 }} />
-      <aside data-noprint="1" style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 'min(560px,calc(100% - 20px))', maxHeight: 'calc(100% - 24px)', background: 'var(--surface)', borderRadius: 16, zIndex: 41, overflow: 'auto', padding: 22, display: 'flex', flexDirection: 'column', gap: 18, boxShadow: '0 30px 60px rgba(22,48,46,0.25)' }}>
+      <div className="scrim-in" data-noprint="1" onClick={V.closeSel} style={{ position: 'fixed', inset: 0, background: 'rgba(11,22,54,0.42)', backdropFilter: 'blur(3px)', WebkitBackdropFilter: 'blur(3px)', zIndex: 40 }} />
+      <aside className="pop-in" data-noprint="1" style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 'min(560px,calc(100% - 20px))', maxHeight: 'calc(100% - 24px)', background: 'var(--surface)', borderRadius: 20, zIndex: 41, overflow: 'auto', padding: 22, display: 'flex', flexDirection: 'column', gap: 18, boxShadow: '0 30px 60px rgba(11,22,54,0.25)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
           <span style={{ background: 'var(--soft)', color: 'var(--text2)', padding: '2px 10px', borderRadius: 5, fontSize: 12 }}>{sel.type}</span>
           <span style={{ background: sel.priBg, color: sel.priC, padding: '2px 10px', borderRadius: 99, fontSize: 12, fontWeight: 600 }}>ความสำคัญ{sel.priLabel}</span>
           {sel.hasFlag && <span style={{ color: sel.flagC, background: sel.flagBg, padding: '2px 10px', borderRadius: 99, fontSize: 12, fontWeight: 600 }}>{sel.flag}</span>}
           {sel.canEdit && !sel.hist && (
-            <button onClick={V.onEdit} style={{ marginLeft: 'auto', border: '1px solid #1F5E5B', background: 'var(--surface)', color: '#1F5E5B', borderRadius: 8, padding: '7px 14px', fontSize: 13, cursor: 'pointer' }}>แก้ไขงาน</button>
+            <button onClick={V.onEdit} style={{ marginLeft: 'auto', border: '1px solid var(--primary)', background: 'var(--surface)', color: 'var(--primary)', borderRadius: 8, padding: '7px 14px', fontSize: 13, cursor: 'pointer' }}>แก้ไขงาน</button>
           )}
           <button onClick={V.closeSel} style={{ ...closeBtn, marginLeft: sel.canEdit && !sel.hist ? 0 : 'auto', fontSize: 16 }}>✕</button>
         </div>
@@ -69,7 +69,7 @@ export function TaskDetail({ V }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, background: 'var(--bg2)', borderRadius: 12, padding: '12px 14px' }}>
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
               <span style={{ ...lbl, marginRight: 4 }}>เลื่อนงาน</span>
-              <Chips items={sel.shiftChips.map((c) => ({ ...c, bg: 'var(--surface)', c: '#1F5E5B', border: '#1F5E5B' }))} pad="5px 12px" />
+              <Chips items={sel.shiftChips.map((c) => ({ ...c, bg: 'var(--surface)', c: 'var(--primary)', border: 'var(--primary)' }))} pad="5px 12px" />
             </div>
             <CustomReschedule key={sel.id + sel.date + sel.start + sel.dur} sel={sel} apply={V.applyReschedule} />
           </div>
@@ -97,7 +97,7 @@ export function TaskDetail({ V }) {
                 <span style={{ fontWeight: 600 }}>คุณได้รับเชิญเข้าร่วมประชุมนี้ — {sel.myRsvp === 'accepted' ? 'คุณตอบรับแล้ว' : sel.myRsvp === 'declined' ? 'คุณปฏิเสธแล้ว' : 'กรุณาตอบรับหรือปฏิเสธ'}</span>
                 <input value={V.rsvpReason} onChange={V.onRsvpReason} placeholder="เหตุผล (ถ้าปฏิเสธ — ไม่บังคับ)" style={{ border: '1px solid var(--border2)', borderRadius: 9, padding: '8px 10px', fontSize: 13, background: 'var(--surface)', color: 'var(--text)' }} />
                 <div style={{ display: 'flex', gap: 8 }}>
-                  <button onClick={() => V.onRsvp('accepted')} style={{ border: 'none', background: sel.myRsvp === 'accepted' ? '#2E7040' : '#1F5E5B', color: '#fff', borderRadius: 9, padding: '8px 18px', fontSize: 13, cursor: 'pointer' }}>✓ ตอบรับ</button>
+                  <button onClick={() => V.onRsvp('accepted')} style={{ border: 'none', background: sel.myRsvp === 'accepted' ? '#2E7040' : 'var(--primary)', color: '#fff', borderRadius: 9, padding: '8px 18px', fontSize: 13, cursor: 'pointer' }}>✓ ตอบรับ</button>
                   <button onClick={() => V.onRsvp('declined')} style={{ border: '1px solid #6B6963', background: sel.myRsvp === 'declined' ? '#E4E3E0' : 'var(--surface)', color: '#4E4C47', borderRadius: 9, padding: '8px 18px', fontSize: 13, cursor: 'pointer' }}>✕ ปฏิเสธ</button>
                 </div>
               </div>
@@ -175,7 +175,7 @@ export function TaskDetail({ V }) {
             <div key={f.id} style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid var(--border)', borderRadius: 9, padding: '8px 10px' }}>
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--muted)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" style={{ flex: 'none' }}><path d="M3.5 1.5h6l3 3v10h-9zM9.5 1.5v3h3" /></svg>
               <button onClick={f.onDownload} title="ดาวน์โหลด" style={{ flex: 1, minWidth: 0, textAlign: 'left', border: 'none', background: 'none', padding: 0, cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <span style={{ fontSize: 13, color: '#1F5E5B', overflowWrap: 'anywhere' }}>{f.name}</span>
+                <span style={{ fontSize: 13, color: 'var(--primary)', overflowWrap: 'anywhere' }}>{f.name}</span>
                 <span style={{ fontSize: 11, color: 'var(--muted)' }}>{f.sizeText} · {f.byName} · {f.atText}</span>
               </button>
               {sel.canEdit && <button onClick={f.onRemove} title="ลบไฟล์" style={{ border: 'none', background: 'none', color: '#B83A32', cursor: 'pointer', fontSize: 13 }}>ลบ</button>}
@@ -183,7 +183,7 @@ export function TaskDetail({ V }) {
           ))}
           {!sel.files.length && !sel.canEdit && <span style={{ fontSize: 13, color: 'var(--muted)' }}>ไม่มีไฟล์แนบ</span>}
           {sel.canEdit && (
-            <label style={{ alignSelf: 'flex-start', border: '1px dashed #1F5E5B', color: '#1F5E5B', borderRadius: 9, padding: '8px 14px', fontSize: 13, cursor: V.uploading ? 'wait' : 'pointer', opacity: V.uploading ? 0.6 : 1 }}>
+            <label style={{ alignSelf: 'flex-start', border: '1px dashed var(--primary)', color: 'var(--primary)', borderRadius: 9, padding: '8px 14px', fontSize: 13, cursor: V.uploading ? 'wait' : 'pointer', opacity: V.uploading ? 0.6 : 1 }}>
               {V.uploading ? 'กำลังอัปโหลด…' : '+ แนบไฟล์ (สูงสุด 15 MB ต่อไฟล์)'}
               <input type="file" multiple disabled={V.uploading} onChange={V.onUpload} style={{ display: 'none' }} />
             </label>
@@ -212,8 +212,8 @@ export function CreateTask({ V }) {
   const f = V.form;
   return (
     <>
-      <div data-noprint="1" onClick={V.closeCreate} style={scrim} />
-      <div data-noprint="1" style={modal(640)}>
+      <div className="scrim-in" data-noprint="1" onClick={V.closeCreate} style={scrim} />
+      <div className="pop-in" data-noprint="1" style={modal(640)}>
         <div style={modalHead}>
           <span style={{ fontSize: 18, fontWeight: 600, marginRight: 'auto' }}>{V.isEditing ? 'แก้ไขงาน / กิจกรรม' : 'สร้างงาน / กิจกรรมใหม่'}</span>
           <button onClick={V.closeCreate} style={closeBtn}>✕</button>
@@ -262,7 +262,7 @@ export function CreateTask({ V }) {
                     <input value={V.attQ} onChange={V.onAttQ} onKeyDown={V.onAttKey} onFocus={V.onAttFocus} onBlur={V.onAttBlur} placeholder="พิมพ์ชื่อผู้เข้าร่วม แล้วกด Enter" style={{ flex: 1, minWidth: 150, border: 'none', outline: 'none', fontSize: 14, padding: '5px 4px', background: 'transparent', color: 'var(--text)' }} />
                   </div>
                   {V.hasAttSuggest && (
-                    <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, boxShadow: '0 14px 30px rgba(22,48,46,0.16)', maxHeight: 220, overflow: 'auto', zIndex: 5, padding: 4 }}>
+                    <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, boxShadow: '0 14px 30px rgba(11,22,54,0.16)', maxHeight: 220, overflow: 'auto', zIndex: 5, padding: 4 }}>
                       {V.attSuggest.map((o, i) => (
                         <button key={i} className="sug" onMouseDown={o.onPick} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, width: '100%', padding: '9px 10px', border: 'none', borderRadius: 7, background: 'var(--surface)', textAlign: 'left', cursor: 'pointer', fontSize: 14, color: 'var(--text)' }}>
                           <span style={{ fontWeight: o.w }}>{o.label}</span>
@@ -303,7 +303,7 @@ export function CreateTask({ V }) {
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}><Chips items={V.fShiftChips} /></div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', fontSize: 13, background: V.shiftChanged ? 'var(--tint)' : 'var(--surface)', border: '1px solid var(--border)', borderRadius: 9, padding: '8px 10px' }}>
                 <span style={{ color: 'var(--muted)' }}>เดิม {V.shiftFrom}</span><span>→</span>
-                <span style={{ fontWeight: 600, color: V.shiftChanged ? '#1F5E5B' : 'var(--text)' }}>{V.shiftChanged ? 'ใหม่' : 'ยังไม่เปลี่ยน'} {V.shiftChanged ? V.shiftTo : ''}</span>
+                <span style={{ fontWeight: 600, color: V.shiftChanged ? 'var(--primary)' : 'var(--text)' }}>{V.shiftChanged ? 'ใหม่' : 'ยังไม่เปลี่ยน'} {V.shiftChanged ? V.shiftTo : ''}</span>
                 {V.shiftChanged && <button type="button" onClick={V.resetShift} style={{ marginLeft: 'auto', border: 'none', background: 'none', color: 'var(--muted)', fontSize: 12, cursor: 'pointer' }}>คืนค่าเดิม</button>}
               </div>
               <span style={{ fontSize: 13, color: 'var(--muted)', marginTop: 2 }}>หรือกำหนดเอง</span>
@@ -327,9 +327,9 @@ export function CreateTask({ V }) {
 
           {V.hasSuggest && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'var(--tint)', borderRadius: 10, padding: '10px 12px', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: 11, fontWeight: 600, color: '#1F5E5B', background: 'var(--surface)', borderRadius: 5, padding: '2px 7px' }}>AI</span>
+              <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--primary)', background: 'var(--surface)', borderRadius: 5, padding: '2px 7px' }}>AI</span>
               <span style={{ fontSize: 13, color: 'var(--text)', flex: 1, minWidth: 160 }}>{V.suggestText}</span>
-              <button onClick={V.applySuggest} style={{ border: '1px solid #1F5E5B', background: 'var(--surface)', color: '#1F5E5B', borderRadius: 8, padding: '5px 10px', fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap' }}>ใช้เวลานี้</button>
+              <button onClick={V.applySuggest} style={{ border: '1px solid var(--primary)', background: 'var(--surface)', color: 'var(--primary)', borderRadius: 8, padding: '5px 10px', fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap' }}>ใช้เวลานี้</button>
             </div>
           )}
 
@@ -361,8 +361,8 @@ export function UserForm({ V }) {
   const uf = V.uf;
   return (
     <>
-      <div data-noprint="1" onClick={V.closeUserForm} style={scrim} />
-      <div data-noprint="1" style={modal(560)}>
+      <div className="scrim-in" data-noprint="1" onClick={V.closeUserForm} style={scrim} />
+      <div className="pop-in" data-noprint="1" style={modal(560)}>
         <div style={modalHead}>
           <span style={{ fontSize: 18, fontWeight: 600, marginRight: 'auto' }}>{uf.titleText}</span>
           <button onClick={V.closeUserForm} style={closeBtn}>✕</button>
@@ -372,7 +372,7 @@ export function UserForm({ V }) {
           <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}><span style={lbl}>ตำแหน่ง</span><input value={uf.role} onChange={V.onUfTitle} placeholder="เช่น เลขานุการผู้อำนวยการ" style={uInput} /></label>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 12 }}>
             <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}><span style={lbl}>ชื่อผู้ใช้ (สำหรับเข้าสู่ระบบ)</span><input value={uf.username} onChange={V.onUfUser} placeholder="เช่น manee" style={{ ...uInput, fontFamily: MONO }} /></label>
-            <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}><span style={{ ...lbl, display: 'flex', justifyContent: 'space-between' }}>รหัสผ่านชั่วคราว<button type="button" onClick={V.genPw} style={{ border: 'none', background: 'none', color: '#1F5E5B', fontSize: 12, cursor: 'pointer', padding: 0 }}>สุ่มรหัสผ่าน</button></span><input value={uf.pw} onChange={V.onUfPw} placeholder={uf.pwPh} autoComplete="off" style={{ ...uInput, fontFamily: MONO }} /></label>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}><span style={{ ...lbl, display: 'flex', justifyContent: 'space-between' }}>รหัสผ่านชั่วคราว<button type="button" onClick={V.genPw} style={{ border: 'none', background: 'none', color: 'var(--primary)', fontSize: 12, cursor: 'pointer', padding: 0 }}>สุ่มรหัสผ่าน</button></span><input value={uf.pw} onChange={V.onUfPw} placeholder={uf.pwPh} autoComplete="off" style={{ ...uInput, fontFamily: MONO }} /></label>
           </div>
           <Field label="บทบาท (Role)">
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}><Chips items={V.rkChips} pad="7px 13px" /></div>
@@ -405,8 +405,8 @@ export function ChangePassword({ V }) {
   const submit = (e) => { e.preventDefault(); V.savePw(); };
   return (
     <>
-      <div data-noprint="1" onClick={p.forced ? undefined : V.closePw} style={{ ...scrim, zIndex: 95, background: p.forced ? 'rgba(22,48,46,0.72)' : scrim.background }} />
-      <form data-noprint="1" onSubmit={submit} style={{ ...modal(440), zIndex: 96 }}>
+      <div data-noprint="1" onClick={p.forced ? undefined : V.closePw} style={{ ...scrim, zIndex: 95, background: p.forced ? 'rgba(11,22,54,0.72)' : scrim.background }} />
+      <form className="pop-in" data-noprint="1" onSubmit={submit} style={{ ...modal(440), zIndex: 96 }}>
         <div style={modalHead}>
           <span style={{ fontSize: 18, fontWeight: 600, marginRight: 'auto' }}>{p.forced ? 'ตั้งรหัสผ่านใหม่ก่อนใช้งาน' : 'เปลี่ยนรหัสผ่าน'}</span>
           {!p.forced && <button type="button" onClick={V.closePw} style={closeBtn}>✕</button>}
@@ -435,7 +435,7 @@ function CustomReschedule({ sel, apply }) {
   const [err, setErr] = React.useState('');
   const set = (p) => { setV((o) => ({ ...o, ...p })); setErr(''); };
   const inp = { border: '1px solid var(--border2)', borderRadius: 9, padding: '8px 10px', fontSize: 14, width: '100%', background: 'var(--surface)' };
-  if (!open) return <button onClick={() => setOpen(true)} style={{ alignSelf: 'flex-start', border: 'none', background: 'none', color: '#1F5E5B', fontSize: 13, cursor: 'pointer', padding: 0 }}>กำหนดวันที่/เวลาเอง…</button>;
+  if (!open) return <button onClick={() => setOpen(true)} style={{ alignSelf: 'flex-start', border: 'none', background: 'none', color: 'var(--primary)', fontSize: 13, cursor: 'pointer', padding: 0 }}>กำหนดวันที่/เวลาเอง…</button>;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(120px,1fr))', gap: 10 }}>

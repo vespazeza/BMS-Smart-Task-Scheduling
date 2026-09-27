@@ -5,7 +5,8 @@ export const MONO = "'IBM Plex Mono'";
 export const card = {
   background: 'var(--surface)',
   border: '1px solid var(--border)',
-  borderRadius: 12,
+  borderRadius: 16,
+  boxShadow: 'var(--shadow)',
 };
 
 export function Toggle({ x }) {
@@ -84,7 +85,7 @@ export function Bar({ r, labelW }) {
     <div style={{ display: 'grid', gridTemplateColumns: `${labelW}px minmax(0,1fr) 88px`, gap: 10, alignItems: 'center', fontSize: 13 }}>
       <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.label}</span>
       <div style={{ height: 10, background: 'var(--track)', borderRadius: 99, overflow: 'hidden', display: 'flex' }}>
-        <div style={{ width: r.doneW, background: '#1F5E5B' }} />
+        <div style={{ width: r.doneW, background: 'var(--primary)' }} />
         <div style={{ width: r.lateW, background: '#D97A5E' }} />
       </div>
       <span style={{ fontFamily: MONO, fontSize: 12, color: 'var(--muted)', textAlign: 'right' }}>
@@ -97,7 +98,7 @@ export function Bar({ r, labelW }) {
 /** one schedule row, shared by dashboard / list / calendar / team views */
 export function TaskRow({ t }) {
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: t.rowCols, gap: '8px 14px', alignItems: 'center', padding: '12px 14px', borderRadius: 10, background: t.rowBg, border: '1px solid var(--border)' }}>
+    <div className="lift" style={{ display: 'grid', gridTemplateColumns: t.rowCols, gap: '8px 14px', alignItems: 'center', padding: '13px 16px', borderRadius: 14, background: t.rowBg, border: '1px solid var(--border)', boxShadow: '0 1px 2px rgba(11,22,54,0.04)' }}>
       <div style={{ fontFamily: MONO, fontSize: 14, color: 'var(--text)', display: 'flex', flexDirection: 'column', gridRow: t.spanRow, alignSelf: 'start' }}>
         <span>{t.start}</span>
         <span style={{ fontSize: 11, color: 'var(--muted)' }}>{t.durLabel}</span>
@@ -120,7 +121,7 @@ export function TaskRow({ t }) {
           {t.statusG} {t.statusLabel}
         </span>
         {t.hasNext && (
-          <button onClick={t.onNext} style={{ border: '1px solid #1F5E5B', background: t.nextBg, color: t.nextC, borderRadius: 8, padding: '5px 12px', fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit' }}>
+          <button onClick={t.onNext} style={{ border: '1px solid var(--primary)', background: t.nextBg, color: t.nextC, borderRadius: 8, padding: '5px 12px', fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit' }}>
             {t.nextLabel}
           </button>
         )}
@@ -136,4 +137,22 @@ export function Stack({ gap = 12, children, style }) {
 export const selectStyle = { height: 38, border: '1px solid var(--border2)', borderRadius: 9, padding: '0 10px', fontSize: 14, background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer', width: '100%' };
 export const fieldStyle = { border: '1px solid var(--border2)', borderRadius: 9, padding: '10px 12px', fontSize: 14, outline: 'none', color: 'var(--text)', background: 'var(--surface)', width: '100%' };
 export const btnGhost = { border: '1px solid var(--border2)', background: 'var(--surface)', borderRadius: 9, padding: '10px 16px', fontSize: 14, cursor: 'pointer' };
-export const btnPrimary = { border: 'none', background: '#1F5E5B', color: '#fff', borderRadius: 9, padding: '10px 18px', fontSize: 14, fontWeight: 500, cursor: 'pointer' };
+export const btnPrimary = { border: 'none', background: 'var(--grad)', boxShadow: '0 8px 18px -10px var(--primary)', color: '#fff', borderRadius: 10, padding: '10px 18px', fontSize: 14, fontWeight: 500, cursor: 'pointer' };
+
+const EMPTY_ICONS = {
+  calendar: 'M4 5h16v15H4zM4 9.5h16M8 3v4M16 3v4M9 14.5l2 2 4-4',
+  search: 'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4',
+  check: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM8 12.5l3 3 5-6',
+};
+/** friendly empty state */
+export function Empty({ icon = 'calendar', title, sub, compact }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 6, padding: compact ? '14px 8px' : '30px 16px', color: 'var(--muted)' }}>
+      <span style={{ width: compact ? 40 : 56, height: compact ? 40 : 56, borderRadius: '50%', background: 'var(--ptint)', display: 'grid', placeItems: 'center', marginBottom: 2 }}>
+        <svg width={compact ? 20 : 26} height={compact ? 20 : 26} viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d={EMPTY_ICONS[icon]} /></svg>
+      </span>
+      <span style={{ fontSize: compact ? 13 : 15, fontWeight: 600, color: 'var(--text)' }}>{title}</span>
+      {sub && <span style={{ fontSize: 13, maxWidth: 320 }}>{sub}</span>}
+    </div>
+  );
+}
