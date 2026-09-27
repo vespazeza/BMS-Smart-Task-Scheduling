@@ -1,0 +1,8 @@
+node_modules
+dist
+server/data
+project/uploads
+project/.thumbnail
+.git
+.env
+*.log

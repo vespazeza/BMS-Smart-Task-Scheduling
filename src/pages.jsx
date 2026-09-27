@@ -15,29 +15,72 @@ const STAT_ICONS = [
   'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM8 12.5l3 3 5-6',
 ];
 
+// purely illustrative mock rows for the dashboard hero banner — the four pillars of the product
+const HERO_MOCK = [
+  { e: '▤', t: 'รายการงาน (Task List)', glow: '#00d4ff' },
+  { e: '⏰', t: 'กำหนดส่ง (Due Dates)', glow: '#ffaa00' },
+  { e: '📊', t: 'รายงานสรุปผล (Report)', glow: '#00e676' },
+  { e: '🔔', t: 'แจ้งเตือนอัจฉริยะ', glow: '#d500f9' },
+];
+
+const heroIconStyle = (glow) => ({
+  background: `radial-gradient(circle, color-mix(in srgb,${glow} 30%,transparent) 0%, color-mix(in srgb,${glow} 12%,transparent) 100%)`,
+  color: glow,
+  border: `1px solid color-mix(in srgb,${glow} 40%,transparent)`,
+  boxShadow: `0 0 12px color-mix(in srgb,${glow} 30%,transparent)`,
+});
+
+const CALENDAR_PATH = 'M4 5h16v15H4zM4 9.5h16M8 3v4M16 3v4';
+
 export function Dashboard({ V }) {
   return (
     <Stack gap={18} style={{ maxWidth: 1280 }}>
-      <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 22, padding: '26px 30px', color: '#fff', background: 'linear-gradient(120deg,#0B1636 0%,#173A8C 55%,#2F7BF0 100%)', boxShadow: '0 22px 44px -22px rgba(37,99,235,0.7)', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 20 }}>
-        <div style={{ position: 'absolute', right: -60, top: -80, width: 260, height: 260, borderRadius: '50%', background: 'rgba(255,255,255,0.08)' }} />
-        <div style={{ position: 'absolute', right: 90, bottom: -110, width: 200, height: 200, borderRadius: '50%', background: 'rgba(255,255,255,0.06)' }} />
-        <div style={{ position: 'relative', flex: '1 1 320px', minWidth: 0 }}>
-          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)' }}>{V.todayLabel}</div>
-          <h1 style={{ margin: '6px 0 0', fontSize: 28, fontWeight: 700, letterSpacing: '-0.015em', lineHeight: 1.25 }}>สวัสดี {V.user.name}</h1>
-          <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.8)', marginTop: 4 }}>{V.user.role} · {V.scopeLabel}</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 18, maxWidth: 420 }}>
-            <div style={{ flex: 1, height: 8, borderRadius: 99, background: 'rgba(255,255,255,0.2)', overflow: 'hidden' }}>
-              <div style={{ width: V.pct + '%', height: '100%', borderRadius: 99, background: 'linear-gradient(90deg,#7DD3FC,#fff)', transition: 'width .6s ease' }} />
-            </div>
-            <span style={{ fontFamily: MONO, fontSize: 14, fontWeight: 600 }}>{V.pct}%</span>
+      <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 20, padding: V.isMobile ? '22px 20px' : '30px', color: '#fff', background: 'linear-gradient(135deg,#0B1A38 0%,#0D2858 50%,#061126 100%)', boxShadow: '0 15px 35px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,255,0.1)', border: '1px solid rgba(0,162,255,0.2)', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 26 }}>
+        <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 80% 20%, rgba(0,162,255,0.15) 0%, transparent 40%), radial-gradient(circle at 20% 80%, rgba(0,81,255,0.1) 0%, transparent 40%)', pointerEvents: 'none' }} />
+
+        <div style={{ position: 'relative', flex: '1 1 320px', minWidth: 0, maxWidth: V.isMobile ? '100%' : 460 }}>
+          <div style={{ fontSize: 13, color: '#8DA4CE', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={CALENDAR_PATH} /></svg>
+            {V.todayLabel}
           </div>
-          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.72)', marginTop: 6 }}>ความคืบหน้าของวันนี้ · {V.pctSub}</div>
+          <h1 style={{ margin: 0, fontSize: 26, fontWeight: 700, letterSpacing: '-0.01em', lineHeight: 1.3, textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>สวัสดี {V.user.name}</h1>
+          <div style={{ fontSize: 14, color: '#A0B7E2', marginTop: 4, marginBottom: 24 }}>{V.user.role} · {V.scopeLabel}</div>
+
+          <div style={{ marginBottom: 22, width: '100%', maxWidth: 340 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: '#8DA4CE', marginBottom: 8 }}>
+              <span>ความก้าวหน้าของวันนี้</span>
+              <span style={{ fontFamily: MONO }}>{V.pctSub} ({V.pct}%)</span>
+            </div>
+            <div style={{ width: '100%', height: 8, background: 'rgba(255,255,255,0.1)', borderRadius: 10, overflow: 'hidden' }}>
+              <div style={{ width: V.pct + '%', height: '100%', background: 'linear-gradient(90deg,#0082ff,#00d4ff)', boxShadow: '0 0 10px #00d4ff', borderRadius: 10, transition: 'width .6s ease' }} />
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            <button className="hero-btn" onClick={V.openCreate} style={{ height: 42, padding: '0 22px', border: 'none', borderRadius: 10, background: '#fff', color: '#0B1A38', fontSize: 14, fontWeight: 700, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 8 }}>+ สร้างงาน</button>
+            <button className="hero-btn" onClick={V.goCal} style={{ height: 42, padding: '0 22px', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 10, background: 'rgba(255,255,255,0.1)', color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={CALENDAR_PATH} /></svg>
+              ดูปฏิทิน
+            </button>
+          </div>
         </div>
-        <div style={{ position: 'relative', display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          <button className="hero-btn" onClick={V.openCreate} style={{ height: 42, padding: '0 18px', border: 'none', borderRadius: 12, background: '#fff', color: '#173A8C', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>+ สร้างงาน</button>
-          <button className="hero-btn" onClick={V.goCal} style={{ height: 42, padding: '0 18px', border: '1px solid rgba(255,255,255,0.45)', borderRadius: 12, background: 'rgba(255,255,255,0.12)', color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>ดูปฏิทิน</button>
-        </div>
+
+        {!V.isMobile && (
+          <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 15, flex: '1 1 380px', maxWidth: 460 }}>
+            {HERO_MOCK.map((r) => (
+              <div key={r.t} className="hero-widget" style={{ background: 'rgba(16,36,75,0.55)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(0,195,255,0.2)', borderRadius: 16, padding: 16, display: 'flex', alignItems: 'center', gap: 14, boxShadow: '0 8px 20px rgba(0,0,0,0.2)' }}>
+                <span style={{ width: 48, height: 48, flex: 'none', borderRadius: 12, display: 'grid', placeItems: 'center', fontSize: 20, ...heroIconStyle(r.glow) }}>{r.e}</span>
+                <span style={{ fontSize: 13, fontWeight: 600, color: '#fff', minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.t}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
+
+      <QuickAddBar V={V} />
+      <NowNextRow V={V} />
+
+      <TodayTimeline V={V} />
 
       <div style={grid(V.isMobile ? 140 : 190, 14)}>
         {V.stats.map((s, i) => (
@@ -53,6 +96,19 @@ export function Dashboard({ V }) {
           </button>
         ))}
       </div>
+
+      <NextMeetingCard V={V} />
+      <RolePanel V={V} />
+
+      <Stack gap={10} style={{ ...card, padding: 16 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+          <div style={cardTitle}>ตารางวันนี้</div>
+          <button onClick={V.goCal} style={linkBtn}>ดูปฏิทิน →</button>
+        </div>
+        {V.todayTasks.map((t) => <TaskRow key={t.id} t={t} />)}
+        {V.todayEmpty && <Empty icon="calendar" title="วันนี้ยังไม่มีงาน" sub="กด “สร้างงาน” เพื่อเพิ่มงานหรือนัดหมายแรกของวัน" />}
+      </Stack>
+      <WeekForecastRow V={V} />
 
       <div style={grid(290, 14, { alignItems: 'start' })}>
         <Stack gap={16} style={{ ...card, padding: 18 }}>
@@ -115,15 +171,447 @@ export function Dashboard({ V }) {
           {V.noProactive && <Empty compact icon="check" title="เรียบร้อยดี" sub="ไม่มีงานที่ต้องจับตาในตอนนี้" />}
         </Stack>
       </div>
+    </Stack>
+  );
+}
 
-      <Stack gap={10} style={{ ...card, padding: 16 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-          <div style={cardTitle}>ตารางวันนี้</div>
-          <button onClick={V.goCal} style={linkBtn}>ดูปฏิทิน →</button>
+/* ---------- quick add: type a sentence, get a task ---------- */
+function QuickAddBar({ V }) {
+  return (
+    <Stack gap={8} style={{ ...card, padding: '14px 16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--primary)', background: 'var(--ptint)', borderRadius: 5, padding: '2px 7px' }}>AI</span>
+        <span style={{ ...cardTitle, fontSize: 14 }}>เพิ่มงานด่วน</span>
+      </div>
+      <form onSubmit={(e) => { e.preventDefault(); V.onQuickAdd(); }} style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <input value={V.quickText} onChange={V.onQuickText} onKeyDown={V.onQuickKey} placeholder="เช่น “ประชุมทีม พรุ่งนี้ 9:30 ด่วน” — พิมพ์เป็นประโยคได้เลย" style={{ flex: '1 1 260px', height: 42, border: '1px solid var(--border2)', borderRadius: 10, padding: '0 14px', fontSize: 14, background: 'var(--surface)', color: 'var(--text)' }} />
+        <button type="submit" disabled={V.quickBusy || !V.quickText.trim()} className="btn-grad" style={{ height: 42, padding: '0 18px', border: 'none', borderRadius: 10, fontSize: 14, fontWeight: 600, cursor: 'pointer', opacity: V.quickBusy || !V.quickText.trim() ? 0.6 : 1 }}>{V.quickBusy ? 'กำลังเพิ่ม…' : '+ เพิ่มงาน'}</button>
+      </form>
+      {V.quickErr && <span style={{ fontSize: 12.5, color: '#B83A32' }}>{V.quickErr}</span>}
+      {V.quickPreview && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 16px', alignItems: 'center', background: 'var(--tint)', borderRadius: 9, padding: '9px 12px', fontSize: 12.5 }}>
+          <span style={{ color: 'var(--muted)' }}>ตัวอย่างงานที่จะสร้าง:</span>
+          <span style={{ fontWeight: 600 }}>{V.quickPreview.title}</span>
+          <span style={{ color: 'var(--muted)' }}>· {V.quickPreview.dateLabel}</span>
+          <span style={{ color: 'var(--muted)' }}>· {V.quickPreview.timeLabel}</span>
+          <span style={{ color: 'var(--muted)' }}>· {V.quickPreview.typeLabel}</span>
+          <span style={{ color: 'var(--muted)' }}>· ความสำคัญ{V.quickPreview.priLabel}</span>
         </div>
-        {V.todayTasks.map((t) => <TaskRow key={t.id} t={t} />)}
-        {V.todayEmpty && <Empty icon="calendar" title="วันนี้ยังไม่มีงาน" sub="กด “สร้างงาน” เพื่อเพิ่มงานหรือนัดหมายแรกของวัน" />}
+      )}
+    </Stack>
+  );
+}
+
+/* ---------- ตอนนี้ / ถัดไป ---------- */
+function NowCard({ n }) {
+  if (!n) return <Stack gap={6} style={{ ...card, padding: 16 }}><div style={{ ...cardTitle, fontSize: 13, color: 'var(--muted)' }}>ตอนนี้</div><Empty compact icon="check" title="ไม่มีงานที่ต้องทำตอนนี้" /></Stack>;
+  return (
+    <Stack gap={10} style={{ ...card, padding: 16, borderLeft: `4px solid ${n.priC}` }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+        <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--muted)', letterSpacing: '.02em' }}>ตอนนี้</span>
+        <span style={{ fontSize: 12, color: n.isActive ? '#B4540F' : '#8A6500' }}>{n.remainLabel}</span>
+      </div>
+      <button onClick={n.open} style={{ border: 'none', background: 'none', padding: 0, textAlign: 'left', cursor: 'pointer' }}>
+        <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--text)' }}>{n.title}</div>
+        <div style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 2 }}>{n.type} · ความสำคัญ{n.priLabel} · {n.timeLabel}</div>
+      </button>
+      {n.isActive && <div style={{ height: 7, background: 'var(--track)', borderRadius: 99, overflow: 'hidden' }}><div style={{ width: n.pct + '%', height: '100%', background: n.priC, borderRadius: 99 }} /></div>}
+      <button onClick={n.onBtn} style={{ alignSelf: 'flex-start', border: 'none', background: n.isActive ? '#2E7040' : 'var(--primary)', color: '#fff', borderRadius: 9, padding: '8px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>{n.btnLabel}</button>
+    </Stack>
+  );
+}
+function NextCard({ n }) {
+  if (!n) return <Stack gap={6} style={{ ...card, padding: 16 }}><div style={{ ...cardTitle, fontSize: 13, color: 'var(--muted)' }}>ถัดไป</div><Empty compact icon="calendar" title="ไม่มีงานถัดไปแล้ววันนี้" /></Stack>;
+  return (
+    <Stack gap={10} style={{ ...card, padding: 16, borderLeft: `4px solid ${n.priC}` }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+        <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--muted)', letterSpacing: '.02em' }}>ถัดไป</span>
+        <span style={{ fontFamily: MONO, fontSize: 12.5, color: 'var(--primary)', fontWeight: 600 }}>{n.untilLabel}</span>
+      </div>
+      <button onClick={n.open} style={{ border: 'none', background: 'none', padding: 0, textAlign: 'left', cursor: 'pointer' }}>
+        <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--text)' }}>{n.title}</div>
+        <div style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 2 }}>{n.type} · ความสำคัญ{n.priLabel} · {n.timeLabel}</div>
+      </button>
+      <button onClick={n.onEarly} style={{ alignSelf: 'flex-start', border: '1px solid var(--primary)', background: 'var(--surface)', color: 'var(--primary)', borderRadius: 9, padding: '8px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>เริ่มก่อนเวลา</button>
+    </Stack>
+  );
+}
+function NowNextRow({ V }) {
+  return (
+    <div style={grid(260, 14)}>
+      <NowCard n={V.nowNext.now} />
+      <NextCard n={V.nowNext.next} />
+    </div>
+  );
+}
+
+/* ---------- ไทม์ไลน์วันนี้ ---------- */
+function TodayTimeline({ V }) {
+  const t = V.timeline;
+  return (
+    <Stack gap={12} style={{ ...card, padding: 18 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+        <div style={cardTitle}>ไทม์ไลน์วันนี้ · 08:00–18:00</div>
+        <div style={{ display: 'flex', gap: 14, fontSize: 12.5, color: 'var(--muted)' }}>
+          <span>ว่างเหลือ <b style={{ color: 'var(--text)' }}>{t.freeLabel}</b></span>
+          <span>ช่วงว่างถัดไป <b style={{ color: 'var(--text)', fontFamily: MONO }}>{t.nextGapLabel}</b></span>
+        </div>
+      </div>
+      <div style={{ position: 'relative', height: 64, background: 'var(--bg2)', borderRadius: 10, border: '1px solid var(--border)' }}>
+        {t.hours.map((h, i) => (
+          <div key={i} style={{ position: 'absolute', left: h.pct, top: 0, bottom: 0, borderLeft: '1px dashed var(--border2)' }}>
+            <span style={{ position: 'absolute', top: -18, left: 2, fontSize: 10.5, fontFamily: MONO, color: 'var(--muted2)' }}>{h.label}</span>
+          </div>
+        ))}
+        {t.inWindow && <div style={{ position: 'absolute', left: t.nowPct, top: -4, bottom: -4, width: 2, background: '#B83A32', zIndex: 2 }} />}
+        {t.items.map((e, i) => (
+          <button key={i} onClick={e.open} title={e.title} style={{ position: 'absolute', top: 8, bottom: 8, left: e.leftPct, width: e.widthPct, background: e.bg, border: e.overdue ? '1.5px solid #B83A32' : '1px solid transparent', borderLeft: `3px solid ${e.c}`, borderRadius: 6, padding: '2px 6px', cursor: 'pointer', overflow: 'hidden', textAlign: 'left' }}>
+            <span style={{ fontSize: 11, color: '#1C2826', whiteSpace: 'nowrap' }}>{e.title}</span>
+          </button>
+        ))}
+      </div>
+    </Stack>
+  );
+}
+
+/* ---------- ประชุมถัดไป ---------- */
+function NextMeetingCard({ V }) {
+  const m = V.nextMeeting;
+  if (!m) return null;
+  return (
+    <Stack gap={10} style={{ ...card, padding: 18, borderLeft: `4px solid ${m.urgent ? '#B83A32' : 'var(--primary)'}` }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+        <div style={cardTitle}>ประชุมถัดไป</div>
+        <span style={{ fontSize: 12.5, fontWeight: 700, padding: '3px 10px', borderRadius: 99, background: m.urgent ? '#FAE8E5' : 'var(--ptint)', color: m.urgent ? '#B83A32' : 'var(--primary)' }}>{m.untilLabel}</span>
+      </div>
+      <button onClick={m.open} style={{ border: 'none', background: 'none', padding: 0, textAlign: 'left', cursor: 'pointer' }}>
+        <div style={{ fontSize: 17, fontWeight: 600 }}>{m.title}</div>
+      </button>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 18px', fontSize: 13, color: 'var(--text2)' }}>
+        <span>{m.dateLabel} · {m.timeLabel}</span>
+        <span>{m.modeLabel}{m.hasLocation ? ' · ' + m.location : ''}</span>
+        <span>ผู้เข้าร่วม: {m.attText}</span>
+      </div>
+      {m.hasLink && <a href={m.link} target="_blank" rel="noopener noreferrer" style={{ alignSelf: 'flex-start', display: 'inline-flex', alignItems: 'center', gap: 6, background: '#2D8CFF', color: '#fff', textDecoration: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600 }}>เข้าร่วม Zoom</a>}
+    </Stack>
+  );
+}
+
+/* ---------- 7 วันข้างหน้า ---------- */
+function WeekForecastRow({ V }) {
+  return (
+    <Stack gap={10} style={{ ...card, padding: 16 }}>
+      <div style={cardTitle}>7 วันข้างหน้า</div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(120px,1fr))', gap: 8 }}>
+        {V.weekForecast.map((d) => (
+          <button key={d.iso} onClick={d.onClick} style={{ textAlign: 'left', border: d.isToday ? '1.5px solid var(--primary)' : '1px solid var(--border)', background: d.isToday ? 'var(--tint)' : 'var(--surface)', borderRadius: 10, padding: '10px 11px', cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <span style={{ fontSize: 12, color: 'var(--muted)' }}>{d.wd} <span style={{ fontFamily: MONO }}>{d.dayNum}</span></span>
+            <span style={{ fontSize: 20, fontWeight: 700, fontFamily: MONO, color: d.count ? 'var(--text)' : 'var(--muted2)' }}>{d.count}</span>
+            <span style={{ fontSize: 11.5, color: 'var(--muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{d.firstLabel}</span>
+            {(d.meetCount > 0 || d.highCount > 0) && (
+              <span style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                {d.meetCount > 0 && <span style={{ fontSize: 10.5, fontWeight: 600, background: '#ECE6F4', color: '#5B3E8C', borderRadius: 99, padding: '1px 7px' }}>ประชุม {d.meetCount}</span>}
+                {d.highCount > 0 && <span style={{ fontSize: 10.5, fontWeight: 600, background: '#FAE8E5', color: '#B83A32', borderRadius: 99, padding: '1px 7px' }}>สำคัญสูง {d.highCount}</span>}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+    </Stack>
+  );
+}
+
+/* ---------- role-specific panels ---------- */
+function RolePanel({ V }) {
+  if (V.isSec) return <SecPanel V={V} />;
+  if (V.isDir) return <DirPanel V={V} />;
+  if (V.isNur) return <NurPanel V={V} />;
+  if (V.isGen) return <GenPanel V={V} />;
+  return null;
+}
+
+function SecPanel({ V }) {
+  return (
+    <Stack gap={14} style={{ ...card, padding: 18 }}>
+      <div style={cardTitle}>สำหรับเลขานุการ</div>
+      {V.secHasConflicts && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, background: '#FAE8E5', borderRadius: 10, padding: '10px 12px' }}>
+          <span style={{ fontSize: 13, fontWeight: 700, color: '#B83A32' }}>⚠ วันนี้มีนัดเวลาชนกัน</span>
+          {V.secConflicts.map((c, i) => <span key={i} style={{ fontSize: 12.5, color: '#7A2A24' }}>{c.range} · {c.a} (ของฉัน) ชนกับ {c.b} ({c.dirName})</span>)}
+        </div>
+      )}
+      {V.secBoards.length > 1 && (
+        <div style={{ display: 'grid', gridTemplateColumns: `repeat(${V.secBoards.length},minmax(200px,1fr))`, gap: 12, overflowX: 'auto' }}>
+          {V.secBoards.map((b) => (
+            <Stack key={b.id} gap={6}>
+              <span style={{ fontSize: 13, fontWeight: 600 }}>{b.name}</span>
+              {b.items.slice(0, 5).map((t) => (
+                <button key={t.id} onClick={t.open} style={{ border: 'none', background: 'var(--bg2)', borderRadius: 8, padding: '7px 10px', textAlign: 'left', cursor: 'pointer', display: 'flex', gap: 8, alignItems: 'baseline' }}>
+                  <span style={{ fontFamily: MONO, fontSize: 11.5, color: 'var(--muted)', flex: 'none' }}>{t.start}</span>
+                  <span style={{ fontSize: 12.5, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.title}</span>
+                </button>
+              ))}
+              {b.empty && <span style={{ fontSize: 12, color: 'var(--muted)' }}>ไม่มีงานวันนี้</span>}
+            </Stack>
+          ))}
+        </div>
+      )}
+      <div style={grid(220, 12)}>
+        <Stack gap={6}>
+          <span style={{ fontSize: 13, fontWeight: 600 }}>นัดที่รอผู้บริหารยืนยัน · {V.secPendingAppt.length}</span>
+          {V.secPendingAppt.map((t) => <PendingRow key={t.id} t={t} todayIso={V.todayIso} />)}
+          {!V.secPendingAppt.length && <span style={{ fontSize: 12.5, color: 'var(--muted)' }}>ไม่มีนัดที่รอยืนยัน</span>}
+        </Stack>
+        <Stack gap={6}>
+          <span style={{ fontSize: 13, fontWeight: 600 }}>เอกสารที่รอเสนอลงนาม · {V.secPendingDocs.length}</span>
+          {V.secPendingDocs.map((t) => <PendingRow key={t.id} t={t} todayIso={V.todayIso} />)}
+          {!V.secPendingDocs.length && <span style={{ fontSize: 12.5, color: 'var(--muted)' }}>ไม่มีเอกสารรอลงนาม</span>}
+        </Stack>
+      </div>
+    </Stack>
+  );
+}
+function PendingRow({ t, todayIso }) {
+  const rejected = t.approvalStatus === 'rejected';
+  return (
+    <button onClick={t.open} style={{ border: 'none', background: rejected ? 'var(--tintred)' : 'var(--bg2)', borderRadius: 8, padding: '8px 10px', textAlign: 'left', cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <span style={{ fontSize: 12.5, color: 'var(--text)' }}>{t.title}</span>
+      <span style={{ fontSize: 11.5, color: 'var(--muted)' }}>{t.assigneeName} · {t.date === todayIso ? 'วันนี้' : t.date} {t.start}</span>
+      {rejected && <span style={{ fontSize: 11.5, color: '#B83A32' }}>ปฏิเสธ: {t.approvalReason}</span>}
+    </button>
+  );
+}
+
+function DirPanel({ V }) {
+  const pendingN = V.dirPendingApprovals.length;
+  return (
+    <Stack gap={14} style={{ ...card, padding: 18 }}>
+      <div style={cardTitle}>สำหรับผู้บริหาร</div>
+      <div style={{ fontSize: 14, background: 'var(--tint)', borderRadius: 10, padding: '10px 12px' }}>{V.dirSummary}</div>
+      {pendingN > 0 && (
+        <button onClick={V.goApprovals} style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid #E8B4AE', background: '#FAE8E5', borderRadius: 10, padding: '12px 14px', cursor: 'pointer', textAlign: 'left' }}>
+          <span style={{ width: 30, height: 30, flex: 'none', borderRadius: '50%', background: '#B83A32', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 14, fontWeight: 700 }}>{pendingN}</span>
+          <span style={{ flex: 1 }}>
+            <span style={{ display: 'block', fontSize: 14, fontWeight: 700, color: '#B83A32' }}>เลขานุการลงตารางไว้ รอคุณยืนยัน / ลงนาม</span>
+            <span style={{ display: 'block', fontSize: 12.5, color: '#7A2A24' }}>แตะเพื่อดูรายการทั้งหมดและตัดสินใจ</span>
+          </span>
+          <span style={{ fontSize: 20, color: '#B83A32' }}>→</span>
+        </button>
+      )}
+      {V.dirTeamOverdue.length > 0 && (
+        <Stack gap={6}>
+          <span style={{ fontSize: 13, fontWeight: 600 }}>งานค้างของฉัน · {V.dirTeamOverdue.length}</span>
+          {V.dirTeamOverdue.slice(0, 3).map((t) => (
+            <button key={t.id} onClick={t.open} style={{ border: 'none', background: 'var(--tintred)', borderRadius: 8, padding: '8px 10px', textAlign: 'left', cursor: 'pointer' }}>
+              <span style={{ fontSize: 12.5, color: 'var(--text)' }}>{t.title}</span>
+              <span style={{ fontSize: 11.5, color: '#B83A32', display: 'block' }}>ค้างเกินเวลา · {t.timeRange}</span>
+            </button>
+          ))}
+        </Stack>
+      )}
+      {!pendingN && !V.dirTeamOverdue.length && <span style={{ fontSize: 12.5, color: 'var(--muted)' }}>ไม่มีงานที่ต้องตัดสินใจตอนนี้</span>}
+      <Stack gap={6}>
+        <span style={{ fontSize: 13, fontWeight: 600 }}>ความคืบหน้าทีมวันนี้</span>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: 8 }}>
+          {V.teamMini.map((m) => (
+            <div key={m.id} style={{ background: 'var(--bg2)', borderRadius: 8, padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: 3 }}>
+              <span style={{ fontSize: 12.5, fontWeight: 600 }}>{m.name}</span>
+              <div style={{ height: 5, background: 'var(--track)', borderRadius: 99, overflow: 'hidden' }}><div style={{ width: m.pctW, height: '100%', background: 'var(--primary)' }} /></div>
+              <span style={{ fontSize: 11, color: 'var(--muted)' }}>{m.done}/{m.total} เสร็จ · ค้าง {m.overdue}</span>
+            </div>
+          ))}
+        </div>
       </Stack>
+    </Stack>
+  );
+}
+
+/* ---------- dedicated page: director's approval queue ---------- */
+function ApprovalRow({ t, todayIso }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', ...card, padding: '12px 14px' }}>
+      <button onClick={t.open} style={{ flex: 1, minWidth: 200, border: 'none', background: 'none', padding: 0, textAlign: 'left', cursor: 'pointer' }}>
+        <span style={{ display: 'block', fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t.title}</span>
+        <span style={{ display: 'block', fontSize: 12.5, color: 'var(--muted)', marginTop: 2 }}>{t.date === todayIso ? 'วันนี้' : t.date} · {t.timeRange} · ความสำคัญ{t.priLabel} · จัดโดย {t.creatorName}</span>
+      </button>
+      <button onClick={t.onApprove} style={{ border: 'none', background: '#2E7040', color: '#fff', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>ยืนยัน</button>
+      <button onClick={t.onReject} style={{ border: '1px solid #B83A32', background: 'var(--surface)', color: '#B83A32', borderRadius: 8, padding: '8px 16px', fontSize: 13, cursor: 'pointer' }}>ปฏิเสธ</button>
+    </div>
+  );
+}
+export function Approvals({ V }) {
+  const a = V.approveAsk;
+  const appts = V.dirPendingApprovals.filter((t) => t.type !== 'เอกสาร');
+  const docs = V.dirPendingApprovals.filter((t) => t.type === 'เอกสาร');
+  return (
+    <Stack gap={20} style={{ maxWidth: 900, position: 'relative' }}>
+      <div>
+        <h1 style={{ margin: 0, fontSize: 24, fontWeight: 600 }}>งานที่รอยืนยัน / ลงนาม</h1>
+        <div style={{ fontSize: 14, color: 'var(--muted)', marginTop: 4 }}>รายการที่เลขานุการลงไว้ในตารางของคุณ ต้องยืนยันหรือปฏิเสธก่อนจึงจะถือว่าเป็นนัดที่ยืนยันแล้ว</div>
+      </div>
+      <Stack gap={10}>
+        <div style={cardTitle}>นัดหมาย / ประชุมที่รอยืนยัน · {appts.length}</div>
+        {appts.map((t) => <ApprovalRow key={t.id} t={t} todayIso={V.todayIso} />)}
+        {!appts.length && <Empty compact icon="check" title="ไม่มีนัดที่รอยืนยัน" />}
+      </Stack>
+      <Stack gap={10}>
+        <div style={cardTitle}>เอกสารที่รอลงนาม · {docs.length}</div>
+        {docs.map((t) => <ApprovalRow key={t.id} t={t} todayIso={V.todayIso} />)}
+        {!docs.length && <Empty compact icon="check" title="ไม่มีเอกสารที่รอลงนาม" />}
+      </Stack>
+      {V.dirTeamOverdue.length > 0 && (
+        <Stack gap={10}>
+          <div style={cardTitle}>งานค้างของฉัน · {V.dirTeamOverdue.length}</div>
+          {V.dirTeamOverdue.map((t) => <TaskRow key={t.id} t={t} />)}
+        </Stack>
+      )}
+      {a && (
+        <>
+          <div className="scrim-in" onClick={V.closeApprove} style={{ position: 'fixed', inset: 0, background: 'rgba(11,22,54,0.42)', zIndex: 60 }} />
+          <div className="pop-in" style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 'min(420px,calc(100% - 32px))', background: 'var(--surface)', borderRadius: 16, padding: 20, zIndex: 61, boxShadow: '0 30px 60px rgba(0,0,0,0.3)', display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <span style={{ fontSize: 16, fontWeight: 700 }}>ปฏิเสธนัดนี้ — ระบุเหตุผล</span>
+            <textarea autoFocus value={a.reason} onChange={V.onApproveReason} rows={3} placeholder="เช่น เวลาไม่สะดวก ให้เลื่อนไปช่วงบ่าย" style={{ border: `1px solid ${a.err ? '#B83A32' : 'var(--border2)'}`, borderRadius: 9, padding: '9px 11px', fontSize: 14 }} />
+            {a.err && <span style={{ fontSize: 12, color: '#B83A32' }}>{a.err}</span>}
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button onClick={V.closeApprove} style={{ border: '1px solid var(--border2)', background: 'var(--surface)', borderRadius: 9, padding: '8px 16px', fontSize: 13, cursor: 'pointer' }}>ยกเลิก</button>
+              <button onClick={V.confirmApprove} style={{ border: 'none', background: '#B83A32', color: '#fff', borderRadius: 9, padding: '8px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>ยืนยันการปฏิเสธ</button>
+            </div>
+          </div>
+        </>
+      )}
+    </Stack>
+  );
+}
+function NurPanel({ V }) {
+  const f = V.nurseSwapForm;
+  return (
+    <Stack gap={16} style={{ ...card, padding: 18, position: 'relative' }}>
+      <div style={cardTitle}>สำหรับพยาบาล</div>
+      <div style={grid(240, 14)}>
+        <Stack gap={6}>
+          <span style={{ fontSize: 13, fontWeight: 600 }}>รอบยา / ตรวจถัดไป</span>
+          {V.nurseNextCare ? (
+            <button onClick={V.nurseNextCare.open} style={{ border: 'none', background: V.nurseNextCare.due ? 'var(--tintamber)' : 'var(--tint)', borderRadius: 10, padding: '12px 14px', textAlign: 'left', cursor: 'pointer' }}>
+              <div style={{ fontSize: 15, fontWeight: 600 }}>{V.nurseNextCare.title}</div>
+              <div style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 2 }}>{V.nurseNextCare.timeLabel} · {V.nurseNextCare.untilLabel}</div>
+            </button>
+          ) : <Empty compact icon="check" title="ไม่มีรอบที่ต้องทำต่อวันนี้" />}
+        </Stack>
+        <Stack gap={6}>
+          <span style={{ fontSize: 13, fontWeight: 600 }}>บันทึกส่งเวร</span>
+          <textarea value={V.nurseHandoverNote} onChange={V.onHandoverNote} rows={3} placeholder="เช่น ผู้ป่วยเตียง 3 ไข้ขึ้นช่วงบ่าย ให้ยาลดไข้แล้ว ติดตามต่อ" style={{ border: '1px solid var(--border2)', borderRadius: 9, padding: '8px 10px', fontSize: 13, resize: 'vertical' }} />
+          <button onClick={V.onSaveHandover} disabled={V.nurseHandoverBusy} style={{ alignSelf: 'flex-start', border: 'none', background: 'var(--primary)', color: '#fff', borderRadius: 8, padding: '6px 14px', fontSize: 12.5, cursor: 'pointer', opacity: V.nurseHandoverBusy ? 0.6 : 1 }}>{V.nurseHandoverBusy ? 'กำลังบันทึก…' : 'บันทึกส่งเวร'}</button>
+        </Stack>
+      </div>
+
+      <Stack gap={8}>
+        <span style={{ fontSize: 13, fontWeight: 600 }}>เช็กลิสต์งานประจำเวร · {V.nurseChecklist.filter((c) => c.done).length}/{V.nurseChecklist.length}</span>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 8 }}>
+          {V.nurseChecklist.map((c) => (
+            <button key={c.id} onClick={c.onToggle} style={{ display: 'flex', alignItems: 'center', gap: 8, border: '1px solid var(--border)', background: c.done ? 'var(--tint2)' : 'var(--surface)', borderRadius: 8, padding: '8px 10px', cursor: 'pointer', textAlign: 'left' }}>
+              <span style={{ width: 18, height: 18, flex: 'none', borderRadius: 5, border: `1.5px solid ${c.done ? '#2E7040' : 'var(--border2)'}`, background: c.done ? '#2E7040' : 'transparent', display: 'grid', placeItems: 'center', color: '#fff', fontSize: 12 }}>{c.done ? '✓' : ''}</span>
+              <span style={{ fontSize: 12.5, textDecoration: c.done ? 'line-through' : 'none', color: c.done ? 'var(--muted)' : 'var(--text)' }}>{c.timeLabel} {c.title}</span>
+            </button>
+          ))}
+          {!V.nurseChecklist.length && <span style={{ fontSize: 12.5, color: 'var(--muted)' }}>ไม่มีงานวันนี้</span>}
+        </div>
+      </Stack>
+
+      <Stack gap={8}>
+        <span style={{ fontSize: 13, fontWeight: 600 }}>สลับเวร เช้า / บ่าย / ดึก</span>
+        <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 }}>
+          {V.nurseShiftDays.map((d) => (
+            <div key={d.iso} style={{ flex: 'none', border: '1px solid var(--border)', borderRadius: 10, padding: '8px 10px', minWidth: 96, display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <span style={{ fontSize: 11.5, color: 'var(--muted)' }}>{d.label}</span>
+              <div style={{ display: 'flex', gap: 3 }}>
+                {d.shiftOpts.map((o) => (
+                  <button key={o.label} onClick={o.onClick} title={o.label} style={{ flex: 1, border: 'none', borderRadius: 6, padding: '4px 0', fontSize: 11, cursor: 'pointer', background: o.on ? 'var(--primary)' : 'var(--bg2)', color: o.on ? '#fff' : 'var(--text2)' }}>{o.label[0]}</button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 12.5, color: 'var(--muted)' }}>ดูเพื่อนร่วมงานวันที่</span>
+          <input type="date" value={V.nurseColDate} onChange={(e) => V.onLoadColleagues(e.target.value)} style={{ border: '1px solid var(--border2)', borderRadius: 8, padding: '5px 8px', fontSize: 12.5 }} />
+        </div>
+        {V.nurseColleagues.length > 0 && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 8 }}>
+            {V.nurseColleagues.map((c) => (
+              <div key={c.id} style={{ border: '1px solid var(--border)', borderRadius: 8, padding: '8px 10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                <span style={{ fontSize: 12.5 }}>{c.name} <span style={{ color: 'var(--muted)' }}>· {c.shiftLabel}</span></span>
+                {c.canSwap && <button onClick={c.onSwap} style={{ border: '1px solid var(--primary)', background: 'var(--surface)', color: 'var(--primary)', borderRadius: 7, padding: '4px 10px', fontSize: 11.5, cursor: 'pointer', whiteSpace: 'nowrap' }}>ขอสลับ</button>}
+              </div>
+            ))}
+          </div>
+        )}
+        {(V.nurseSwapsIn.length > 0 || V.nurseSwapsOut.length > 0) && (
+          <Stack gap={6}>
+            {V.nurseSwapsIn.map((sw) => (
+              <div key={sw.id} style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', background: 'var(--tintamber)', borderRadius: 8, padding: '8px 10px' }}>
+                <span style={{ fontSize: 12.5, flex: 1, minWidth: 160 }}>{sw.fromName} ขอสลับเวร {sw.date} · {sw.fromShift} ↔ {sw.toShift}ของคุณ</span>
+                <button onClick={sw.onAccept} style={{ border: 'none', background: '#2E7040', color: '#fff', borderRadius: 7, padding: '4px 10px', fontSize: 11.5, cursor: 'pointer' }}>ตอบรับ</button>
+                <button onClick={sw.onDecline} style={{ border: '1px solid #B83A32', background: 'var(--surface)', color: '#B83A32', borderRadius: 7, padding: '4px 10px', fontSize: 11.5, cursor: 'pointer' }}>ปฏิเสธ</button>
+              </div>
+            ))}
+            {V.nurseSwapsOut.map((sw) => (
+              <div key={sw.id} style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', background: 'var(--bg2)', borderRadius: 8, padding: '8px 10px' }}>
+                <span style={{ fontSize: 12.5, flex: 1, minWidth: 160 }}>ขอสลับกับ {sw.toName} · {sw.date} · <span style={{ color: sw.status === 'accepted' ? '#2E7040' : sw.status === 'declined' || sw.status === 'cancelled' ? '#6B6963' : '#9A6210' }}>{{ pending: 'รอตอบรับ', accepted: 'ตอบรับแล้ว', declined: 'ถูกปฏิเสธ', cancelled: 'ยกเลิกแล้ว' }[sw.status]}</span></span>
+                {sw.onCancel && <button onClick={sw.onCancel} style={{ border: 'none', background: 'none', color: 'var(--muted)', fontSize: 11.5, cursor: 'pointer' }}>ยกเลิกคำขอ</button>}
+              </div>
+            ))}
+          </Stack>
+        )}
+      </Stack>
+
+      {f && (
+        <>
+          <div className="scrim-in" onClick={V.onCloseSwap} style={{ position: 'fixed', inset: 0, background: 'rgba(11,22,54,0.42)', zIndex: 60 }} />
+          <div className="pop-in" style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 'min(380px,calc(100% - 32px))', background: 'var(--surface)', borderRadius: 16, padding: 20, zIndex: 61, boxShadow: '0 30px 60px rgba(0,0,0,0.3)', display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <span style={{ fontSize: 16, fontWeight: 700 }}>ขอสลับเวร</span>
+            <span style={{ fontSize: 13, color: 'var(--text2)' }}>วันที่ {f.date} — เวรของคุณ ({f.myShift}) ↔ เวรของเพื่อนร่วมงาน ({f.theirShift})</span>
+            {V.nurseSwapErr && <span style={{ fontSize: 12, color: '#B83A32' }}>{V.nurseSwapErr}</span>}
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button onClick={V.onCloseSwap} style={{ border: '1px solid var(--border2)', background: 'var(--surface)', borderRadius: 9, padding: '8px 16px', fontSize: 13, cursor: 'pointer' }}>ยกเลิก</button>
+              <button onClick={V.onSendSwap} disabled={V.nurseSwapBusy} style={{ border: 'none', background: 'var(--primary)', color: '#fff', borderRadius: 9, padding: '8px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer', opacity: V.nurseSwapBusy ? 0.6 : 1 }}>{V.nurseSwapBusy ? 'กำลังส่ง…' : 'ส่งคำขอ'}</button>
+            </div>
+          </div>
+        </>
+      )}
+    </Stack>
+  );
+}
+
+function GenPanel({ V }) {
+  return (
+    <Stack gap={14} style={{ ...card, padding: 18 }}>
+      <div style={cardTitle}>สำหรับคุณ</div>
+      <div style={grid(220, 14)}>
+        <Stack gap={6}>
+          <span style={{ fontSize: 13, fontWeight: 600 }}>บิล / ค่าใช้จ่ายใกล้ครบกำหนด</span>
+          {V.genBills.map((t) => <PendingRow key={t.id} t={t} todayIso={V.todayIso} />)}
+          {!V.genBills.length && <span style={{ fontSize: 12.5, color: 'var(--muted)' }}>ไม่มีรายการค้าง</span>}
+        </Stack>
+        <Stack gap={6}>
+          <span style={{ fontSize: 13, fontWeight: 600 }}>นัดแพทย์ครั้งถัดไป</span>
+          {V.genNextAppt ? (
+            <button onClick={V.genNextAppt.open} style={{ border: 'none', background: 'var(--tint)', borderRadius: 10, padding: '10px 12px', textAlign: 'left', cursor: 'pointer' }}>
+              <div style={{ fontSize: 14, fontWeight: 600 }}>{V.genNextAppt.title}</div>
+              <div style={{ fontSize: 12, color: 'var(--muted)' }}>{V.genNextAppt.date} · {V.genNextAppt.start}</div>
+            </button>
+          ) : <span style={{ fontSize: 12.5, color: 'var(--muted)' }}>ไม่มีนัดที่จะถึง</span>}
+        </Stack>
+        <Stack gap={6}>
+          <span style={{ fontSize: 13, fontWeight: 600 }}>สถานะเคลมที่ยื่นไว้</span>
+          {V.genClaims.map((t) => (
+            <button key={t.id} onClick={t.open} style={{ border: 'none', background: 'var(--bg2)', borderRadius: 8, padding: '8px 10px', textAlign: 'left', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+              <span style={{ fontSize: 12.5 }}>{t.title}</span>
+              <span style={{ fontSize: 11.5, padding: '2px 8px', borderRadius: 99, background: t.statusBg, color: t.statusC, whiteSpace: 'nowrap' }}>{t.statusLabel}</span>
+            </button>
+          ))}
+          {!V.genClaims.length && <span style={{ fontSize: 12.5, color: 'var(--muted)' }}>ยังไม่มีการยื่นเคลม</span>}
+        </Stack>
+      </div>
     </Stack>
   );
 }
@@ -178,10 +666,13 @@ export function List({ V }) {
 }
 
 function TaskTip({ tip }) {
-  const { t, ghost, x, y } = tip;
+  const { t, ghost, rect } = tip;
   const W = 300;
-  const left = Math.max(8, Math.min(x + 14, window.innerWidth - W - 8));
-  const top = y + 200 > window.innerHeight ? Math.max(8, y - 190) : y + 16;
+  const GAP = 10;
+  const fitsRight = rect.right + GAP + W <= window.innerWidth - 8;
+  const left = fitsRight ? rect.right + GAP : Math.max(8, rect.left - GAP - W);
+  const H = 200;
+  const top = Math.min(Math.max(8, rect.top), window.innerHeight - H - 8);
   const rows = [
     ['เวลา', `${t.timeRange} (${t.durLabel})`],
     ['ประเภท', t.type],
@@ -211,8 +702,10 @@ function TaskTip({ tip }) {
 export function Calendar({ V }) {
   const [tip, setTip] = React.useState(null);
   const bind = (t, ghost) => ({
-    onMouseEnter: (e) => setTip({ t: { ...t, isMeetingTip: t.type === 'ประชุม' && !!t.location }, ghost, x: e.clientX, y: e.clientY }),
-    onMouseMove: (e) => setTip((p) => p && { ...p, x: e.clientX, y: e.clientY }),
+    onMouseEnter: (e) => {
+      const r = e.currentTarget.getBoundingClientRect();
+      setTip({ t: { ...t, isMeetingTip: t.type === 'ประชุม' && !!t.location }, ghost, rect: { left: r.left, right: r.right, top: r.top, bottom: r.bottom } });
+    },
     onMouseLeave: () => setTip(null),
   });
   return (
@@ -657,6 +1150,9 @@ const ACTIONS = {
   'task.create': ['สร้างงาน', 'var(--primary)'], 'task.update': ['แก้ไขงาน', '#9A6210'], 'task.delete': ['ลบงาน', '#B83A32'],
   'file.upload': ['แนบไฟล์', 'var(--primary)'], 'file.download': ['ดาวน์โหลดไฟล์', 'var(--muted)'], 'file.delete': ['ลบไฟล์', '#B83A32'], 'task.cancel': ['ยกเลิกงาน', '#6B6963'], 'task.rsvp': ['ตอบรับคำเชิญ', 'var(--primary)'], 'report.export': ['ส่งออกรายงาน Excel', '#5E6966'], 'calendar.feed-regenerate': ['สร้างลิงก์ปฏิทินใหม่', '#9A6210'], 'digest.update': ['ตั้งค่าสรุปงานประจำวัน', '#5E6966'], 'digest.test': ['ทดสอบส่งสรุปงาน', '#5E6966'],
   'user.create': ['เพิ่มผู้ใช้', 'var(--primary)'], 'user.update': ['แก้ไขผู้ใช้', '#9A6210'], 'user.reset-password': ['รีเซ็ตรหัสผ่านผู้ใช้', '#B83A32'],
+  'task.approve': ['ยืนยันนัด / ลงนาม', '#2E7040'], 'task.reject': ['ปฏิเสธนัด', '#B83A32'],
+  'shift.set': ['ตั้งเวร', 'var(--primary)'], 'shift.swap-request': ['ขอสลับเวร', '#9A6210'], 'shift.swap-accept': ['ตอบรับสลับเวร', '#2E7040'], 'shift.swap-decline': ['ปฏิเสธสลับเวร', '#B83A32'], 'shift.swap-cancel': ['ยกเลิกคำขอสลับเวร', 'var(--muted)'],
+  'handover.save': ['บันทึกส่งเวร', 'var(--primary)'],
   'system.init': ['เริ่มระบบ', 'var(--muted)'],
 };
 const FIELD = { title: 'ชื่องาน', type: 'ประเภท', priority: 'ความสำคัญ', date: 'วันที่', start: 'เวลาเริ่ม', dur: 'ระยะเวลา', repeat: 'รูปแบบ', status: 'สถานะ', assignee: 'ผู้รับผิดชอบ', mode: 'รูปแบบประชุม', location: 'สถานที่', link: 'ลิงก์', note: 'บันทึก', name: 'ชื่อ', username: 'ชื่อผู้ใช้', rk: 'บทบาท', role: 'ตำแหน่ง', active: 'สถานะบัญชี', manages: 'ผู้บริหารที่ดูแล' };
@@ -670,6 +1166,11 @@ function describe(r) {
   if (r.action === 'task.cancel') return `${d.title} · ${d.date} ${d.start} · เหตุผล: ${d.reason}`;
   if (r.action === 'task.rsvp') return `${d.title} · ${d.status === 'accepted' ? 'ตอบรับ' : d.status === 'declined' ? 'ปฏิเสธ' + (d.reason ? ' (' + d.reason + ')' : '') : 'รอตอบรับ'}`;
   if (r.action === 'report.export') return `ช่วง ${d.range} วัน · ขอบเขต ${d.scope} · ${d.rows} แถว`;
+  if (r.action === 'task.approve') return d.title || '';
+  if (r.action === 'task.reject') return `${d.title || ''}${d.reason ? ' · เหตุผล: ' + d.reason : ''}`;
+  if (r.action === 'shift.set') return `${r.entityId || ''} · เวร${d.shift || 'ว่าง'}`;
+  if (r.action.startsWith('shift.swap')) return `${r.entityId ? 'วันที่ ' + d.date : ''}${d.to ? ' · กับ ' + d.to : ''}${d.myShift ? ' · เวร' + d.myShift + ' ↔ เวร' + d.theirShift : ''}`;
+  if (r.action === 'handover.save') return `${r.entityId || ''} · ${d.len} ตัวอักษร`;
   if (r.action === 'task.create' || r.action === 'task.delete') return `${d.title} · ${d.date} ${d.start}`;
   if (r.action.startsWith('file.')) return `${d.file}${d.title ? ' · ' + d.title : ''}`;
   if (r.action === 'login' || r.action === 'login.fail') return [d.username, d.ip].filter(Boolean).join(' · ');

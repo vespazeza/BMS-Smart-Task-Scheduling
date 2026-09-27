@@ -36,7 +36,133 @@ export function install(api, ctx) {
     CREATE TABLE IF NOT EXISTS digest_prefs(user_id TEXT PRIMARY KEY, enabled INTEGER NOT NULL DEFAULT 0, time TEXT NOT NULL DEFAULT '07:30',
       email TEXT NOT NULL DEFAULT '', email_on INTEGER NOT NULL DEFAULT 0, line_id TEXT NOT NULL DEFAULT '', line_on INTEGER NOT NULL DEFAULT 0);
     CREATE TABLE IF NOT EXISTS digest_log(id INTEGER PRIMARY KEY AUTOINCREMENT, ts TEXT NOT NULL, user_id TEXT NOT NULL, channel TEXT NOT NULL, status TEXT NOT NULL, detail TEXT);
+    CREATE TABLE IF NOT EXISTS shifts(user_id TEXT NOT NULL, date TEXT NOT NULL, shift TEXT NOT NULL, PRIMARY KEY(user_id,date));
+    CREATE TABLE IF NOT EXISTS shift_swaps(id TEXT PRIMARY KEY, date TEXT NOT NULL, from_user TEXT NOT NULL, to_user TEXT NOT NULL,
+      from_shift TEXT NOT NULL, to_shift TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'pending', reason TEXT NOT NULL DEFAULT '',
+      created_at TEXT NOT NULL, decided_at TEXT);
+    CREATE TABLE IF NOT EXISTS handover_notes(id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT NOT NULL, date TEXT NOT NULL, shift TEXT NOT NULL,
+      note TEXT NOT NULL, created_at TEXT NOT NULL, UNIQUE(user_id,date,shift));
   `);
+  const rid = (p) => p + crypto.randomBytes(6).toString('hex');
+  const nurseOnly = (req, res, next) => (req.user.rk === 'nur' ? next() : res.status(403).json({ error: 'เฉพาะบัญชีพยาบาล / พนักงาน' }));
+  const SHIFTS = ['เช้า', 'บ่าย', 'ดึก'];
+
+  /* ---------- task approval (secretary → director confirmation / document sign-off) ---------- */
+  api.post('/tasks/:id/approve', auth(), (req, res) => {
+    const u = req.user;
+    const row = db.prepare('SELECT * FROM tasks WHERE id=?').get(req.params.id);
+    if (!row) return res.status(404).json({ error: 'ไม่พบงาน' });
+    if (row.assignee !== u.id) return res.status(403).json({ error: 'เฉพาะเจ้าของตารางเท่านั้นที่ยืนยันได้' });
+    const data = JSON.parse(row.data);
+    if (!data.approvalStatus || data.approvalStatus === 'none') return res.status(400).json({ error: 'งานนี้ไม่ต้องรอการยืนยัน' });
+    const status = (req.body || {}).status;
+    if (!['approved', 'rejected'].includes(status)) return res.status(400).json({ error: 'สถานะไม่ถูกต้อง' });
+    const reason = String((req.body || {}).reason || '').trim().slice(0, 300);
+    if (status === 'rejected' && reason.length < 3) return res.status(400).json({ error: 'กรุณาระบุเหตุผลที่ปฏิเสธ (อย่างน้อย 3 ตัวอักษร)' });
+    data.approvalStatus = status; data.approvalReason = status === 'rejected' ? reason : ''; data.approvalAt = now(); data.approvalBy = u.id;
+    db.prepare('UPDATE tasks SET data=?, updated_at=? WHERE id=?').run(JSON.stringify(data), now(), row.id);
+    audit(u, status === 'approved' ? 'task.approve' : 'task.reject', 'task', row.id, { title: data.title, reason: data.approvalReason });
+    res.json({ task: { ...data, id: row.id, assignee: row.assignee } });
+  });
+
+  /* ---------- shift schedule & swaps (nurses) ---------- */
+  api.get('/shifts', auth(), nurseOnly, (req, res) => {
+    const from = DATE.test(req.query.from || '') ? req.query.from : todayStr();
+    const to = DATE.test(req.query.to || '') ? req.query.to : isoD(addDays(new Date(), 13));
+    const rows = db.prepare('SELECT date,shift FROM shifts WHERE user_id=? AND date BETWEEN ? AND ? ORDER BY date').all(req.user.id, from, to);
+    res.json({ shifts: rows });
+  });
+  api.put('/shifts', auth(), nurseOnly, (req, res) => {
+    const { date, shift } = req.body || {};
+    if (!DATE.test(date || '')) return res.status(400).json({ error: 'วันที่ไม่ถูกต้อง' });
+    if (date < todayStr()) return res.status(400).json({ error: 'แก้ไขเวรของวันที่ผ่านมาแล้วไม่ได้' });
+    if (shift !== '' && !SHIFTS.includes(shift)) return res.status(400).json({ error: 'กะเวรไม่ถูกต้อง' });
+    if (shift === '') db.prepare('DELETE FROM shifts WHERE user_id=? AND date=?').run(req.user.id, date);
+    else db.prepare('INSERT INTO shifts(user_id,date,shift) VALUES(?,?,?) ON CONFLICT(user_id,date) DO UPDATE SET shift=excluded.shift').run(req.user.id, date, shift);
+    audit(req.user, 'shift.set', 'shift', date, { shift });
+    res.json({ ok: true });
+  });
+  api.get('/shifts/colleagues', auth(), nurseOnly, (req, res) => {
+    const date = DATE.test(req.query.date || '') ? req.query.date : todayStr();
+    const colleagues = allUsers().filter((x) => x.rk === 'nur' && x.active && x.id !== req.user.id).map((x) => {
+      const s = db.prepare('SELECT shift FROM shifts WHERE user_id=? AND date=?').get(x.id, date);
+      return { id: x.id, name: x.name, shift: s ? s.shift : '' };
+    });
+    res.json({ date, colleagues });
+  });
+  api.post('/shift-swaps', auth(), nurseOnly, (req, res) => {
+    const { date, toUser, myShift, theirShift } = req.body || {};
+    if (!DATE.test(date || '')) return res.status(400).json({ error: 'วันที่ไม่ถูกต้อง' });
+    if (date < todayStr()) return res.status(400).json({ error: 'ขอสลับเวรของวันที่ผ่านมาแล้วไม่ได้' });
+    const target = getUser(toUser);
+    if (!target || target.rk !== 'nur' || !target.active || target.id === req.user.id) return res.status(400).json({ error: 'เลือกเพื่อนร่วมงานไม่ถูกต้อง' });
+    if (![myShift, theirShift].every((x) => SHIFTS.includes(x))) return res.status(400).json({ error: 'กะเวรไม่ถูกต้อง' });
+    const mine = db.prepare('SELECT shift FROM shifts WHERE user_id=? AND date=?').get(req.user.id, date);
+    if (!mine || mine.shift !== myShift) return res.status(400).json({ error: 'ข้อมูลเวรของคุณเปลี่ยนไปแล้ว กรุณารีเฟรชแล้วลองใหม่' });
+    const theirs = db.prepare('SELECT shift FROM shifts WHERE user_id=? AND date=?').get(toUser, date);
+    if (!theirs || theirs.shift !== theirShift) return res.status(400).json({ error: 'ข้อมูลเวรของเพื่อนร่วมงานเปลี่ยนไปแล้ว กรุณารีเฟรชแล้วลองใหม่' });
+    if (db.prepare("SELECT 1 FROM shift_swaps WHERE date=? AND from_user=? AND to_user=? AND status='pending'").get(date, req.user.id, toUser)) return res.status(400).json({ error: 'มีคำขอสลับเวรกับคนนี้ในวันนี้ค้างอยู่แล้ว' });
+    const id = rid('sw');
+    db.prepare('INSERT INTO shift_swaps(id,date,from_user,to_user,from_shift,to_shift,status,reason,created_at) VALUES(?,?,?,?,?,?,?,?,?)')
+      .run(id, date, req.user.id, toUser, myShift, theirShift, 'pending', '', now());
+    audit(req.user, 'shift.swap-request', 'shift_swap', id, { date, to: target.name, myShift, theirShift });
+    res.json({ ok: true, id });
+  });
+  api.get('/shift-swaps', auth(), nurseOnly, (req, res) => {
+    const rows = db.prepare('SELECT * FROM shift_swaps WHERE from_user=? OR to_user=? ORDER BY created_at DESC LIMIT 30').all(req.user.id, req.user.id);
+    res.json({
+      swaps: rows.map((r) => ({
+        id: r.id, date: r.date, fromUser: r.from_user, fromName: (getUser(r.from_user) || {}).name || '—', toUser: r.to_user, toName: (getUser(r.to_user) || {}).name || '—',
+        fromShift: r.from_shift, toShift: r.to_shift, status: r.status, reason: r.reason, createdAt: r.created_at, decidedAt: r.decided_at, mine: r.from_user === req.user.id,
+      })),
+    });
+  });
+  api.post('/shift-swaps/:id/respond', auth(), nurseOnly, (req, res) => {
+    const row = db.prepare('SELECT * FROM shift_swaps WHERE id=?').get(req.params.id);
+    if (!row) return res.status(404).json({ error: 'ไม่พบคำขอ' });
+    if (row.to_user !== req.user.id) return res.status(403).json({ error: 'ไม่มีสิทธิ์ตอบคำขอนี้' });
+    if (row.status !== 'pending') return res.status(400).json({ error: 'คำขอนี้ถูกตอบไปแล้ว' });
+    const status = (req.body || {}).status;
+    if (!['accepted', 'declined'].includes(status)) return res.status(400).json({ error: 'สถานะไม่ถูกต้อง' });
+    if (status === 'accepted') {
+      const mine = db.prepare('SELECT shift FROM shifts WHERE user_id=? AND date=?').get(row.to_user, row.date);
+      if (!mine || mine.shift !== row.to_shift) return res.status(400).json({ error: 'เวรของคุณเปลี่ยนไปแล้ว ไม่สามารถยืนยันคำขอนี้ได้' });
+      const theirs = db.prepare('SELECT shift FROM shifts WHERE user_id=? AND date=?').get(row.from_user, row.date);
+      if (!theirs || theirs.shift !== row.from_shift) return res.status(400).json({ error: 'เวรของผู้ขอเปลี่ยนไปแล้ว ไม่สามารถยืนยันคำขอนี้ได้' });
+      db.prepare('INSERT INTO shifts(user_id,date,shift) VALUES(?,?,?) ON CONFLICT(user_id,date) DO UPDATE SET shift=excluded.shift').run(row.from_user, row.date, row.to_shift);
+      db.prepare('INSERT INTO shifts(user_id,date,shift) VALUES(?,?,?) ON CONFLICT(user_id,date) DO UPDATE SET shift=excluded.shift').run(row.to_user, row.date, row.from_shift);
+    }
+    db.prepare('UPDATE shift_swaps SET status=?, decided_at=? WHERE id=?').run(status, now(), row.id);
+    audit(req.user, status === 'accepted' ? 'shift.swap-accept' : 'shift.swap-decline', 'shift_swap', row.id, { date: row.date });
+    res.json({ ok: true });
+  });
+  api.post('/shift-swaps/:id/cancel', auth(), nurseOnly, (req, res) => {
+    const row = db.prepare('SELECT * FROM shift_swaps WHERE id=?').get(req.params.id);
+    if (!row) return res.status(404).json({ error: 'ไม่พบคำขอ' });
+    if (row.from_user !== req.user.id) return res.status(403).json({ error: 'ไม่มีสิทธิ์ยกเลิกคำขอนี้' });
+    if (row.status !== 'pending') return res.status(400).json({ error: 'คำขอนี้ถูกตอบไปแล้ว' });
+    db.prepare("UPDATE shift_swaps SET status='cancelled', decided_at=? WHERE id=?").run(now(), row.id);
+    audit(req.user, 'shift.swap-cancel', 'shift_swap', row.id, { date: row.date });
+    res.json({ ok: true });
+  });
+
+  /* ---------- shift handover notes ---------- */
+  api.get('/handover', auth(), nurseOnly, (req, res) => {
+    const date = DATE.test(req.query.date || '') ? req.query.date : todayStr();
+    const history = db.prepare('SELECT date,shift,note,created_at FROM handover_notes WHERE user_id=? ORDER BY created_at DESC LIMIT 6').all(req.user.id);
+    const mine = history.find((r) => r.date === date) || null;
+    res.json({ date, note: mine ? mine.note : '', shift: mine ? mine.shift : '', history });
+  });
+  api.put('/handover', auth(), nurseOnly, (req, res) => {
+    const { date, shift, note } = req.body || {};
+    if (!DATE.test(date || '')) return res.status(400).json({ error: 'วันที่ไม่ถูกต้อง' });
+    if (!SHIFTS.includes(shift)) return res.status(400).json({ error: 'กะเวรไม่ถูกต้อง' });
+    if (typeof note !== 'string' || note.length > 2000) return res.status(400).json({ error: 'บันทึกยาวเกินไป' });
+    db.prepare('INSERT INTO handover_notes(user_id,date,shift,note,created_at) VALUES(?,?,?,?,?) ON CONFLICT(user_id,date,shift) DO UPDATE SET note=excluded.note,created_at=excluded.created_at')
+      .run(req.user.id, date, shift, note.trim(), now());
+    audit(req.user, 'handover.save', 'handover', date + ':' + shift, { len: note.length });
+    res.json({ ok: true });
+  });
 
   /* ---------- 7. conflict check ---------- */
   api.post('/conflicts', auth(), (req, res) => {

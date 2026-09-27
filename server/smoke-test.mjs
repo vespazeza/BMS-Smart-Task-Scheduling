@@ -92,6 +92,54 @@ try {
   r = await call('PATCH', '/tasks/' + mid, S, { attendees: [] }); ok(r.s === 200, 'attendee removed');
   r = await call('POST', '/tasks/' + mid + '/rsvp', N, { status: 'accepted' }); ok(r.s === 404, 'removed attendee cannot answer');
   await call('PATCH', '/tasks/' + mid, S, { attendees: [nur.id] });
+  // task approval (secretary books director, director confirms/rejects)
+  r = await call('POST', '/tasks', S, { ...t0, title: 'ลงนามอนุมัติงบ', type: 'เอกสาร', assignee: dir.id, date: '2030-03-01', start: '09:00' });
+  ok(r.s === 200 && r.j.task.approvalStatus === 'pending', 'secretary-created director task starts pending');
+  const docId = r.j.task.id;
+  r = await call('POST', '/tasks', D, { ...t0, title: 'งานของตัวเอง', assignee: dir.id, date: '2030-03-01', start: '11:00' });
+  ok(r.s === 200 && r.j.task.approvalStatus === 'none', 'director creating their own task needs no approval');
+  r = await call('POST', '/tasks', S, { ...t0, title: 'งานของเลขาเอง', assignee: sec.id, date: '2030-03-01', start: '11:30' });
+  ok(r.s === 200 && r.j.task.approvalStatus === 'none', "secretary's own task needs no approval");
+  r = await call('POST', '/tasks/' + docId + '/approve', S, { status: 'approved' }); ok(r.s === 403, 'only the director approves their own task');
+  r = await call('POST', '/tasks/' + docId + '/approve', D, { status: 'rejected' }); ok(r.s === 400, 'rejecting needs a reason');
+  r = await call('POST', '/tasks/' + docId + '/approve', D, { status: 'rejected', reason: 'ยอดไม่ตรง' }); ok(r.s === 200 && r.j.task.approvalStatus === 'rejected' && r.j.task.approvalReason === 'ยอดไม่ตรง', 'director rejects with reason');
+  r = await call('PATCH', '/tasks/' + docId, S, { start: '09:30' }); ok(r.j.task.approvalStatus === 'pending', 'editing a rejected task resubmits it for confirmation');
+  r = await call('POST', '/tasks/' + docId + '/approve', D, { status: 'approved' }); ok(r.s === 200 && r.j.task.approvalStatus === 'approved', 'director approves');
+  r = await call('PATCH', '/tasks/' + docId, S, { title: 'ลงนามอนุมัติงบ (แก้ชื่อ)' }); ok(r.j.task.approvalStatus === 'approved', 'unrelated edits do not reopen an approved task');
+  r = await call('PATCH', '/tasks/' + docId, S, { start: '14:00' }); ok(r.j.task.approvalStatus === 'pending', 'changing the time reopens an approved task');
+  r = await call('POST', '/tasks/' + docId + '/approve', D, { status: 'approved' });
+  r = await call('POST', '/tasks/' + docId + '/approve', N, { status: 'approved' }); ok(r.s === 403 || r.s === 404, 'nobody else can decide it');
+  r = await call('GET', '/sync', D); ok(r.j.tasks.find((x) => x.id === docId).approvalStatus === 'approved', 'director sees the current approval state');
+  // shift schedule & swaps
+  r = await call('GET', '/shifts', S); ok(r.s === 403, 'only nurses have shifts');
+  const nur2 = await mk('พว.มานี รักงาน', 'manee', 'nur');
+  const M = await change('manee', 'temp1234', 'Manee2025x');
+  r = await call('PUT', '/shifts', N, { date: '2020-01-01', shift: 'เช้า' }); ok(r.s === 400, 'cannot set a shift in the past');
+  r = await call('PUT', '/shifts', N, { date: '2030-04-01', shift: 'กลางวัน' }); ok(r.s === 400, 'invalid shift value rejected');
+  r = await call('PUT', '/shifts', N, { date: '2030-04-01', shift: 'เช้า' }); ok(r.s === 200, 'nurse sets own shift');
+  r = await call('PUT', '/shifts', M, { date: '2030-04-01', shift: 'บ่าย' }); ok(r.s === 200, 'colleague sets own shift');
+  r = await call('GET', '/shifts?from=2030-04-01&to=2030-04-01', N); ok(r.j.shifts[0].shift === 'เช้า', 'reads own shift back');
+  r = await call('GET', '/shifts/colleagues?date=2030-04-01', N); ok(r.j.colleagues.find((c) => c.id === nur2.id).shift === 'บ่าย', 'sees colleague shift for swap picking');
+  r = await call('POST', '/shift-swaps', N, { date: '2030-04-01', toUser: nur2.id, myShift: 'บ่าย', theirShift: 'บ่าย' }); ok(r.s === 400, 'rejects a request that misstates my current shift');
+  r = await call('POST', '/shift-swaps', N, { date: '2030-04-01', toUser: nur2.id, myShift: 'เช้า', theirShift: 'ดึก' }); ok(r.s === 400, "rejects a request that misstates the colleague's shift");
+  r = await call('POST', '/shift-swaps', N, { date: '2030-04-01', toUser: nur2.id, myShift: 'เช้า', theirShift: 'บ่าย' }); ok(r.s === 200, 'valid swap request created');
+  const swId = r.j.id;
+  r = await call('GET', '/shift-swaps', M); ok(r.j.swaps.find((x) => x.id === swId).status === 'pending' && !r.j.swaps.find((x) => x.id === swId).mine, 'recipient sees the pending request');
+  r = await call('POST', '/shift-swaps/' + swId + '/respond', N, { status: 'accepted' }); ok(r.s === 403, 'only the recipient can respond');
+  r = await call('POST', '/shift-swaps/' + swId + '/respond', M, { status: 'accepted' }); ok(r.s === 200, 'recipient accepts');
+  r = await call('GET', '/shifts?from=2030-04-01&to=2030-04-01', N); ok(r.j.shifts[0].shift === 'บ่าย', "requester's shift swapped");
+  r = await call('GET', '/shifts?from=2030-04-01&to=2030-04-01', M); ok(r.j.shifts[0].shift === 'เช้า', "recipient's shift swapped");
+  r = await call('POST', '/shift-swaps/' + swId + '/respond', M, { status: 'declined' }); ok(r.s === 400, 'a decided request cannot be answered again');
+  r = await call('PUT', '/shifts', N, { date: '2030-04-02', shift: 'เช้า' }); await call('PUT', '/shifts', M, { date: '2030-04-02', shift: 'บ่าย' });
+  r = await call('POST', '/shift-swaps', N, { date: '2030-04-02', toUser: nur2.id, myShift: 'เช้า', theirShift: 'บ่าย' }); const swId2 = r.j.id;
+  r = await call('POST', '/shift-swaps/' + swId2 + '/cancel', M, {}); ok(r.s === 403, 'only the requester can cancel');
+  r = await call('POST', '/shift-swaps/' + swId2 + '/cancel', N, {}); ok(r.s === 200, 'requester cancels their own request');
+  r = await call('GET', '/shifts?from=2030-04-02&to=2030-04-02', N); ok(r.j.shifts[0].shift === 'เช้า', 'cancelled swap leaves shifts unchanged');
+  // shift handover notes
+  r = await call('PUT', '/handover', N, { date: '2030-04-01', shift: 'เช้า', note: 'ผู้ป่วยเตียง 3 ไข้ขึ้นตอนบ่าย ให้ยาลดไข้แล้ว' }); ok(r.s === 200, 'nurse saves a handover note');
+  r = await call('GET', '/handover?date=2030-04-01', N); ok(r.j.note.includes('เตียง 3'), 'reads the note back');
+  r = await call('GET', '/handover?date=2030-04-01', M); ok(r.j.note === '', "each nurse's handover notes are separate");
+  r = await call('PUT', '/handover', S, { date: '2030-04-01', shift: 'เช้า', note: 'x' }); ok(r.s === 403, 'only nurses use handover notes');
   // calendar feed
   r = await call('GET', '/calendar-feed', N); const tok1 = r.j.token; ok(/^[0-9a-f]{48}$/.test(tok1), 'feed token issued');
   r = await call('GET', '/ics/' + tok1 + '.ics'); const ics = await r.r.text();
@@ -140,7 +188,7 @@ try {
   // audit
   r = await call('GET', '/audit?limit=500', A);
   const acts = new Set(r.j.rows.map((x) => x.action));
-  for (const a of ['login', 'login.fail', 'password.change', 'user.create', 'task.create', 'task.update', 'file.upload', 'file.download', 'file.delete', 'user.update', 'user.reset-password', 'logout', 'task.cancel', 'task.rsvp', 'digest.update', 'digest.test', 'report.export', 'calendar.feed-regenerate']) ok(acts.has(a), 'audit has ' + a);
+  for (const a of ['login', 'login.fail', 'password.change', 'user.create', 'task.create', 'task.update', 'file.upload', 'file.download', 'file.delete', 'user.update', 'user.reset-password', 'logout', 'task.cancel', 'task.rsvp', 'digest.update', 'digest.test', 'report.export', 'calendar.feed-regenerate', 'task.approve', 'task.reject', 'shift.set', 'shift.swap-request', 'shift.swap-accept', 'shift.swap-cancel', 'handover.save']) ok(acts.has(a), 'audit has ' + a);
   const upd = r.j.rows.find((x) => x.action === 'task.update' && x.detail.changes.start && x.detail.changes.start[1] === '10:30');
   ok(upd && upd.detail.changes.start[0] === '09:00' && upd.detail.changes.start[1] === '10:30' && upd.userName === 'คุณสุดา', 'audit records who changed what (old→new)');
 } catch (e) { fail++; console.log('ERROR', e); }

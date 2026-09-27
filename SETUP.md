@@ -54,10 +54,35 @@ Until these are set, the settings page shows "เซิร์ฟเวอร์�
 
 Yellow = pending (ยังไม่ทำ), orange = in progress (กำลังทำ), green = completed (เสร็จแล้ว), grey = cancelled (ยกเลิก).
 
+## Dashboard (round 3): now/next, quick add, and per-role panels
+
+The ภาพรวม page adds: a **ตอนนี้ / ถัดไป** pair (active or next-due task, with a start/finish button and countdown),
+a **เพิ่มงานด่วน** box that parses a Thai sentence ("ประชุมทีม พรุ่งนี้ 9:30 ด่วน") into date/time/type/priority — leaving out
+a time makes it search the assignee's next free slot — a **ไทม์ไลน์วันนี้** (08:00–18:00) strip, a **ประชุมถัดไป** card (red once
+under 30 min out), and a **7 วันข้างหน้า** forecast row (click a day to jump the month calendar there). Below that, one panel
+tailored to the signed-in role:
+
+| Role | Panel shows |
+| --- | --- |
+| เลขานุการ | Own schedule next to each managed director's, today's time-overlap warnings between them, and two queues: appointments awaiting the director's confirmation and documents awaiting signature (see approval workflow below) |
+| ผู้บริหาร | A one-line today summary, the pending confirmations queue with ยืนยัน/ปฏิเสธ, own overdue tasks, and a compact per-person team progress grid |
+| พยาบาล / พนักงาน | Countdown to the next care/round task, a same-day checklist (tap to toggle done), a handover-notes box, and shift scheduling + swap requests (see below) |
+| บุคคลทั่วไป | Bills/documents coming due, the next medical appointment, and claim statuses |
+
+**Task approval** — a task a secretary creates or reassigns onto a director's calendar starts `approvalStatus: pending`;
+editing its date/time after a decision reopens it. The director approves or rejects (rejecting requires a reason) from
+the dashboard or the task dialog; `POST /api/tasks/:id/approve`. Documents (`type: เอกสาร`) and everything else use the
+same mechanism, just labelled "ลงนาม" vs "ยืนยัน" in the UI.
+
+**Shift scheduling** — nurses set their own เช้า/บ่าย/ดึก shift per day (`GET/PUT /api/shifts`) and can request a swap with
+a colleague; the colleague accepts or declines (`/api/shift-swaps*`), and an accepted swap exchanges both shifts atomically
+after re-checking neither side changed since the request was made. Handover notes save per day+shift (`/api/handover`).
+
 ## Checks
 
-    node server/smoke-test.mjs    # 100 API checks against a throwaway database
+    node server/smoke-test.mjs    # 142 API checks against a throwaway database
 
-Layout: `src/App.jsx` state + logic, `src/api.js` HTTP client, `src/View.jsx` shell, `src/pages.jsx` screens,
-`src/overlays.jsx` modals, `src/Login.jsx`, `src/ui.jsx` shared components, `server/index.js` core API,
-`server/extras.js` conflicts / RSVP / calendar feed / digest / export.
+Layout: `src/App.jsx` state + logic, `src/api.js` HTTP client, `src/View.jsx` shell, `src/pages.jsx` screens (Dashboard's
+now/next, timeline, quick-add and the four role panels live here too), `src/overlays.jsx` modals, `src/Login.jsx`,
+`src/ui.jsx` shared components, `server/index.js` core API + task approval, `server/extras.js` conflicts / RSVP / calendar
+feed / digest / export / shifts / handover.

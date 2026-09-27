@@ -24,14 +24,42 @@ const CHAN={sound:'เสียง',push:'Push',popup:'Popup'};
 const KIND={reminder:{tag:'ใกล้ถึงเวลา',c:'var(--primary)'},high:{tag:'งานสำคัญยังไม่เริ่ม',c:'#B83A32'},renag:{tag:'เตือนซ้ำ',c:'#9A6210'},overdue:{tag:'งานค้างเกินเวลา',c:'#B83A32'},snooze:{tag:'เลื่อนเตือน',c:'var(--primary)'}};
 const ICON={dashboard:'M2 2h5v6H2zM9 2h5v4H9zM2 10h5v4H2zM9 8h5v6H9z',list:'M5.5 4h8.5M5.5 8h8.5M5.5 12h8.5M2 4h.6M2 8h.6M2 12h.6',calendar:'M2 3h12v11H2zM2 6.5h12M5 1.5v3M11 1.5v3',team:'M6 7a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM1.5 14c0-2.5 2-4.5 4.5-4.5s4.5 2 4.5 4.5M11 2.5a2.2 2.2 0 0 1 0 4.4M12 9.6c1.5.5 2.5 2 2.5 4.4',report:'M3 1.5h7l3 3v10H3zM10 1.5v3h3M5.5 12v-2M8 12V7.5M10.5 12V9',alerts:'M4 11V7a4 4 0 0 1 8 0v4l1.2 1.5H2.8L4 11zM6.5 14a1.6 1.6 0 0 0 3 0'};
 ICON.users=ICON.team;ICON.audit='M8 1.5 2.5 4v4c0 3 2.3 5.3 5.5 6.5 3.2-1.2 5.5-3.5 5.5-6.5V4L8 1.5zM5.5 8l2 2 3-3.5';
+ICON.approvals='M8 1.5A6.5 6.5 0 1 0 8 14.5 6.5 6.5 0 0 0 8 1.5zM5.2 8.2l2 2 3.6-4.2';
 const HOUR=56;
 const startToday=()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),d.getDate());};
+const SHIFTS=['เช้า','บ่าย','ดึก'];
+const TYPE_LABEL={'เอกสาร':'เอกสาร','นัดหมาย':'นัดหมาย','เคลม':'เคลม','ตรวจสอบ':'ตรวจสอบ','ประชุม':'ประชุม','ดูแลผู้ป่วย':'ดูแลผู้ป่วย'};
+/* ---- quick-add: best-effort Thai date/time/type/priority parser (client-side only) ---- */
+const WD=['จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์','อาทิตย์'];
+const nextWeekday=(base,name)=>{const idx=WD.indexOf(name);if(idx<0)return null;const jsTarget=(idx+1)%7;let d=addDays(base,1);for(let i=0;i<8;i++){if(d.getDay()===jsTarget)return d;d=addDays(d,1);}return null;};
+function parseQuickAdd(text,today){
+  let t=' '+String(text||'').trim()+' ',date=null;
+  if(/พรุ่งนี้/.test(t)){date=iso(addDays(today,1));t=t.replace(/พรุ่งนี้/,' ');}
+  else if(/มะรืนนี้|มะรืน/.test(t)){date=iso(addDays(today,2));t=t.replace(/มะรืนนี้|มะรืน/,' ');}
+  else if(/วันนี้/.test(t)){date=iso(today);t=t.replace(/วันนี้/,' ');}
+  else{for(const w of WD){if(t.includes(w)){const d=nextWeekday(today,w);if(d){date=iso(d);t=t.replace(w,' ');}break;}}}
+  let start=null,dur=null,m;
+  if((m=t.match(/(\d{1,2})[:.](\d{2})\s*(น\.?|นาฬิกา)?/))){let h=Math.min(23,parseInt(m[1],10)),mi=Math.min(59,parseInt(m[2],10));start=pad(h)+':'+pad(mi);t=t.replace(m[0],' ');}
+  else if((m=t.match(/(บ่าย|เย็น|เช้า|ตี)?\s*(\d{1,2})\s*โมง(ครึ่ง)?/))){let h=parseInt(m[2],10);const part=m[1]||'';if((part==='บ่าย'||part==='เย็น')&&h<=6)h+=12;if(part==='ตี')h=h%12;start=pad(h%24)+':'+(m[3]?'30':'00');t=t.replace(m[0],' ');}
+  else if(/เที่ยง/.test(t)){start='12:00';t=t.replace('เที่ยง',' ');}
+  if((m=t.match(/(\d{1,3})\s*(ชม\.?|ชั่วโมง)/))){dur=parseInt(m[1],10)*60;t=t.replace(m[0],' ');}
+  else if((m=t.match(/(\d{1,3})\s*นาที/))){dur=parseInt(m[1],10);t=t.replace(m[0],' ');}
+  let priority=null;
+  if(/ด่วนมาก|สำคัญมาก|เร่งด่วน|ด่วน|สำคัญ/.test(t)){priority='high';t=t.replace(/ด่วนมาก|สำคัญมาก|เร่งด่วน|ด่วน|สำคัญ/,' ');}
+  else if(/ไม่ด่วน|ไม่รีบ|ไม่สำคัญ/.test(t)){priority='low';t=t.replace(/ไม่ด่วน|ไม่รีบ|ไม่สำคัญ/,' ');}
+  let type=null;
+  for(const[kw,ty]of[['ประชุม','ประชุม'],['เคลม','เคลม'],['ตรวจ','ตรวจสอบ'],['ผู้ป่วย','ดูแลผู้ป่วย'],['ดูแล','ดูแลผู้ป่วย'],['นัด','นัดหมาย'],['เอกสาร','เอกสาร'],['หนังสือ','เอกสาร'],['ลงนาม','เอกสาร']])if(t.includes(kw)){type=ty;break;}
+  const title=t.replace(/\s+/g,' ').trim();
+  return {title,date,start,dur,priority,type};
+}
 
 export default class App extends React.Component {
   render(){return <View V={this.renderVals()}/>;}
   get today(){return startToday();}
   lastAct=Date.now(); pending=0; patchQ={};
-  state={attQ:'',attOpen:false,attHistory:[],accounts:[],authUid:null,booting:hasToken(),mustChange:false,pwForm:null,uploading:false,cancelAsk:null,conf:{key:'',list:[]},feed:{token:'',loading:false},rsvpReason:'',digest:{loaded:false,loading:false,busy:false,msg:'',err:'',prefs:{enabled:false,time:'07:30',email:'',emailOn:false,lineId:'',lineOn:false},status:{email:'',line:''},log:[]},settingsSec:'account',audit:{rows:[],q:'',loading:false},login:{u:this.savedUser(),p:'',err:'',remember:!!this.savedUser(),busy:false},userForm:null,view:'dashboard',scope:'mine',tasks:[],history:[],q:'',fStatus:'all',fPri:'all',fType:'all',fDate:'all',fDateVal:'',sel:null,showCreate:false,form:null,formErr:false,toasts:[],log:[],showLog:false,unread:0,fired:{},snooze:{},weekOff:0,monthOff:0,calMode:null,selDay:null,rRange:7,vw:typeof window!=='undefined'?window.innerWidth:1200,
+  state={attQ:'',attOpen:false,attHistory:[],accounts:[],authUid:null,booting:hasToken(),mustChange:false,pwForm:null,uploading:false,cancelAsk:null,conf:{key:'',list:[]},feed:{token:'',loading:false},rsvpReason:'',quick:{text:'',busy:false,err:''},approveAsk:null,
+    nurse:{loading:false,shiftMap:{},colDate:'',colleagues:[],swaps:[],swapForm:null,swapBusy:false,swapErr:'',handoverNote:'',handoverHistory:[],handoverBusy:false},
+    digest:{loaded:false,loading:false,busy:false,msg:'',err:'',prefs:{enabled:false,time:'07:30',email:'',emailOn:false,lineId:'',lineOn:false},status:{email:'',line:''},log:[]},settingsSec:'account',audit:{rows:[],q:'',loading:false},login:{u:this.savedUser(),p:'',err:'',remember:!!this.savedUser(),busy:false},userForm:null,view:'dashboard',scope:'mine',tasks:[],history:[],q:'',fStatus:'all',fPri:'all',fType:'all',fDate:'all',fDateVal:'',sel:null,showCreate:false,form:null,formErr:false,toasts:[],log:[],showLog:false,unread:0,fired:{},snooze:{},weekOff:0,monthOff:0,calMode:null,selDay:null,rRange:7,vw:typeof window!=='undefined'?window.innerWidth:1200,
     settings:{sound:true,push:true,popup:true,tone:'chime',volume:70,intensity:{high:'urgent',medium:'normal',low:'quiet'},offsets:[30,5],renag:true,renagEvery:10,overdue:true,highNotStarted:true,ai:true,theme:(()=>{try{return localStorage.getItem('st_theme')||'light';}catch(e){return 'light';}})()}};
   savedUser(){try{return localStorage.getItem('st_user')||'';}catch(e){return '';}}
   componentDidMount(){
@@ -53,6 +81,67 @@ export default class App extends React.Component {
   async confirmSlot(p){try{const list=await this.fetchConflicts(p);if(!list.length)return true;return window.confirm('เวลานี้ชนกับงานอื่น:\n\n'+list.map(c=>'• '+this.conflictText(c)).join('\n')+'\n\nต้องการดำเนินการต่อหรือไม่?');}catch(e){return true;}}
   /* ---- meeting invitations ---- */
   async rsvpAnswer(id,status){try{await api('POST','/api/tasks/'+id+'/rsvp',{status,reason:status==='declined'?this.state.rsvpReason:''});this.setState({rsvpReason:''});await this.applySync(false);this.info(status==='accepted'?'ตอบรับการประชุมแล้ว':'ปฏิเสธการประชุมแล้ว','ผู้จัดจะเห็นคำตอบของคุณ');}catch(e){this.fail(e);}}
+  /* ---- director confirms / rejects a secretary-booked task ---- */
+  askApprove(id,status){if(status==='rejected'){this.setState({approveAsk:{id,status,reason:'',err:''}});return;}this.decideApproval(id,'approved','');}
+  closeApprove(){this.setState({approveAsk:null});}
+  onApproveReason(e){const a=this.state.approveAsk;this.setState({approveAsk:a&&{...a,reason:e.target.value,err:''}});}
+  confirmApprove(){const a=this.state.approveAsk,r=(a.reason||'').trim();if(r.length<3){this.setState({approveAsk:{...a,err:'กรุณาระบุเหตุผลที่ปฏิเสธ (อย่างน้อย 3 ตัวอักษร)'}});return;}this.setState({approveAsk:null});this.decideApproval(a.id,'rejected',r);}
+  async decideApproval(id,status,reason){try{await api('POST','/api/tasks/'+id+'/approve',{status,reason});await this.applySync(false);this.info(status==='approved'?'ยืนยันนัดแล้ว':'ปฏิเสธแล้ว',status==='approved'?'เลขานุการจะเห็นว่ายืนยันแล้ว':'เลขานุการจะเห็นเหตุผลและแก้ไขนัดใหม่ได้');}catch(e){this.fail(e);}}
+  /* ---- quick add: type a sentence, get a task ---- */
+  setQuickText(v){this.setState(s=>({quick:{...s.quick,text:v,err:''}}));}
+  async quickAdd(){
+    const s=this.state,text=(s.quick.text||'').trim();if(!text||s.quick.busy)return;
+    const uid=this.uid(),u=USERS.find(x=>x.id===uid)||{},mgA=this.mg(uid),asg=s.scope==='dir'&&mgA[0]?mgA[0]:uid;
+    const p=parseQuickAdd(text,this.today);
+    let date=p.date||iso(this.today),start=p.start,dur=p.dur||30;
+    this.setState(st=>({quick:{...st.quick,busy:true,err:''}}));
+    if(!start){const g=this.gaps(asg,date,this.nowMin()).find(([a,b])=>b-a>=dur);start=g?fmt(g[0]):fmt(Math.ceil(this.nowMin()/15)*15+15);}
+    const body={title:p.title||text,type:p.type||u.defType||'เอกสาร',priority:p.priority||'medium',date,start,dur,repeat:'none',assignee:asg,reminders:[...s.settings.offsets],renag:true,channels:['sound','popup','push'],mode:'onsite',location:'',link:'',attendees:[],ext:''};
+    if(!(await this.confirmSlot(body))){this.setState(st=>({quick:{...st.quick,busy:false}}));return;}
+    try{
+      await api('POST','/api/tasks',body);
+      this.setState({quick:{text:'',busy:false,err:''}});
+      await this.applySync(false);
+      this.info('เพิ่มงานด่วนแล้ว',body.title+' · '+this.slotLabel(body.date,body.start));
+    }catch(e){this.setState(st=>({quick:{...st.quick,busy:false,err:e.message}}));}
+  }
+  /* ---- nurse: shift schedule, swaps, handover notes ---- */
+  async loadNurse(){
+    this.setState(s=>({nurse:{...s.nurse,loading:true}}));
+    try{
+      const today=iso(this.today);
+      const[sh,sw,ho]=await Promise.all([
+        api('GET','/api/shifts?from='+today+'&to='+iso(addDays(this.today,6))),
+        api('GET','/api/shift-swaps'),
+        api('GET','/api/handover?date='+today),
+      ]);
+      const map={};sh.shifts.forEach(r=>{map[r.date]=r.shift;});
+      this.setState(s=>({nurse:{...s.nurse,loading:false,shiftMap:map,swaps:sw.swaps,handoverNote:ho.note,handoverHistory:ho.history}}));
+    }catch(e){this.setState(s=>({nurse:{...s.nurse,loading:false}}));this.fail(e,true);}
+  }
+  async setMyShift(date,shift){try{await api('PUT','/api/shifts',{date,shift});await this.loadNurse();this.info('บันทึกเวรแล้ว',this.slotLabel(date,'')+' · '+(shift||'ว่าง'));}catch(e){this.fail(e);}}
+  async loadColleagues(date){try{const r=await api('GET','/api/shifts/colleagues?date='+date);this.setState(s=>({nurse:{...s.nurse,colDate:date,colleagues:r.colleagues}}));}catch(e){this.fail(e);}}
+  openSwap(theirId,theirShift,date){const mine=this.state.nurse.shiftMap[date]||'';if(!mine){this.info('ยังไม่ได้ลงเวรของวันนี้','กรุณาเลือกเวรของคุณก่อนขอสลับ');return;}this.setState(s=>({nurse:{...s.nurse,swapErr:'',swapForm:{toUser:theirId,theirShift,myShift:mine,date}}}));}
+  closeSwap(){this.setState(s=>({nurse:{...s.nurse,swapForm:null}}));}
+  async sendSwap(){
+    const f=this.state.nurse.swapForm;if(!f)return;
+    this.setState(s=>({nurse:{...s.nurse,swapBusy:true,swapErr:''}}));
+    try{
+      await api('POST','/api/shift-swaps',{date:f.date,toUser:f.toUser,myShift:f.myShift,theirShift:f.theirShift});
+      this.setState(s=>({nurse:{...s.nurse,swapBusy:false,swapForm:null}}));
+      await this.loadNurse();
+      this.info('ส่งคำขอสลับเวรแล้ว','รอเพื่อนร่วมงานตอบรับ');
+    }catch(e){this.setState(s=>({nurse:{...s.nurse,swapBusy:false,swapErr:e.message}}));}
+  }
+  async respondSwap(id,status){try{await api('POST','/api/shift-swaps/'+id+'/respond',{status});await this.loadNurse();this.info(status==='accepted'?'ยืนยันสลับเวรแล้ว':'ปฏิเสธคำขอแล้ว','');}catch(e){this.fail(e);}}
+  async cancelSwap(id){try{await api('POST','/api/shift-swaps/'+id+'/cancel');await this.loadNurse();this.info('ยกเลิกคำขอแล้ว','');}catch(e){this.fail(e);}}
+  setHandoverNote(v){this.setState(s=>({nurse:{...s.nurse,handoverNote:v}}));}
+  async saveHandover(){
+    const s=this.state,shift=s.nurse.shiftMap[iso(this.today)]||'เช้า';
+    this.setState(st=>({nurse:{...st.nurse,handoverBusy:true}}));
+    try{await api('PUT','/api/handover',{date:iso(this.today),shift,note:s.nurse.handoverNote});await this.loadNurse();this.setState(st=>({nurse:{...st.nurse,handoverBusy:false}}));this.info('บันทึกส่งเวรแล้ว','');}
+    catch(e){this.setState(st=>({nurse:{...st.nurse,handoverBusy:false}}));this.fail(e);}
+  }
   /* ---- external calendar feed / digest / export ---- */
   feedUrl(){return this.state.feed.token?window.location.origin+'/api/ics/'+this.state.feed.token+'.ics':'';}
   async loadFeed(){this.setState(s=>({feed:{...s.feed,loading:true}}));try{const r=await api('GET','/api/calendar-feed');this.setState({feed:{token:r.token,loading:false}});}catch(e){this.setState(s=>({feed:{...s.feed,loading:false}}));this.fail(e);}}
@@ -75,7 +164,7 @@ export default class App extends React.Component {
     if(d.mustChange){USERS=[d.me];this.setState({authUid:d.me.id,accounts:[d.me],mustChange:true,pwForm:{cur:'',next:'',next2:'',err:'',busy:false,forced:true}});return;}
     USERS=d.users;
     const ex=first?(()=>{let f={};try{const j=JSON.parse(localStorage.getItem('st_fired_'+d.me.id)||'null');if(j&&j.d===iso(this.today))f=j.f;}catch(e){}return {authUid:d.me.id,mustChange:false,pwForm:null,view:d.me.rk==='admin'?'users':'dashboard',scope:'mine',sel:null,toasts:[],log:[],unread:0,fired:f,q:''};})():{};
-    this.setState(s=>({...ex,accounts:d.users,tasks:d.tasks,attHistory:d.attHistory.length?d.attHistory:s.attHistory,settings:d.settings?{...s.settings,...d.settings}:s.settings}),first?()=>setTimeout(()=>this.tick(),800):undefined);
+    this.setState(s=>({...ex,accounts:d.users,tasks:d.tasks,attHistory:d.attHistory.length?d.attHistory:s.attHistory,settings:d.settings?{...s.settings,...d.settings}:s.settings}),first?()=>{setTimeout(()=>this.tick(),800);if(d.me.rk==='nur')this.loadNurse();}:undefined);
   }
   async doLogin(){
     const L=this.state.login;if(L.busy)return;
@@ -261,7 +350,26 @@ export default class App extends React.Component {
     const todayT=all.filter(t=>t.dd===0).sort((a,b)=>a.st-b.st);
     const todayAct=todayT.filter(t=>t.status!=='cancelled'),doneT=todayT.filter(t=>t.status==='completed');
     const overdueT=all.filter(t=>t.overdue),soonT=all.filter(t=>t.soon);
-    let view=s.view;if(view==='team'&&rk!=='dir')view='dashboard';if(view==='users'&&rk!=='admin')view='dashboard';if(view==='audit'&&rk!=='admin')view='dashboard';if(rk==='admin'&&!['users','audit','alerts'].includes(view))view='users';
+    /* ---- now/next + today timeline + next meeting ---- */
+    const activeTask=todayT.find(t=>t.status==='inprogress'&&t.canEdit);
+    const pendingToday=todayT.filter(t=>t.status==='pending'&&t.canEdit).sort((a,b)=>a.st-b.st);
+    const dueNow=pendingToday.find(t=>t.st<=now);
+    const nowItem=activeTask||dueNow||null;
+    const nextItem=pendingToday.find(t=>t.id!==(nowItem&&nowItem.id)&&t.st>=(nowItem?nowItem.en:now))||pendingToday.find(t=>t.id!==(nowItem&&nowItem.id));
+    const nowNext={
+      now:nowItem?{title:nowItem.title,type:nowItem.type,priLabel:nowItem.priLabel,priC:nowItem.priC,priBg:nowItem.priBg,timeLabel:nowItem.timeRange,isActive:nowItem.status==='inprogress',pct:nowItem.status==='inprogress'?Math.max(0,Math.min(100,Math.round((now-nowItem.st)/nowItem.dur*100))):0,remainLabel:nowItem.status==='inprogress'?(nowItem.en>now?'เหลืออีก '+durTxt(nowItem.en-now):'เลยเวลาแล้ว '+durTxt(now-nowItem.en)):'ถึงเวลาแล้ว · ยังไม่เริ่ม',btnLabel:nowItem.status==='inprogress'?'เสร็จแล้ว':'เริ่มงาน',onBtn:()=>this.setStatus(nowItem.id,nowItem.status==='inprogress'?'completed':'inprogress'),open:nowItem.open}:null,
+      next:nextItem?{title:nextItem.title,type:nextItem.type,priLabel:nextItem.priLabel,priC:nextItem.priC,priBg:nextItem.priBg,timeLabel:nextItem.timeRange,untilLabel:offTxt(Math.max(0,nextItem.st-now))+'อีก',onEarly:()=>this.setStatus(nextItem.id,'inprogress'),open:nextItem.open}:null,
+    };
+    const TL_START=480,TL_END=1080,TL_SPAN=TL_END-TL_START;
+    const tlItems=todayT.filter(t=>t.status!=='cancelled').map(t=>{const s0=Math.max(TL_START,t.st),e0=Math.min(TL_END,t.en);if(e0<=TL_START||s0>=TL_END)return null;return{title:t.title,leftPct:((s0-TL_START)/TL_SPAN*100)+'%',widthPct:(Math.max(1.2,(e0-s0)/TL_SPAN*100))+'%',bg:t.statusBg,c:t.priC,overdue:t.overdue,open:t.open};}).filter(Boolean);
+    const gapsToday=this.gaps(uid,todayIso,now).map(([a,b])=>[Math.max(a,TL_START,now),Math.min(b,TL_END)]).filter(([a,b])=>b>a);
+    const freeLeft=gapsToday.reduce((sum,[a,b])=>sum+(b-a),0);
+    const timeline={items:tlItems,nowPct:Math.max(0,Math.min(100,(now-TL_START)/TL_SPAN*100))+'%',inWindow:now>=TL_START&&now<=TL_END,freeLabel:freeLeft?durTxt(freeLeft):'ไม่มีเวลาว่างแล้ววันนี้',nextGapLabel:gapsToday[0]?fmt(gapsToday[0][0])+'–'+fmt(gapsToday[0][1]):'–',hours:[8,10,12,14,16,18].map(h=>({label:pad(h)+':00',pct:((h*60-TL_START)/TL_SPAN*100)+'%'}))};
+    const meetingCandidates=all.filter(t=>t.type==='ประชุม'&&t.status!=='cancelled'&&(t.dd>0||(t.dd===0&&t.st>=now))).sort((a,b)=>a.dd-b.dd||a.st-b.st);
+    const nmTask=meetingCandidates[0];
+    let nextMeeting=null;
+    if(nmTask){const mv=this.meetV(nmTask);const until=nmTask.dd*1440+nmTask.st-now;nextMeeting={title:nmTask.title,dateLabel:nmTask.dd===0?'วันนี้':nmTask.dd===1?'พรุ่งนี้':parse(nmTask.date).toLocaleDateString('th-TH',{weekday:'short',day:'numeric',month:'short'}),timeLabel:nmTask.timeRange,modeLabel:mv.modeLabel,hasLocation:mv.hasLocation,location:nmTask.location,attText:mv.attText,hasLink:mv.hasLink,link:nmTask.link,urgent:until<=30,untilLabel:until<=0?'ถึงเวลาแล้ว':offTxt(until)+'อีก',open:nmTask.open};}
+    let view=s.view;if(view==='team'&&rk!=='dir')view='dashboard';if(view==='approvals'&&rk!=='dir')view='dashboard';if(view==='users'&&rk!=='admin')view='dashboard';if(view==='audit'&&rk!=='admin')view='dashboard';if(rk==='admin'&&!['users','audit','alerts'].includes(view))view='users';
     const go=(v,extra={})=>()=>this.setState({view:v,showLog:false,...extra});
     const pct=todayAct.length?Math.round(doneT.length/todayAct.length*100):0;
     const stats=[
@@ -300,6 +408,7 @@ export default class App extends React.Component {
     const calMode=s.calMode||(mob?'month':'week');
     const histByDate={};histS.forEach(t=>{(histByDate[t.date]=histByDate[t.date]||[]).push(t);});
     const eventsFor=day=>{const di=iso(day);const a=all.map(t=>({t,k:occurs(t,day)})).filter(x=>x.k);const h=(histByDate[di]||[]).map(t=>({t:D(t),k:'base'}));return [...h,...a].sort((x,y)=>x.t.st-y.t.st);};
+    const week7f=[...Array(7)].map((_,i)=>{const day=addDays(this.today,i),di=iso(day),ev=eventsFor(day).map(x=>x.t).filter(t=>t.status!=='cancelled');const first=[...ev].sort((a,b)=>a.st-b.st)[0];return{iso:di,dayNum:day.getDate(),wd:i===0?'วันนี้':day.toLocaleDateString('th-TH',{weekday:'short'}),isToday:i===0,count:ev.length,firstLabel:first?first.start+' '+first.title:'ไม่มีงาน',meetCount:ev.filter(t=>t.type==='ประชุม').length,highCount:ev.filter(t=>t.priority==='high').length,onClick:()=>{const monthOff=(day.getFullYear()-this.today.getFullYear())*12+(day.getMonth()-this.today.getMonth());this.setState({view:'calendar',calMode:'month',monthOff,selDay:di});}};});
     let calDays=[],monthCells=[],calLabel='',calPrev,calNext,calNow;
     if(calMode==='week'){
       const dow=(this.today.getDay()+6)%7,ws=addDays(this.today,-dow+s.weekOff*7),we=addDays(ws,6);
@@ -329,6 +438,45 @@ export default class App extends React.Component {
     const teamOverdue=s.tasks.map(D).filter(t=>t.overdue).map(t=>({...t,showAssignee:true}));
     const tAll=team.reduce((a,m)=>a+m.total,0),tDone=team.reduce((a,m)=>a+m.done,0);
     const teamKpis=[{label:'งานทั้งทีมวันนี้',value:tAll,c:'var(--text)'},{label:'เสร็จแล้ว',value:tDone,c:'#2E7040'},{label:'ค้างเกินเวลา',value:teamOverdue.length,c:'#B83A32'},{label:'ความคืบหน้า',value:(tAll?Math.round(tDone/tAll*100):0)+'%',c:'var(--primary)'}];
+    /* ---- role-specific dashboard panels ---- */
+    let secBoards=[],secConflicts=[],secPendingAppt=[],secPendingDocs=[];
+    if(rk==='sec'){
+      secBoards=[uid,...mgL].map(pid=>{const person=USERS.find(x=>x.id===pid)||{};const items=s.tasks.filter(t=>t.assignee===pid&&this.dd(t.date)===0).map(D).sort((a,b)=>a.st-b.st);return{id:pid,name:pid===uid?'ตารางของฉัน':person.name,items,empty:!items.length};});
+      mgL.forEach(dirId=>{
+        const mine=s.tasks.filter(t=>t.assignee===uid&&t.date===todayIso&&t.status!=='cancelled');
+        const theirs=s.tasks.filter(t=>t.assignee===dirId&&t.date===todayIso&&t.status!=='cancelled');
+        mine.forEach(a=>theirs.forEach(b=>{const as=toMin(a.start),ae=as+a.dur,bs=toMin(b.start),be=bs+b.dur;if(as<be&&bs<ae)secConflicts.push({a:a.title,b:b.title,dirName:uName(dirId),range:fmt(Math.max(as,bs))+'–'+fmt(Math.min(ae,be))});}));
+      });
+      const pendingMine=s.tasks.filter(t=>t.creator===uid&&mgL.includes(t.assignee)&&(t.approvalStatus==='pending'||t.approvalStatus==='rejected')).map(D).sort((a,b)=>(a.approvalStatus==='rejected'?0:1)-(b.approvalStatus==='rejected'?0:1)||a.dd-b.dd||a.st-b.st);
+      secPendingAppt=pendingMine.filter(t=>t.type!=='เอกสาร');
+      secPendingDocs=pendingMine.filter(t=>t.type==='เอกสาร');
+    }
+    let dirSummary='',dirPendingApprovals=[],teamOverdue2=teamOverdue;
+    if(rk==='dir'){
+      const meetsToday=todayT.filter(t=>t.type==='ประชุม'&&t.status!=='cancelled').length;
+      const docsToday=todayT.filter(t=>t.type==='เอกสาร'&&t.status!=='cancelled').length;
+      const freeSlots=this.gaps(uid,todayIso,now).filter(([a,b])=>b-a>=30);
+      dirSummary='ประชุม '+meetsToday+' · เอกสาร '+docsToday+' · ว่าง '+(freeSlots.length?fmt(freeSlots[0][0])+'–'+fmt(freeSlots[0][1]):'ไม่มีช่วงว่าง');
+      dirPendingApprovals=s.tasks.filter(t=>t.assignee===uid&&t.approvalStatus==='pending').map(D).sort((a,b)=>a.dd-b.dd||a.st-b.st).map(t=>({...t,creatorName:uName(t.creator),onApprove:()=>this.askApprove(t.id,'approved'),onReject:()=>this.askApprove(t.id,'rejected')}));
+      const pendingIds=new Set(dirPendingApprovals.map(t=>t.id));
+      // "must decide" stays personal — the director's own overdue work, not the whole org (that's what ภาพรวมทีม is for)
+      teamOverdue2=s.tasks.map(D).filter(t=>t.assignee===uid&&t.overdue&&!pendingIds.has(t.id)).map(t=>({...t,showAssignee:false}));
+    }
+    let nurseNextCare=null,nurseChecklist=[],nurseSwapsIn=[],nurseSwapsOut=[];
+    if(rk==='nur'){
+      const care=todayT.filter(t=>['ดูแลผู้ป่วย','ตรวจสอบ'].includes(t.type)&&t.status==='pending').sort((a,b)=>a.st-b.st)[0];
+      if(care){const until=care.st-now;nurseNextCare={title:care.title,timeLabel:care.start,untilLabel:until<=0?'ถึงเวลาแล้ว':offTxt(until)+'อีก',due:until<=0,open:care.open};}
+      nurseChecklist=todayAct.map(t=>({id:t.id,title:t.title,timeLabel:t.start,type:t.type,done:t.status==='completed',onToggle:()=>this.setStatus(t.id,t.status==='completed'?'pending':'completed')}));
+      nurseSwapsIn=s.nurse.swaps.filter(x=>!x.mine&&x.status==='pending').map(x=>({...x,onAccept:()=>this.respondSwap(x.id,'accepted'),onDecline:()=>this.respondSwap(x.id,'declined')}));
+      nurseSwapsOut=s.nurse.swaps.filter(x=>x.mine).slice(0,5).map(x=>({...x,onCancel:x.status==='pending'?()=>this.cancelSwap(x.id):null}));
+    }
+    let genBills=[],genNextAppt=null,genClaims=[];
+    if(rk==='gen'){
+      const activeG=all.filter(t=>t.status!=='cancelled');
+      genBills=activeG.filter(t=>t.type==='เอกสาร'&&t.status!=='completed').sort((a,b)=>a.dd-b.dd||a.st-b.st).slice(0,5);
+      genNextAppt=activeG.filter(t=>t.type==='นัดหมาย'&&t.status!=='completed'&&(t.dd>0||(t.dd===0&&t.st>=now))).sort((a,b)=>a.dd-b.dd||a.st-b.st)[0]||null;
+      genClaims=activeG.filter(t=>t.type==='เคลม').sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
+    }
     const rr=s.rRange,inR=t=>{const d=this.dd(t.date);return d<=0&&d>-rr;};
     const recs=[...histS,...s.tasks.filter(t=>inScope(t.assignee)&&mq(t))].filter(inR).map(D);
     const valid=recs.filter(t=>t.status!=='cancelled'),comp=valid.filter(t=>t.status==='completed'),lateR=valid.filter(t=>t.late||t.overdue);
@@ -365,27 +513,43 @@ export default class App extends React.Component {
     const f=s.form||{reminders:[],channels:[]};
     let hasSuggest=false,suggestText='',sugStart='';
     if(s.showCreate&&set.ai&&f.date){const g=this.gaps(f.assignee,f.date,now).find(([a,b])=>b-a>=Number(f.dur));if(g&&fmt(g[0])!==f.start){hasSuggest=true;sugStart=fmt(g[0]);suggestText='ช่วงว่างที่เหมาะสม '+fmt(g[0])+'–'+fmt(g[1])+' ในตารางของ'+uName(f.assignee);}}
+    const qp=s.quick.text.trim()?parseQuickAdd(s.quick.text,this.today):null;
+    const quickPreview=qp?{title:qp.title||s.quick.text.trim(),dateLabel:qp.date?parse(qp.date).toLocaleDateString('th-TH',{weekday:'short',day:'numeric',month:'short'}):'วันนี้',timeLabel:qp.start||'อัตโนมัติ (หาช่วงว่างให้)',typeLabel:qp.type||user.defType||'เอกสาร',priLabel:PRI[qp.priority||'medium'].label}:null;
     const tgl=(arr,v)=>arr.includes(v)?arr.filter(x=>x!==v):[...arr,v];
-    const navDef=rk==='admin'?[['users','จัดการผู้ใช้','ผู้ใช้'],['audit','ประวัติการใช้งาน','บันทึก'],['alerts','การตั้งค่า','ตั้งค่า']]:[['dashboard','ภาพรวม','ภาพรวม'],['list','รายการ Schedule','Schedule'],['calendar','ปฏิทิน','ปฏิทิน'],...(rk==='dir'?[['team','ภาพรวมทีม','ทีม']]:[]),['report','รายงาน','รายงาน'],['alerts','การตั้งค่า','ตั้งค่า']];
-    const navItems=navDef.map(([k,l,sh])=>({label:l,short:sh,d:ICON[k],onClick:k==='audit'?()=>{go(k)();this.loadAudit('');}:go(k),bg:view===k?'rgba(232,238,252,0.13)':'transparent',c:view===k?'#FFFFFF':'#B9C6E6',tc:view===k?'var(--primary)':'#6B7472',hasBadge:k==='list'&&overdueT.length>0,badge:overdueT.length}));
-    const titles={audit:'ประวัติการใช้งาน (Audit log)',users:'จัดการผู้ใช้',dashboard:'ภาพรวม',list:'รายการ Schedule',calendar:'ปฏิทิน',team:'ภาพรวมทีม',report:'รายงาน',alerts:'การตั้งค่า'};
+    const navDef=rk==='admin'?[['users','จัดการผู้ใช้','ผู้ใช้'],['audit','ประวัติการใช้งาน','บันทึก'],['alerts','การตั้งค่า','ตั้งค่า']]:[['dashboard','ภาพรวม','ภาพรวม'],...(rk==='dir'?[['approvals','รออนุมัติ','รออนุมัติ']]:[]),['list','รายการ Schedule','Schedule'],['calendar','ปฏิทิน','ปฏิทิน'],...(rk==='dir'?[['team','ภาพรวมทีม','ทีม']]:[]),['report','รายงาน','รายงาน'],['alerts','การตั้งค่า','ตั้งค่า']];
+    const navItems=navDef.map(([k,l,sh])=>({label:l,short:sh,d:ICON[k],onClick:k==='audit'?()=>{go(k)();this.loadAudit('');}:go(k),bg:view===k?'rgba(232,238,252,0.13)':'transparent',c:view===k?'#FFFFFF':'#B9C6E6',tc:view===k?'var(--primary)':'#6B7472',hasBadge:(k==='list'&&overdueT.length>0)||(k==='approvals'&&dirPendingApprovals.length>0),badge:k==='approvals'?dirPendingApprovals.length:overdueT.length}));
+    const titles={audit:'ประวัติการใช้งาน (Audit log)',users:'จัดการผู้ใช้',dashboard:'ภาพรวม',list:'รายการ Schedule',calendar:'ปฏิทิน',team:'ภาพรวมทีม',approvals:'งานที่รอยืนยัน / ลงนาม',report:'รายงาน',alerts:'การตั้งค่า'};
     const framed=mob&&this.props.preview==='มือถือ'&&this.curW()>=500;
     const fr=framed?{w:'390px',h:'844px',m:'24px auto',r:'44px',b:'10px solid var(--text)',t:'translateZ(0)'}:{w:'100%',h:'100vh',m:'0',r:'0',b:'none',t:mob?'translateZ(0)':'none'};
     return {
       fr,shellCols:mob?'minmax(0,1fr)':'252px minmax(0,1fr)',sideDisplay:mob?'none':'flex',headerPad:mob?'10px 14px':'14px 28px',contentPad:mob?'16px 14px 28px':'24px 28px 56px',searchFlex:mob?'1 1 100%':'0 1 180px',searchOrder:mob?'5':'0',createLabel:mob?'':view==='users'?'เพิ่มผู้ใช้':'สร้างงาน',showCreateBtn:rk!=='admin'||view==='users',toastBottom:mob?'84px':'18px',isMobile:mob,notMobile:!mob,loginNowLeft:Math.max(0,Math.min(100,(this.nowMin()-480)/600*100))+'%',...(()=>{const w=!mob&&this.curW()>=1024;return {loginCols:w?'minmax(0,1fr) minmax(0,1fr)':'minmax(0,1fr)',loginRows:w?'minmax(0,100%)':'max-content max-content',loginInnerOv:w?'auto':'visible',loginRightOv:w?'auto':'visible',loginOv:w?'hidden':'auto',loginPanelH:w?'100%':'auto',loginPad:mob?'32px 24px':'48px',loginCardPad:mob?'32px':'40px',loginTitleSize:mob?'19px':'24px',loginHeadSize:mob?'clamp(16px,5.2vw,24px)':'clamp(20px,2.3vw,32px)'};})(),cellH:mob?'52px':'108px',
-      navItems,tabItems:navItems,tabCols:'repeat('+navItems.length+',minmax(0,1fr))',goCal:go('calendar'),
+      navItems,tabItems:navItems,tabCols:'repeat('+navItems.length+',minmax(0,1fr))',goCal:go('calendar'),goApprovals:go('approvals'),
       user,nowText:fmt(now),viewTitle:titles[view],q:s.q,onQ:e=>this.setState({q:e.target.value}),
       hasScope:scopeList.length>0,scopeOpts:scopeList.map(([k,l])=>this.seg(l,scope===k,()=>this.setState({scope:k}))),
       toggleLog:()=>this.setState(st=>({showLog:!st.showLog,unread:0})),hasUnread:s.unread>0,unread:s.unread,showLog:s.showLog,
       log:s.log.map(l=>({...l,open:()=>this.setState({sel:l.taskId,showLog:false})})),logEmpty:!s.log.length,
       openCreate:()=>this.openCreate(),createAt:(date,start)=>this.openCreate({date,...(start?{start}:{})}),
-      isDash:view==='dashboard',isList:view==='list',isCal:view==='calendar',isTeam:view==='team',isReport:view==='report',isAlerts:view==='alerts',isUsers:view==='users',isAudit:view==='audit',viewKey:view,settingsSec:s.settingsSec,setSettingsSec:k=>{this.setState({settingsSec:k});if(k==='calendar')this.loadFeed();if(k==='digest')this.loadDigest();},feedUrl:this.feedUrl(),feedLoading:s.feed.loading,copyFeed:()=>this.copyFeed(),regenFeed:()=>this.regenFeed(),downloadIcs:()=>downloadUrl('/api/my-calendar.ics','smart-schedule.ics').catch(e=>this.fail(e)),
+      isDash:view==='dashboard',isList:view==='list',isCal:view==='calendar',isTeam:view==='team',isApprovals:view==='approvals',isReport:view==='report',isAlerts:view==='alerts',isUsers:view==='users',isAudit:view==='audit',viewKey:view,settingsSec:s.settingsSec,setSettingsSec:k=>{this.setState({settingsSec:k});if(k==='calendar')this.loadFeed();if(k==='digest')this.loadDigest();},feedUrl:this.feedUrl(),feedLoading:s.feed.loading,copyFeed:()=>this.copyFeed(),regenFeed:()=>this.regenFeed(),downloadIcs:()=>downloadUrl('/api/my-calendar.ics','smart-schedule.ics').catch(e=>this.fail(e)),
       dg:(()=>{const d=s.digest,p=d.prefs,st=d.status;return {loading:d.loading,busy:d.busy,msg:d.msg,err:d.err,prefs:p,log:d.log,emailStatus:st.email==='smtp'?'พร้อมส่ง (SMTP)':st.email==='log'?'โหมดทดสอบ — บันทึกในระบบ ไม่ส่งจริง':'เซิร์ฟเวอร์ยังไม่ได้ตั้งค่าอีเมล — ผู้ดูแลระบบต้องตั้งค่า SMTP',lineStatus:st.line==='line'?'พร้อมส่ง (LINE Messaging API)':st.line==='log'?'โหมดทดสอบ — บันทึกในระบบ ไม่ส่งจริง':'เซิร์ฟเวอร์ยังไม่ได้ตั้งค่า LINE — ผู้ดูแลระบบต้องตั้งค่า LINE_CHANNEL_TOKEN',enabledTog:this.tog('ส่งสรุปงานประจำวัน','ส่งรายการงานของวันนั้นให้ทุกเช้าตามเวลาที่กำหนด',p.enabled,()=>this.setDigest({enabled:!p.enabled})),emailTog:this.tog('ส่งทางอีเมล','',p.emailOn,()=>this.setDigest({emailOn:!p.emailOn})),lineTog:this.tog('ส่งทาง LINE','',p.lineOn,()=>this.setDigest({lineOn:!p.lineOn})),onTime:e=>this.setDigest({time:e.target.value}),onEmail:e=>this.setDigest({email:e.target.value}),onLineId:e=>this.setDigest({lineId:e.target.value.trim()}),save:()=>this.saveDigest(),test:()=>this.testDigest()};})(),
       rsvpReason:s.rsvpReason,onRsvpReason:e=>this.setState({rsvpReason:e.target.value}),onRsvp:st=>this.rsvpAnswer(s.sel,st),
       conflictLines:(s.showCreate&&s.form&&s.conf.key===this.confKeyOf(f)?s.conf.list:[]).map(c=>this.conflictText(c)),isAdminUser:rk==='admin',themeOpts:[['light','สว่าง','พื้นหลังสว่าง เหมาะกับการใช้งานตอนกลางวัน'],['dark','มืด','พื้นหลังมืด ถนอมสายตาตอนกลางคืน / เวรดึก'],['system','ตามอุปกรณ์','สลับสว่าง–มืดอัตโนมัติตามการตั้งค่าของเครื่อง']].map(([k,l,d])=>({k,label:l,desc:d,on:(set.theme||'light')===k,onClick:()=>this.setS({theme:k})})),
       todayLabel:this.today.toLocaleDateString('th-TH',{weekday:'long',day:'numeric',month:'long',year:'numeric'}),scopeLabel:scope==='all'?(rk==='dir'?'มุมมองทั้งทีม':'งานของฉันและตารางผู้บริหาร'):scope==='dir'?'ตารางผู้บริหาร':'เฉพาะงานของฉัน',
       stats,pct,pctSub:doneT.length+'/'+todayAct.length+' งาน',ringBg,breakdown,week7,proactive,proactiveCount:proactive.length,noProactive:!proactive.length,
       todayTasks:todayT,todayEmpty:!todayT.length,
+      quickText:s.quick.text,quickBusy:s.quick.busy,quickErr:s.quick.err,onQuickText:e=>this.setQuickText(e.target.value),onQuickKey:e=>{if(e.key==='Enter'){e.preventDefault();this.quickAdd();}},onQuickAdd:()=>this.quickAdd(),quickPreview,
+      nowNext,timeline,nextMeeting,weekForecast:week7f,
+      isSec:rk==='sec',isDir:rk==='dir',isNur:rk==='nur',isGen:rk==='gen',
+      secBoards,secConflicts,secHasConflicts:!!secConflicts.length,secPendingAppt,secPendingDocs,
+      dirSummary,dirPendingApprovals,dirTeamOverdue:teamOverdue2,teamMini:team.slice(0,4),todayIso,
+      approveAsk:s.approveAsk,onApproveReason:e=>this.onApproveReason(e),closeApprove:()=>this.closeApprove(),confirmApprove:()=>this.confirmApprove(),
+      nurseNextCare,nurseChecklist,nurseShiftLoading:s.nurse.loading,
+      nurseShiftDays:[...Array(7)].map((_,i)=>{const d=addDays(this.today,i),di=iso(d);return{iso:di,label:i===0?'วันนี้':d.toLocaleDateString('th-TH',{weekday:'short',day:'numeric'}),shift:s.nurse.shiftMap[di]||'',shiftOpts:SHIFTS.map(sh=>({label:sh,on:s.nurse.shiftMap[di]===sh,onClick:()=>this.setMyShift(di,s.nurse.shiftMap[di]===sh?'':sh)}))};}),
+      nurseColleagues:s.nurse.colleagues.map(c=>({...c,shiftLabel:c.shift||'ยังไม่ระบุ',canSwap:!!(c.shift&&s.nurse.shiftMap[s.nurse.colDate||todayIso]),onSwap:()=>this.openSwap(c.id,c.shift,s.nurse.colDate||todayIso)})),
+      nurseColDate:s.nurse.colDate||todayIso,onLoadColleagues:date=>this.loadColleagues(date),
+      nurseSwapForm:s.nurse.swapForm,nurseSwapBusy:s.nurse.swapBusy,nurseSwapErr:s.nurse.swapErr,onCloseSwap:()=>this.closeSwap(),onSendSwap:()=>this.sendSwap(),
+      nurseSwapsIn,nurseSwapsOut,
+      nurseHandoverNote:s.nurse.handoverNote,onHandoverNote:e=>this.setHandoverNote(e.target.value),onSaveHandover:()=>this.saveHandover(),nurseHandoverBusy:s.nurse.handoverBusy,nurseHandoverHistory:s.nurse.handoverHistory,
+      genBills,genNextAppt,genClaims,
       statusChips,priChips,typeChips,groups,fDate:s.fDate,fStatus:s.fStatus,fPri:s.fPri,fType:s.fType,fDateVal:s.fDateVal,isCustomDate:s.fDate==='custom',
       dateOpts:[['all','ทุกวัน'],['today','วันนี้'],['yesterday','เมื่อวาน'],['tomorrow','พรุ่งนี้'],['week','สัปดาห์นี้'],['next7','7 วันข้างหน้า'],['past','ย้อนหลัง (ค้างจากวันก่อน)'],['custom','เลือกวันที่…']].map(([v,l])=>({v,l})),
       statusOpts2:[['all','ทุกสถานะ'],['pending','⏳ ยังไม่ทำ (Pending)'],['inprogress','▶ กำลังทำ (In Progress)'],['completed','✓ เสร็จแล้ว (Completed)'],['cancelled','✕ ยกเลิก (Cancelled)'],['overdue','เกินเวลา'],['soon','ใกล้ถึงเวลา (60 นาที)']].map(([v,l])=>({v,l})),

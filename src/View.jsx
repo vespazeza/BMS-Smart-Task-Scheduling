@@ -1,10 +1,11 @@
 import React from 'react';
 import { MONO, Seg } from './ui.jsx';
 import Login from './Login.jsx';
-import { Dashboard, List, Calendar, Team, Report, Users, Alerts, Audit } from './pages.jsx';
+import { Dashboard, List, Calendar, Team, Approvals, Report, Users, Alerts, Audit } from './pages.jsx';
 import { Toasts, TaskDetail, CreateTask, UserForm, ChangePassword } from './overlays.jsx';
 
 const badge = { fontSize: 11, fontFamily: MONO, background: '#B83A32', color: '#fff', borderRadius: 99 };
+const MANUAL_URL = 'https://claude.ai/artifact/Q4PqkNdvXLAFMeENX9Fgo3';
 
 function Sidebar({ V }) {
   const glass = { background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: 14 };
@@ -34,6 +35,13 @@ function Sidebar({ V }) {
             </button>
           );
         })}
+        <a href={MANUAL_URL} target="_blank" rel="noopener noreferrer" className="navitem" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '9px 12px', border: 'none', borderRadius: 12, background: 'transparent', color: '#B9C6E6', fontSize: 14, fontWeight: 400, cursor: 'pointer', textAlign: 'left', textDecoration: 'none' }}>
+          <span style={{ width: 30, height: 30, flex: 'none', borderRadius: 9, background: 'rgba(255,255,255,0.06)', display: 'grid', placeItems: 'center' }}>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 2.5h7l3 3v8H3zM10 2.5V6h3M5.5 8.5h5M5.5 11h5" /></svg>
+          </span>
+          <span style={{ flex: 1, whiteSpace: 'nowrap' }}>คู่มือการใช้งาน</span>
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.6, flex: 'none' }}><path d="M6.5 3.5h6v6M12.5 3.5 7 9M4 5.5H3.5v7H10.5V11" /></svg>
+        </a>
       </nav>
       <div style={{ position: 'relative', marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 10 }}>
         <div style={{ ...glass, padding: '11px 14px', display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -136,6 +144,7 @@ export default function View({ V }) {
               {V.isList && <List V={V} />}
               {V.isCal && <Calendar V={V} />}
               {V.isTeam && <Team V={V} />}
+              {V.isApprovals && <Approvals V={V} />}
               {V.isReport && <Report V={V} />}
               {V.isUsers && <Users V={V} />}
               {V.isAlerts && <Alerts V={V} />}

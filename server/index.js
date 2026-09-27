@@ -296,7 +296,9 @@ api.post('/tasks', auth(), (req, res) => {
   if (patch.status === 'cancelled') return res.status(400).json({ error: 'สร้างงานใหม่เป็นสถานะยกเลิกไม่ได้' });
   delete patch.cancelReason;
   const id = rid('t');
-  const data = { ...patch, creator: u.id };
+  // a task a delegate (e.g. secretary) creates on a director's calendar starts out awaiting that director's confirmation
+  const approvalStatus = (target.rk === 'dir' && assignee !== u.id) ? 'pending' : 'none';
+  const data = { ...patch, creator: u.id, approvalStatus, approvalReason: '', approvalAt: '', approvalBy: '' };
   db.prepare('INSERT INTO tasks(id,assignee,data,created_at,updated_at) VALUES(?,?,?,?,?)').run(id, assignee, JSON.stringify(data), now(), now());
   audit(u, 'task.create', 'task', id, { title: data.title, date: data.date, start: data.start, assignee });
   res.json({ task: taskOut(db.prepare('SELECT * FROM tasks WHERE id=?').get(id), {}) });
@@ -318,6 +320,21 @@ api.patch('/tasks/:id', auth(), (req, res) => {
   if (error) return res.status(400).json({ error });
   const old = JSON.parse(row.data);
   const next = { ...old, ...patch, cancelReason: old.cancelReason || '' };
+  // approval: a delegate-created task on a director's calendar needs that director's confirmation again
+  // whenever it moves to a new director or its date/time changes after a decision was already made
+  const creatorId = old.creator || row.assignee;
+  const newAssigneeUser = getUser(assignee);
+  const inApprovalCtx = !!(newAssigneeUser && newAssigneeUser.rk === 'dir' && creatorId !== assignee);
+  if (!inApprovalCtx) {
+    next.approvalStatus = 'none'; next.approvalReason = ''; next.approvalAt = ''; next.approvalBy = '';
+  } else {
+    const wasCtx = old.approvalStatus && old.approvalStatus !== 'none';
+    const reassignedDirector = assignee !== row.assignee;
+    const timeChanged = (patch.date !== undefined && patch.date !== old.date) || (patch.start !== undefined && patch.start !== old.start) || (patch.dur !== undefined && patch.dur !== old.dur);
+    if (!wasCtx || reassignedDirector || (timeChanged && (old.approvalStatus === 'approved' || old.approvalStatus === 'rejected'))) {
+      next.approvalStatus = 'pending'; next.approvalReason = ''; next.approvalAt = ''; next.approvalBy = '';
+    }
+  }
   let rsvpReset = false;
   if (next.rsvp) {
     const att = new Set(next.attendees || []);
