@@ -1,0 +1,31 @@
+:root {
+  color-scheme: light;
+  --page: #E2DED4; --bg: #F3F1EB; --bg2: #F8F7F3; --surface: #FFFFFF; --soft: #F0EDE6; --track: #ECE9E1; --line: #EFECE5;
+  --today: #FBFAF6; --tint: #EEF4F2; --tint2: #DCE7E4; --toggleoff: #CFCAC0; --rowover: #FDF6F4; --tintred: #FDF3F1; --tintamber: #FCF6EA;
+  --text: #1C2826; --text2: #3E4A48; --muted: #5E6966; --muted2: #8A8780; --border: #E4E0D6; --border2: #DDD8CC;
+}
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --page: #0E1211; --bg: #151A19; --bg2: #1B2221; --surface: #1F2726; --soft: #2A3332; --track: #2A3231; --line: #2C3534;
+  --today: #232B2A; --tint: #22332F; --tint2: #2B3C38; --toggleoff: #56605E; --rowover: #3A2826; --tintred: #3A2826; --tintamber: #3A3222;
+  --text: #E7EEEC; --text2: #C5D0CD; --muted: #97A6A2; --muted2: #7F8B88; --border: #333D3B; --border2: #414C4A;
+}
+
+html,body{margin:0;background:var(--page);color:var(--text);font-family:'IBM Plex Sans Thai',sans-serif;-webkit-font-smoothing:antialiased}
+*{box-sizing:border-box}
+a{color:#1F5E5B}a:hover{color:#16302E}
+:root[data-theme='dark'] a{color:#7FC4BC}
+button,input,select,textarea{font-family:inherit}
+input[type=range]{accent-color:#1F5E5B}
+@media print{
+  :root[data-theme]{color-scheme:light;--page:#fff;--bg:#F3F1EB;--bg2:#F8F7F3;--surface:#FFFFFF;--soft:#F0EDE6;--track:#ECE9E1;--line:#EFECE5;--today:#FBFAF6;--tint:#EEF4F2;--tint2:#DCE7E4;--toggleoff:#CFCAC0;--rowover:#FDF6F4;--tintred:#FDF3F1;--tintamber:#FCF6EA;--text:#1C2826;--text2:#3E4A48;--muted:#5E6966;--muted2:#8A8780;--border:#E4E0D6;--border2:#DDD8CC}
+  [data-noprint]{display:none!important}[data-print-auto]{display:block!important;height:auto!important;overflow:visible!important;width:auto!important;margin:0!important;border:none!important;transform:none!important;border-radius:0!important;padding:0!important;max-width:none!important}html,body{background:#fff}
+}
+
+/* hover / focus states from the design */
+.login-input:focus{border-color:#3b82f6!important;box-shadow:0 0 0 3px rgba(59,130,246,0.18)!important;background:#f5f8ff!important}
+.login-forgot:hover{text-decoration:underline!important}
+.login-btn:hover{background:linear-gradient(90deg,#255fca,#4a98e2)!important}
+.join-link:hover{background:#1F74E0!important;color:#fff!important}
+.tok-x:hover{background:rgba(0,0,0,0.08)!important}
+.sug:hover{background:var(--bg)!important}

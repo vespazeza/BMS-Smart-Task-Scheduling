@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;background:#E2DED4;color:#1C2826;font-family:'IBM Plex Sans Thai',sans-serif;-webkit-font-smoothing:antialiased}
+*{box-sizing:border-box}
+a{color:#1F5E5B}a:hover{color:#16302E}
+button,input,select,textarea{font-family:inherit}
+input[type=range]{accent-color:#1F5E5B}
+@media print{[data-noprint]{display:none!important}[data-print-auto]{display:block!important;height:auto!important;overflow:visible!important;width:auto!important;margin:0!important;border:none!important;transform:none!important;border-radius:0!important;padding:0!important;max-width:none!important}html,body{background:#fff}}
+</style>
+</helmet>
+<div data-print-auto="1" style="position:relative;width:{{ fr.w }};height:{{ fr.h }};margin:{{ fr.m }};border-radius:{{ fr.r }};border:{{ fr.b }};transform:{{ fr.t }};overflow:hidden;background:#F3F1EB">
+<sc-if value="{{ loggedOut }}">
+<div data-noprint="1" style="position:absolute;inset:0;z-index:90;display:grid;grid-template-columns:{{ loginCols }};grid-template-rows:{{ loginRows }};height:100%;overflow:{{ loginOv }};background:#eef1f5">
+  <div style="position:relative;overflow:hidden;height:{{ loginPanelH }};background:#0b1636">
+    <div style="position:absolute;inset:-40px;background-image:url('assets/login-bg.png');background-size:cover;background-position:center;filter:blur(22px) saturate(1.2);transform:scale(1.08)"></div>
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,22,58,0.55),rgba(8,14,40,0.72) 60%,rgba(6,10,28,0.88))"></div>
+    <div style="position:relative;z-index:2;height:100%;overflow-y:{{ loginInnerOv }};padding:{{ loginPad }};display:flex;flex-direction:column;gap:28px;scrollbar-width:thin;scrollbar-color:rgba(148,163,184,0.3) transparent">
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="width:56px;height:56px;flex:none;border-radius:14px;background:linear-gradient(145deg,#1e293b,#020617);box-shadow:0 10px 24px rgba(0,0,0,0.45),inset 0 1px 0 rgba(255,255,255,0.12);display:grid;place-items:center;font-weight:900;font-size:24px;letter-spacing:-0.04em"><span><span style="color:#fff">S</span><span style="color:#3b82f6">T</span></span></div>
+        <div style="display:flex;flex-direction:column;gap:2px;min-width:0"><h1 style="margin:0;font-size:{{ loginTitleSize }};font-weight:600;color:#fff;line-height:1.25">Smart Task Scheduling &amp; Alert System</h1><p style="margin:0;font-size:14px;color:#cbd5e1">ระบบจัดตารางงาน &amp; แจ้งเตือนอัจฉริยะ</p></div>
+      </div>
+      <div style="position:relative;max-width:560px;width:100%;padding:0 40px 40px 0">
+        <div style="position:relative;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);border-radius:22px;padding:22px 22px 26px;box-shadow:0 30px 60px rgba(0,0,0,0.35);display:flex;flex-direction:column;gap:10px">
+          <h2 style="margin:0 0 6px;color:#fff;font-size:26px;font-weight:700">ปฏิทินตารางงาน</h2>
+          <div style="display:grid;grid-template-columns:minmax(0,1fr) 104px 96px;gap:10px;padding:9px 14px;border-radius:10px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.14);font-size:13px;color:#e2e8f0;font-weight:500"><span>งาน</span><span style="white-space:nowrap">กำหนดส่ง</span><span style="white-space:nowrap">ผู้รับผิดชอบ</span></div>
+          <div style="display:grid;grid-template-columns:minmax(0,1fr) 104px 96px;gap:10px;align-items:center;padding:11px 14px;border-radius:12px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.16)"><span style="display:flex;align-items:center;gap:10px;min-width:0"><span style="width:26px;height:26px;flex:none;border-radius:7px;background:#22c55e;color:#fff;display:grid;place-items:center;font-size:13px">✓</span><span style="color:#fff;font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">วางแผนงานได้ง่าย</span></span><span style="display:flex"><span style="background:#dcfce7;color:#15803d;font-size:12px;font-weight:600;padding:3px 10px;border-radius:99px;white-space:nowrap">Done</span></span><span style="display:flex"><span style="width:26px;height:26px;border-radius:50%;background:linear-gradient(#e2e8f0,#94a3b8);border:2px solid rgba(255,255,255,0.6)"></span><span style="width:26px;height:26px;border-radius:50%;background:linear-gradient(#f1f5f9,#cbd5e1);border:2px solid rgba(255,255,255,0.6);margin-left:-10px"></span></span></div>
+          <div style="display:grid;grid-template-columns:minmax(0,1fr) 104px 96px;gap:10px;align-items:center;padding:11px 14px;border-radius:12px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.16)"><span style="display:flex;align-items:center;gap:10px;min-width:0"><span style="width:26px;height:26px;flex:none;border-radius:7px;background:#f59e0b;color:#fff;display:grid;place-items:center;font-size:13px">🔔</span><span style="color:#fff;font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">แจ้งเตือนทันเวลา</span></span><span style="display:flex"><span style="background:#fef3c7;color:#b45309;font-size:12px;font-weight:600;padding:3px 10px;border-radius:99px;white-space:nowrap">In Progress</span></span><span style="display:flex"><span style="width:26px;height:26px;border-radius:50%;background:linear-gradient(#e2e8f0,#94a3b8);border:2px solid rgba(255,255,255,0.6)"></span><span style="width:26px;height:26px;border-radius:50%;background:linear-gradient(#f1f5f9,#cbd5e1);border:2px solid rgba(255,255,255,0.6);margin-left:-10px"></span></span></div>
+          <div style="display:grid;grid-template-columns:minmax(0,1fr) 104px 96px;gap:10px;align-items:center;padding:11px 14px;border-radius:12px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.16)"><span style="display:flex;align-items:center;gap:10px;min-width:0"><span style="width:26px;height:26px;flex:none;border-radius:7px;background:#3b82f6;color:#fff;display:grid;place-items:center;font-size:13px">▤</span><span style="color:#fff;font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">ติดตามสถานะ &amp; สรุปผล</span></span><span style="display:flex"><span style="background:#dbeafe;color:#1d4ed8;font-size:12px;font-weight:600;padding:3px 10px;border-radius:99px;white-space:nowrap">Pending</span></span><span style="display:flex"><span style="width:26px;height:26px;border-radius:50%;background:linear-gradient(#e2e8f0,#94a3b8);border:2px solid rgba(255,255,255,0.6)"></span><span style="width:26px;height:26px;border-radius:50%;background:linear-gradient(#f1f5f9,#cbd5e1);border:2px solid rgba(255,255,255,0.6);margin-left:-10px"></span></span></div>
+        </div>
+        <img src="assets/login-bell.png" alt="" style="position:absolute;right:-6px;top:-78px;width:150px;-webkit-mask-image:radial-gradient(closest-side,#000 62%,transparent 100%);mask-image:radial-gradient(closest-side,#000 62%,transparent 100%);pointer-events:none;filter:drop-shadow(0 16px 24px rgba(0,0,0,0.35))">
+        <img src="assets/login-calendar.png" alt="" style="position:absolute;right:-18px;bottom:-14px;width:170px;-webkit-mask-image:radial-gradient(closest-side,#000 62%,transparent 100%);mask-image:radial-gradient(closest-side,#000 62%,transparent 100%);pointer-events:none;filter:drop-shadow(0 16px 24px rgba(0,0,0,0.35))">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:22px;margin-top:auto">
+        <h2 style="margin:0;color:#fff;font-size:{{ loginHeadSize }};font-weight:700;line-height:1.25;white-space:nowrap">ระบบจัดตารางงาน &amp; แจ้งเตือนอัจฉริยะ</h2>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:18px 22px">
+          <div style="display:flex;gap:12px;align-items:flex-start;min-width:0"><span style="font-size:30px;line-height:1;flex:none">📅</span><span style="display:flex;flex-direction:column;gap:4px;min-width:0"><span style="color:#fff;font-size:16px;font-weight:600">วางแผนงานง่าย</span><span style="color:#cbd5e1;font-size:13px;line-height:1.55">งานครั้งเดียวหรือวนซ้ำ กำหนดวัน เวลา และความสำคัญ</span></span></div>
+          <div style="display:flex;gap:12px;align-items:flex-start;min-width:0"><span style="font-size:30px;line-height:1;flex:none">🔔</span><span style="display:flex;flex-direction:column;gap:4px;min-width:0"><span style="color:#fff;font-size:16px;font-weight:600">แจ้งเตือนทันเวลา</span><span style="color:#cbd5e1;font-size:13px;line-height:1.55">เสียง Push Popup เตือนล่วงหน้าและเตือนซ้ำอัตโนมัติ</span></span></div>
+          <div style="display:flex;gap:12px;align-items:flex-start;min-width:0"><span style="font-size:30px;line-height:1;flex:none">📊</span><span style="display:flex;flex-direction:column;gap:4px;min-width:0"><span style="color:#fff;font-size:16px;font-weight:600">ติดตาม &amp; สรุปผล</span><span style="color:#cbd5e1;font-size:13px;line-height:1.55">อัปเดตสถานะ บันทึกเวลาเริ่ม–เสร็จ ดู Dashboard และรายงาน</span></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;align-items:center;padding:{{ loginPad }};height:{{ loginPanelH }};overflow-y:{{ loginRightOv }};background:linear-gradient(180deg,#f3f5f9,#e9edf3)">
+    <div style="width:100%;max-width:440px;background:#fff;padding:{{ loginCardPad }};border-radius:22px;box-shadow:0 24px 48px -12px rgba(15,23,42,0.18),0 2px 6px rgba(15,23,42,0.05);margin:auto 0">
+      <div style="display:flex;align-items:center;gap:8px;font-size:14px;color:#2563eb;font-weight:600"><span style="width:9px;height:9px;border-radius:50%;background:#3b82f6"></span>ยินดีต้อนรับ</div>
+      <h2 style="margin:8px 0 4px;font-size:32px;font-weight:700;color:#0f172a;letter-spacing:-0.01em">เข้าสู่ระบบ</h2>
+      <p style="margin:0 0 26px;color:#64748b;font-size:14px">กรุณากรอกข้อมูลเพื่อเข้าใช้งาน</p>
+      <div style="display:flex;flex-direction:column;gap:18px">
+        <div><label style="display:block;font-size:14px;font-weight:500;color:#1e293b;margin-bottom:8px">ชื่อผู้ใช้งาน หรือ อีเมล</label><div style="position:relative"><svg style="position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m3.5 6.5 8.5 6.5 8.5-6.5"></path></svg><input value="{{ loginU }}" onChange="{{ onLoginU }}" onKeyDown="{{ onLoginKey }}" autoComplete="username" placeholder="username@domain.com" style="width:100%;padding:12px 16px 12px 44px;border-radius:12px;border:1px solid #dbe1ea;font-size:15px;background:#fff;color:#0f172a;outline:none;transition:box-shadow 0.15s,background 0.15s" style-focus="border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,0.18);background:#f5f8ff"></div></div>
+        <div><label style="display:block;font-size:14px;font-weight:500;color:#1e293b;margin-bottom:8px">รหัสผ่าน</label><div style="position:relative"><svg style="position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="10" rx="2"></rect><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3M12 14.5v2.5"></path></svg><input type="password" value="{{ loginP }}" onChange="{{ onLoginP }}" onKeyDown="{{ onLoginKey }}" autoComplete="current-password" placeholder="••••••••" style="width:100%;padding:12px 16px 12px 44px;border-radius:12px;border:1px solid #dbe1ea;font-size:15px;background:#fff;color:#0f172a;outline:none;transition:box-shadow 0.15s,background 0.15s" style-focus="border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,0.18);background:#f5f8ff"></div></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;font-size:14px;gap:8px"><label style="display:flex;align-items:center;gap:10px;color:#334155;cursor:pointer"><input type="checkbox" checked="{{ loginRemember }}" onChange="{{ onLoginRemember }}" style="width:18px;height:18px;accent-color:#2563eb;margin:0">จดจำการใช้งาน</label><a href="#" onClick="{{ onForgot }}" style="color:#2563eb;font-weight:500;text-decoration:none" style-hover="text-decoration:underline">ลืมรหัสผ่าน?</a></div>
+        <sc-if value="{{ hasLoginErr }}"><div style="font-size:13px;color:#b91c1c;background:#fee2e2;border-radius:10px;padding:9px 12px">{{ loginErr }}</div></sc-if>
+        <button type="button" onClick="{{ doLogin }}" style="width:100%;height:50px;background:linear-gradient(90deg,#2f6fe0,#5aa9f0);color:#fff;font-weight:600;border:none;border-radius:12px;box-shadow:0 12px 24px -8px rgba(47,111,224,0.55);font-size:16px;cursor:pointer;margin-top:4px" style-hover="background:linear-gradient(90deg,#255fca,#4a98e2)">เข้าสู่ระบบ</button>
+      </div>
+    </div>
+    <div style="text-align:center;font-size:13px;color:#475569;line-height:1.6;margin-top:24px"><div>Smart Task System</div><div style="color:#94a3b8">version 1.0.0</div></div>
+  </div>
+</div>
+</sc-if>
+<div data-print-auto="1" style="display:grid;grid-template-columns:{{ shellCols }};height:100%;overflow:hidden">
+  <aside data-noprint="1" style="background:#16302E;color:#E7EFEC;display:{{ sideDisplay }};flex-direction:column;padding:20px 12px;gap:24px;overflow:auto">
+    <div style="display:flex;align-items:center;gap:10px;padding:0 8px">
+      <div style="width:38px;height:38px;flex:none;border-radius:10px;background:linear-gradient(145deg,#1e293b,#020617);box-shadow:0 4px 10px rgba(0,0,0,0.35),inset 0 1px 0 rgba(255,255,255,0.12);display:grid;place-items:center;font-weight:900;font-size:16px;letter-spacing:-0.04em"><span><span style="color:#fff">S</span><span style="color:#3b82f6">T</span></span></div>
+      <div style="min-width:0"><div style="font-weight:600;font-size:13px;line-height:1.3;color:#fff">Smart Task Scheduling &amp; Alert System</div><div style="font-size:11px;color:#9DB5B0;line-height:1.4;margin-top:2px">ระบบจัดตารางงาน &amp; แจ้งเตือนอัจฉริยะ</div></div>
+    </div>
+    <nav style="display:flex;flex-direction:column;gap:2px">
+      <sc-for list="{{ navItems }}" as="n" hint-placeholder-count="5">
+        <button onClick="{{ n.onClick }}" style="display:flex;align-items:center;gap:10px;padding:9px 10px;border:none;border-radius:8px;background:{{ n.bg }};color:{{ n.c }};font-size:14px;cursor:pointer;text-align:left"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="{{ n.d }}"></path></svg><span style="flex:1">{{ n.label }}</span><sc-if value="{{ n.hasBadge }}"><span style="font-size:11px;font-family:'IBM Plex Mono';background:#B83A32;color:#fff;border-radius:99px;padding:1px 7px">{{ n.badge }}</span></sc-if></button>
+      </sc-for>
+    </nav>
+    <div style="margin-top:auto;display:flex;flex-direction:column;gap:14px">
+      <div style="padding:0 10px;display:flex;flex-direction:column;gap:2px">
+        <span style="font-size:11px;color:#8BA6A0">เวลาในระบบ</span>
+        <span style="font-family:'IBM Plex Mono';font-size:20px;font-weight:500">{{ nowText }}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 10px;border-top:1px solid rgba(231,239,236,0.12)">
+        <span style="width:36px;height:36px;flex:none;border-radius:50%;background:#E7EFEC;color:#16302E;display:grid;place-items:center;font-size:13px;font-weight:600">{{ user.short }}</span>
+        <span style="display:flex;flex-direction:column;min-width:0;flex:1"><span style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ user.name }}</span><span style="font-size:11px;color:#9DB5B0">{{ user.role }}</span></span><button onClick="{{ logout }}" title="ออกจากระบบ" style="border:1px solid rgba(231,239,236,0.25);background:transparent;color:#E7EFEC;border-radius:7px;padding:5px 8px;font-size:12px;cursor:pointer;white-space:nowrap">ออก</button>
+      </div>
+    </div>
+  </aside>
+
+  <main data-print-auto="1" style="display:flex;flex-direction:column;min-width:0;overflow:hidden;position:relative">
+    <header data-noprint="1" style="display:flex;align-items:center;gap:10px;padding:{{ headerPad }};border-bottom:1px solid #E4E0D6;background:#F8F7F3;flex-wrap:wrap;position:relative">
+      <sc-if value="{{ isMobile }}"><button onClick="{{ logout }}" title="ออกจากระบบ" style="width:36px;height:36px;flex:none;border:none;border-radius:50%;background:#16302E;color:#E7EFEC;display:grid;place-items:center;font-size:12px;font-weight:600;cursor:pointer">{{ user.short }}</button></sc-if>
+      <div style="font-size:18px;font-weight:600;margin-right:auto">{{ viewTitle }}</div>
+      <div style="display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #DDD8CC;border-radius:9px;padding:0 12px;height:38px;min-width:0;flex:{{ searchFlex }};order:{{ searchOrder }}">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#5E6966" stroke-width="1.6"><circle cx="7" cy="7" r="5"></circle><path d="m11 11 3.5 3.5"></path></svg>
+        <input value="{{ q }}" onChange="{{ onQ }}" placeholder="ค้นหางาน ประเภท หรือผู้รับผิดชอบ" style="border:none;outline:none;background:transparent;font-size:14px;width:100%;color:#1C2826">
+      </div>
+      <sc-if value="{{ hasScope }}">
+        <div style="display:flex;background:#ECE9E1;border-radius:9px;padding:3px;gap:2px;order:{{ searchOrder }}">
+          <sc-for list="{{ scopeOpts }}" as="o"><button onClick="{{ o.onClick }}" style="border:none;border-radius:7px;padding:6px 11px;font-size:13px;cursor:pointer;background:{{ o.bg }};color:{{ o.c }};box-shadow:{{ o.sh }};white-space:nowrap">{{ o.label }}</button></sc-for>
+        </div>
+      </sc-if>
+      <button onClick="{{ toggleLog }}" style="position:relative;width:38px;height:38px;border-radius:9px;border:1px solid #DDD8CC;background:#fff;cursor:pointer;display:grid;place-items:center;flex:none">
+        <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="#1C2826" stroke-width="1.5"><path d="M4 11V7a4 4 0 0 1 8 0v4l1.2 1.5H2.8L4 11Z"></path><path d="M6.5 14a1.6 1.6 0 0 0 3 0"></path></svg>
+        <sc-if value="{{ hasUnread }}"><span style="position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;border-radius:99px;background:#B83A32;color:#fff;font-size:11px;font-family:'IBM Plex Mono';display:grid;place-items:center;padding:0 4px">{{ unread }}</span></sc-if>
+      </button>
+      <button onClick="{{ openCreate }}" style="height:38px;border:none;border-radius:9px;background:#1F5E5B;color:#fff;padding:0 14px;font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:6px;flex:none"><span style="font-size:18px;line-height:1">+</span>{{ createLabel }}</button>
+      <sc-if value="{{ showLog }}">
+        <div style="position:absolute;top:60px;right:14px;width:min(380px,calc(100% - 28px));max-height:460px;overflow:auto;background:#fff;border:1px solid #E4E0D6;border-radius:12px;box-shadow:0 18px 40px rgba(22,48,46,0.16);z-index:30;padding:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px"><span style="font-weight:600;font-size:14px">ประวัติการแจ้งเตือน</span><button onClick="{{ toggleLog }}" style="border:none;background:none;cursor:pointer;color:#5E6966;font-size:13px">ปิด</button></div>
+          <sc-for list="{{ log }}" as="l"><button onClick="{{ l.open }}" style="display:flex;gap:10px;width:100%;text-align:left;border:none;background:transparent;padding:10px;border-radius:8px;cursor:pointer;border-top:1px solid #F0EDE6">
+            <span style="width:8px;height:8px;border-radius:50%;background:{{ l.c }};margin-top:6px;flex:none"></span>
+            <span style="display:flex;flex-direction:column;gap:2px;min-width:0;flex:1"><span style="font-size:12px;color:{{ l.c }};font-weight:600">{{ l.tag }} · <span style="font-family:'IBM Plex Mono';color:#5E6966;font-weight:400">{{ l.time }}</span></span><span style="font-size:13px;color:#1C2826">{{ l.task }}</span><span style="font-size:12px;color:#5E6966">{{ l.title }}</span></span>
+          </button></sc-for>
+          <sc-if value="{{ logEmpty }}"><div style="padding:20px 10px;font-size:13px;color:#5E6966">ยังไม่มีการแจ้งเตือน</div></sc-if>
+        </div>
+      </sc-if>
+    </header>
+
+    <div data-print-auto="1" style="flex:1;overflow:auto;padding:{{ contentPad }}">
+      <sc-if value="{{ isDash }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:18px;max-width:1280px">
+          <div>
+            <div style="font-size:13px;color:#5E6966">{{ todayLabel }}</div>
+            <h1 style="margin:4px 0 0;font-size:24px;font-weight:600;letter-spacing:-0.01em">สวัสดี {{ user.name }}</h1>
+            <div style="font-size:14px;color:#5E6966;margin-top:2px">{{ user.role }} · {{ scopeLabel }}</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">
+            <sc-for list="{{ stats }}" as="s" hint-placeholder-count="4">
+              <button onClick="{{ s.onClick }}" style="text-align:left;background:#fff;border:1px solid #E4E0D6;border-radius:12px;padding:14px 16px;cursor:pointer;display:flex;flex-direction:column;gap:6px">
+                <span style="font-size:13px;color:#5E6966;display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:50%;background:{{ s.c }};flex:none"></span>{{ s.label }}</span>
+                <span style="font-size:32px;font-weight:500;font-family:'IBM Plex Mono';color:#1C2826;line-height:1.1">{{ s.value }}</span>
+                <span style="font-size:12px;color:#5E6966">{{ s.sub }}</span>
+              </button>
+            </sc-for>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:12px">
+            <div style="background:#fff;border:1px solid #E4E0D6;border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:16px">
+              <div style="font-weight:600;font-size:15px">% งานสำเร็จวันนี้</div>
+              <div style="display:flex;align-items:center;gap:22px;flex-wrap:wrap">
+                <div style="width:124px;height:124px;border-radius:50%;background:{{ ringBg }};display:grid;place-items:center;flex:none">
+                  <div style="width:96px;height:96px;border-radius:50%;background:#fff;display:grid;place-items:center;text-align:center"><div><div style="font-size:26px;font-weight:600;font-family:'IBM Plex Mono'">{{ pct }}%</div><div style="font-size:11px;color:#5E6966">{{ pctSub }}</div></div></div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:8px;flex:1;min-width:120px">
+                  <sc-for list="{{ breakdown }}" as="b" hint-placeholder-count="4"><div style="display:flex;align-items:center;gap:8px;font-size:13px"><span style="width:10px;height:10px;border-radius:3px;background:{{ b.c }}"></span><span style="flex:1;color:#3E4A48">{{ b.label }}</span><span style="font-family:'IBM Plex Mono'">{{ b.count }}</span></div></sc-for>
+                </div>
+              </div>
+            </div>
+            <div style="background:#fff;border:1px solid #E4E0D6;border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:14px">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+                <div style="font-weight:600;font-size:15px">งานล่าช้า · 7 วัน</div>
+                <div style="display:flex;gap:12px;font-size:12px;color:#5E6966"><span style="display:flex;align-items:center;gap:5px"><span style="width:9px;height:9px;border-radius:2px;background:#1F5E5B"></span>ตรงเวลา</span><span style="display:flex;align-items:center;gap:5px"><span style="width:9px;height:9px;border-radius:2px;background:#D97A5E"></span>ล่าช้า/ค้าง</span></div>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;align-items:end">
+                <sc-for list="{{ week7 }}" as="d" hint-placeholder-count="7">
+                  <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+                    <span style="font-size:11px;font-family:'IBM Plex Mono';color:#5E6966">{{ d.pctText }}</span>
+                    <div style="width:100%;max-width:26px;height:104px;display:flex;flex-direction:column;justify-content:flex-end;gap:2px">
+                      <div style="height:{{ d.lateH }};background:#D97A5E;border-radius:3px"></div>
+                      <div style="height:{{ d.doneH }};background:#1F5E5B;border-radius:3px"></div>
+                    </div>
+                    <span style="font-size:12px;color:{{ d.c }};font-weight:{{ d.w }}">{{ d.label }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="background:#fff;border:1px solid #E4E0D6;border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;justify-content:space-between;align-items:center"><div style="font-weight:600;font-size:15px">แจ้งเตือนเชิงรุก</div><span style="font-size:12px;color:#5E6966;font-family:'IBM Plex Mono'">{{ proactiveCount }}</span></div>
+              <sc-for list="{{ proactive }}" as="p" hint-placeholder-count="3">
+                <button onClick="{{ p.onClick }}" style="display:flex;flex-direction:column;gap:3px;text-align:left;background:{{ p.bg }};border:none;border-radius:9px;padding:10px 12px;cursor:pointer">
+                  <span style="font-size:11px;font-weight:600;color:{{ p.c }};letter-spacing:0.02em">{{ p.tag }}</span>
+                  <span style="font-size:14px;font-weight:500;color:#1C2826">{{ p.title }}</span>
+                  <span style="font-size:12px;color:#3E4A48">{{ p.msg }}</span>
+                </button>
+              </sc-for>
+              <sc-if value="{{ noProactive }}"><div style="font-size:13px;color:#5E6966;padding:12px 0">ไม่มีงานที่ต้องจับตาในตอนนี้</div></sc-if>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #E4E0D6;border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div style="font-weight:600;font-size:15px">ตารางวันนี้</div><button onClick="{{ goCal }}" style="border:none;background:none;color:#1F5E5B;font-size:13px;cursor:pointer">ดูปฏิทิน →</button></div>
+            <sc-for list="{{ todayTasks }}" as="t" hint-placeholder-count="4"><div style="display:grid;grid-template-columns:{{ t.rowCols }};gap:8px 14px;align-items:center;padding:12px 14px;border-radius:10px;background:{{ t.rowBg }};border:1px solid #E4E0D6;font-family:'IBM Plex Sans Thai',sans-serif">
+  <div style="font-family:'IBM Plex Mono';font-size:14px;color:#1C2826;display:flex;flex-direction:column;grid-row:{{ t.spanRow }};align-self:start"><span>{{ t.start }}</span><span style="font-size:11px;color:#5E6966">{{ t.durLabel }}</span></div>
+  <div style="width:4px;align-self:stretch;border-radius:2px;background:{{ t.priC }};grid-row:{{ t.spanRow }}"></div>
+  <button onClick="{{ t.open }}" style="border:none;background:none;padding:0;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:5px;min-width:0;font-family:inherit">
+    <span style="font-size:15px;font-weight:500;text-decoration:{{ t.deco }};color:{{ t.titleC }};text-wrap:pretty">{{ t.title }}</span>
+    <span style="display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-size:12px;color:#5E6966">
+      <span style="background:#F0EDE6;color:#3E4A48;padding:1px 8px;border-radius:5px">{{ t.type }}</span>
+      <span style="color:{{ t.priC }};font-weight:600">{{ t.priLabel }}</span>
+      <sc-if value="{{ t.hasRepeat }}"><span>↻ {{ t.repeatLabel }}</span></sc-if>
+      <sc-if value="{{ t.showAssignee }}"><span>{{ t.assigneeName }}</span></sc-if>
+      <sc-if value="{{ t.hasFlag }}"><span style="color:{{ t.flagC }};background:{{ t.flagBg }};padding:1px 8px;border-radius:99px;font-weight:600">{{ t.flag }}</span></sc-if>
+      <sc-if value="{{ t.hasNote }}"><span>· มีบันทึก</span></sc-if>
+    </span>
+  </button>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:{{ t.actJust }};grid-column:{{ t.actCol }}">
+    <span style="font-size:12px;padding:3px 10px;border-radius:99px;background:{{ t.statusBg }};color:{{ t.statusC }};white-space:nowrap">{{ t.statusG }} {{ t.statusLabel }}</span>
+    <sc-if value="{{ t.hasNext }}"><button onClick="{{ t.onNext }}" style="border:1px solid #1F5E5B;background:{{ t.nextBg }};color:{{ t.nextC }};border-radius:8px;padding:5px 12px;font-size:13px;cursor:pointer;white-space:nowrap;font-family:inherit">{{ t.nextLabel }}</button></sc-if>
+  </div>
+</div></sc-for>
+            <sc-if value="{{ todayEmpty }}"><div style="font-size:13px;color:#5E6966;padding:16px 0">ไม่มีงานวันนี้</div></sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isList }}">
+        <div style="display:flex;flex-direction:column;gap:16px;max-width:1100px">
+          <div style="display:flex;flex-direction:column;gap:12px;background:#fff;border:1px solid #E4E0D6;border-radius:12px;padding:14px 16px">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;align-items:end">
+              <label style="display:flex;flex-direction:column;gap:5px;min-width:0"><span style="font-size:12px;color:#5E6966">วันที่</span><select value="{{ fDate }}" onChange="{{ onFDateSel }}" style="height:38px;border:1px solid #DDD8CC;border-radius:9px;padding:0 10px;font-size:14px;background:#fff;color:#1C2826;cursor:pointer;width:100%"><sc-for list="{{ dateOpts }}" as="o"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></label>
+              <label style="display:flex;flex-direction:column;gap:5px;min-width:0"><span style="font-size:12px;color:#5E6966">สถานะ</span><select value="{{ fStatus }}" onChange="{{ onFStatusSel }}" style="height:38px;border:1px solid #DDD8CC;border-radius:9px;padding:0 10px;font-size:14px;background:#fff;color:#1C2826;cursor:pointer;width:100%"><sc-for list="{{ statusOpts2 }}" as="o"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></label>
+              <label style="display:flex;flex-direction:column;gap:5px;min-width:0"><span style="font-size:12px;color:#5E6966">ความสำคัญ</span><select value="{{ fPri }}" onChange="{{ onFPriSel }}" style="height:38px;border:1px solid #DDD8CC;border-radius:9px;padding:0 10px;font-size:14px;background:#fff;color:#1C2826;cursor:pointer;width:100%"><sc-for list="{{ priOpts2 }}" as="o"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></label>
+              <label style="display:flex;flex-direction:column;gap:5px;min-width:0"><span style="font-size:12px;color:#5E6966">ประเภทงาน</span><select value="{{ fType }}" onChange="{{ onFTypeSel }}" style="height:38px;border:1px solid #DDD8CC;border-radius:9px;padding:0 10px;font-size:14px;background:#fff;color:#1C2826;cursor:pointer;width:100%"><sc-for list="{{ typeOpts2 }}" as="o"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></label>
+            </div>
+            <sc-if value="{{ isCustomDate }}"><label style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span style="font-size:12px;color:#5E6966">เลือกวันที่</span><input type="date" value="{{ fDateVal }}" onChange="{{ onFDateVal }}" style="height:38px;border:1px solid #DDD8CC;border-radius:9px;padding:0 10px;font-size:14px"></label></sc-if>
+            <sc-if value="{{ hasActiveFilter }}"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span style="font-size:12px;color:#5E6966">กรองอยู่ {{ activeFilterCount }} เงื่อนไข</span><button onClick="{{ clearFilters }}" style="border:none;background:none;color:#1F5E5B;font-size:13px;cursor:pointer;padding:0">ล้างตัวกรอง</button></div></sc-if>
+          </div>
+          <div style="font-size:13px;color:#5E6966">พบ {{ listCount }} งาน</div>
+          <sc-for list="{{ groups }}" as="g">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;align-items:baseline;gap:10px;padding:0 2px"><span style="font-weight:600;font-size:15px">{{ g.label }}</span><span style="font-size:12px;color:#5E6966">{{ g.sub }} · {{ g.count }} งาน</span></div>
+              <sc-for list="{{ g.items }}" as="t"><div style="display:grid;grid-template-columns:{{ t.rowCols }};gap:8px 14px;align-items:center;padding:12px 14px;border-radius:10px;background:{{ t.rowBg }};border:1px solid #E4E0D6;font-family:'IBM Plex Sans Thai',sans-serif">
+  <div style="font-family:'IBM Plex Mono';font-size:14px;color:#1C2826;display:flex;flex-direction:column;grid-row:{{ t.spanRow }};align-self:start"><span>{{ t.start }}</span><span style="font-size:11px;color:#5E6966">{{ t.durLabel }}</span></div>
+  <div style="width:4px;align-self:stretch;border-radius:2px;background:{{ t.priC }};grid-row:{{ t.spanRow }}"></div>
+  <button onClick="{{ t.open }}" style="border:none;background:none;padding:0;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:5px;min-width:0;font-family:inherit">
+    <span style="font-size:15px;font-weight:500;text-decoration:{{ t.deco }};color:{{ t.titleC }};text-wrap:pretty">{{ t.title }}</span>
+    <span style="display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-size:12px;color:#5E6966">
+      <span style="background:#F0EDE6;color:#3E4A48;padding:1px 8px;border-radius:5px">{{ t.type }}</span>
+      <span style="color:{{ t.priC }};font-weight:600">{{ t.priLabel }}</span>
+      <sc-if value="{{ t.hasRepeat }}"><span>↻ {{ t.repeatLabel }}</span></sc-if>
+      <sc-if value="{{ t.showAssignee }}"><span>{{ t.assigneeName }}</span></sc-if>
+      <sc-if value="{{ t.hasFlag }}"><span style="color:{{ t.flagC }};background:{{ t.flagBg }};padding:1px 8px;border-radius:99px;font-weight:600">{{ t.flag }}</span></sc-if>
+      <sc-if value="{{ t.hasNote }}"><span>· มีบันทึก</span></sc-if>
+    </span>
+  </button>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:{{ t.actJust }};grid-column:{{ t.actCol }}">
+    <span style="font-size:12px;padding:3px 10px;border-radius:99px;background:{{ t.statusBg }};color:{{ t.statusC }};white-space:nowrap">{{ t.statusG }} {{ t.statusLabel }}</span>
+    <sc-if value="{{ t.hasNext }}"><button onClick="{{ t.onNext }}" style="border:1px solid #1F5E5B;background:{{ t.nextBg }};color:{{ t.nextC }};border-radius:8px;padding:5px 12px;font-size:13px;cursor:pointer;white-space:nowrap;font-family:inherit">{{ t.nextLabel }}</button></sc-if>
+  </div>
+</div></sc-for>
+            </div>
+          </sc-for>
+          <sc-if value="{{ listEmpty }}"><div style="background:#fff;border:1px dashed #D9D4C8;border-radius:12px;padding:32px;text-align:center;color:#5E6966;font-size:14px">ไม่พบงานตามเงื่อนไข</div></sc-if>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isCal }}">
+        <div style="display:flex;flex-direction:column;gap:14px;max-width:1280px">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <div style="display:flex;background:#ECE9E1;border-radius:9px;padding:3px;gap:2px"><sc-for list="{{ calModes }}" as="o"><button onClick="{{ o.onClick }}" style="border:none;border-radius:7px;padding:6px 14px;font-size:13px;cursor:pointer;background:{{ o.bg }};color:{{ o.c }};box-shadow:{{ o.sh }}">{{ o.label }}</button></sc-for></div>
+            <div style="font-weight:600;font-size:16px;margin-right:auto">{{ calLabel }}</div>
+            <button onClick="{{ calPrev }}" style="border:1px solid #DDD8CC;background:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:13px;white-space:nowrap">‹</button>
+            <button onClick="{{ calNow }}" style="border:1px solid #DDD8CC;background:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:13px;white-space:nowrap">วันนี้</button>
+            <button onClick="{{ calNext }}" style="border:1px solid #DDD8CC;background:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:13px;white-space:nowrap">›</button>
+          </div>
+          <sc-if value="{{ isWeek }}">
+            <div style="background:#fff;border:1px solid #E4E0D6;border-radius:12px;overflow:auto">
+              <div style="min-width:880px">
+                <div style="display:grid;grid-template-columns:56px repeat(7,minmax(0,1fr));border-bottom:1px solid #E4E0D6;background:#fff">
+                  <div></div>
+                  <sc-for list="{{ calDays }}" as="d" hint-placeholder-count="7"><div style="padding:10px 8px;border-left:1px solid #E4E0D6;display:flex;align-items:baseline;gap:6px"><span style="font-size:12px;color:#5E6966">{{ d.wd }}</span><span style="font-family:'IBM Plex Mono';font-size:16px;font-weight:600;color:{{ d.numC }};background:{{ d.numBg }};border-radius:6px;padding:0 6px">{{ d.num }}</span></div></sc-for>
+                </div>
+                <div style="display:grid;grid-template-columns:56px repeat(7,minmax(0,1fr));height:728px">
+                  <div style="position:relative"><sc-for list="{{ hours }}" as="h"><span style="position:absolute;top:{{ h.top }};right:8px;font-family:'IBM Plex Mono';font-size:11px;color:#8A8780;transform:translateY(-6px)">{{ h.label }}</span></sc-for></div>
+                  <sc-for list="{{ calDays }}" as="d" hint-placeholder-count="7">
+                    <div style="position:relative;border-left:1px solid #E4E0D6;background-color:{{ d.bg }};background-image:repeating-linear-gradient(to bottom,transparent 0,transparent 55px,#EFECE5 55px,#EFECE5 56px)">
+                      <sc-if value="{{ d.isToday }}"><div style="position:absolute;left:0;right:0;top:{{ nowTop }};height:2px;background:#B83A32;z-index:2"></div></sc-if>
+                      <sc-for list="{{ d.events }}" as="e">
+                        <button onClick="{{ e.open }}" title="{{ e.title }}" style="position:absolute;top:{{ e.top }};height:{{ e.height }};left:{{ e.left }};width:{{ e.width }};background:{{ e.bg }};border:1px {{ e.bs }} {{ e.bc }};border-left:3px solid {{ e.c }};border-radius:6px;padding:3px 6px;text-align:left;cursor:pointer;overflow:hidden;opacity:{{ e.op }};display:flex;flex-direction:column;gap:1px">
+                          <span style="font-size:11px;font-family:'IBM Plex Mono';color:{{ e.c }}">{{ e.time }}</span>
+                          <span style="font-size:12px;line-height:1.3;color:#1C2826;text-decoration:{{ e.deco }}">{{ e.title }}</span>
+                        </button>
+                      </sc-for>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+            <div style="font-size:12px;color:#5E6966">กรอบเส้นประ = รอบถัดไปของงานวนซ้ำ · เส้นแดง = เวลาปัจจุบัน</div>
+          </sc-if>
+          <sc-if value="{{ isMonth }}">
+            <div style="background:#fff;border:1px solid #E4E0D6;border-radius:12px;overflow:hidden">
+              <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-bottom:1px solid #E4E0D6">
+                <sc-for list="{{ monthWd }}" as="w" hint-placeholder-count="7"><div style="padding:8px;font-size:12px;color:#5E6966;text-align:center">{{ w.label }}</div></sc-for>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr))">
+                <sc-for list="{{ monthCells }}" as="c" hint-placeholder-count="35">
+                  <button onClick="{{ c.onClick }}" style="min-height:{{ cellH }};border:none;border-right:1px solid #EFECE5;border-bottom:1px solid #EFECE5;background:{{ c.bg }};box-shadow:{{ c.ring }};padding:6px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:4px;min-width:0;opacity:{{ c.op }}">
+                    <span style="font-family:'IBM Plex Mono';font-size:13px;font-weight:600;color:{{ c.numC }};background:{{ c.numBg }};border-radius:6px;padding:0 5px;align-self:flex-start">{{ c.num }}</span>
+                    <sc-if value="{{ isMobile }}">
+                      <span style="display:flex;gap:3px;flex-wrap:wrap"><sc-for list="{{ c.dots }}" as="o"><span style="width:6px;height:6px;border-radius:50%;background:{{ o.c }}"></span></sc-for></span>
+                    </sc-if>
+                    <sc-if value="{{ notMobile }}">
+                      <sc-for list="{{ c.chips }}" as="e"><span style="display:block;font-size:11px;line-height:1.35;padding:2px 5px;border-radius:4px;background:{{ e.bg }};color:#1C2826;border-left:2px solid {{ e.c }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-decoration:{{ e.deco }}"><span style="font-family:'IBM Plex Mono';color:{{ e.c }}">{{ e.time }}</span> {{ e.title }}</span></sc-for>
+                      <sc-if value="{{ c.hasMore }}"><span style="font-size:11px;color:#5E6966;padding-left:4px">{{ c.more }}</span></sc-if>
+                    </sc-if>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;align-items:baseline;gap:10px"><span style="font-weight:600;font-size:15px">{{ selDayLabel }}</span><span style="font-size:12px;color:#5E6966">{{ selDayCount }} งาน</span></div>
+              <sc-for list="{{ selDayItems }}" as="t"><div style="display:grid;grid-template-columns:{{ t.rowCols }};gap:8px 14px;align-items:center;padding:12px 14px;border-radius:10px;background:{{ t.rowBg }};border:1px solid #E4E0D6;font-family:'IBM Plex Sans Thai',sans-serif">
+  <div style="font-family:'IBM Plex Mono';font-size:14px;color:#1C2826;display:flex;flex-direction:column;grid-row:{{ t.spanRow }};align-self:start"><span>{{ t.start }}</span><span style="font-size:11px;color:#5E6966">{{ t.durLabel }}</span></div>
+  <div style="width:4px;align-self:stretch;border-radius:2px;background:{{ t.priC }};grid-row:{{ t.spanRow }}"></div>
+  <button onClick="{{ t.open }}" style="border:none;background:none;padding:0;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:5px;min-width:0;font-family:inherit">
+    <span style="font-size:15px;font-weight:500;text-decoration:{{ t.deco }};color:{{ t.titleC }};text-wrap:pretty">{{ t.title }}</span>
+    <span style="display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-size:12px;color:#5E6966">
+      <span style="background:#F0EDE6;color:#3E4A48;padding:1px 8px;border-radius:5px">{{ t.type }}</span>
+      <span style="color:{{ t.priC }};font-weight:600">{{ t.priLabel }}</span>
+      <sc-if value="{{ t.hasRepeat }}"><span>↻ {{ t.repeatLabel }}</span></sc-if>
+      <sc-if value="{{ t.showAssignee }}"><span>{{ t.assigneeName }}</span></sc-if>
+      <sc-if value="{{ t.hasFlag }}"><span style="color:{{ t.flagC }};background:{{ t.flagBg }};padding:1px 8px;border-radius:99px;font-weight:600">{{ t.flag }}</span></sc-if>
+      <sc-if value="{{ t.hasNote }}"><span>· มีบันทึก</span></sc-if>
+    </span>
+  </button>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:{{ t.actJust }};grid-column:{{ t.actCol }}">
+    <span style="font-size:12px;padding:3px 10px;border-radius:99px;background:{{ t.statusBg }};color:{{ t.statusC }};white-space:nowrap">{{ t.statusG }} {{ t.statusLabel }}</span>
+    <sc-if value="{{ t.hasNext }}"><button onClick="{{ t.onNext }}" style="border:1px solid #1F5E5B;background:{{ t.nextBg }};color:{{ t.nextC }};border-radius:8px;padding:5px 12px;font-size:13px;cursor:pointer;white-space:nowrap;font-family:inherit">{{ t.nextLabel }}</button></sc-if>
+  </div>
+</div></sc-for>
+              <sc-if value="{{ selDayEmpty }}"><div style="font-size:13px;color:#5E6966;padding:8px 0">ไม่มีงานในวันนี้</div></sc-if>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isTeam }}">
+        <div style="display:flex;flex-direction:column;gap:18px;max-width:1280px">
+          <div><div style="font-size:13px;color:#5E6966">{{ todayLabel }}</div><h1 style="margin:4px 0 0;font-size:24px;font-weight:600">ภาพรวมทีม</h1><div style="font-size:14px;color:#5E6966;margin-top:2px">ดูได้อย่างเดียว · การแก้ไขตารางผู้บริหารทำผ่านเลขานุการ</div></div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">
+            <sc-for list="{{ teamKpis }}" as="s" hint-placeholder-count="4"><div style="background:#fff;border:1px solid #E4E0D6;border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;color:#5E6966">{{ s.label }}</span><span style="font-size:30px;font-weight:500;font-family:'IBM Plex Mono';color:{{ s.c }};line-height:1.1">{{ s.value }}</span></div></sc-for>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px">
+            <sc-for list="{{ team }}" as="m" hint-placeholder-count="4">
+              <div style="background:#fff;border:1px solid #E4E0D6;border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;align-items:center;gap:10px"><span style="width:38px;height:38px;border-radius:50%;background:#16302E;color:#E7EFEC;display:grid;place-items:center;font-size:13px;font-weight:600;flex:none">{{ m.short }}</span><span style="display:flex;flex-direction:column;min-width:0"><span style="font-size:14px;font-weight:600">{{ m.name }}</span><span style="font-size:12px;color:#5E6966">{{ m.role }}</span></span></div>
+                <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+                  <div style="display:flex;flex-direction:column"><span style="font-size:11px;color:#5E6966">วันนี้</span><span style="font-family:'IBM Plex Mono';font-size:18px">{{ m.total }}</span></div>
+                  <div style="display:flex;flex-direction:column"><span style="font-size:11px;color:#5E6966">เสร็จ</span><span style="font-family:'IBM Plex Mono';font-size:18px">{{ m.done }}</span></div>
+                  <div style="display:flex;flex-direction:column"><span style="font-size:11px;color:#5E6966">ค้าง</span><span style="font-family:'IBM Plex Mono';font-size:18px;color:{{ m.odC }}">{{ m.overdue }}</span></div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:5px"><div style="display:flex;justify-content:space-between;font-size:12px;color:#5E6966"><span>ความคืบหน้าวันนี้</span><span style="font-family:'IBM Plex Mono'">{{ m.pct }}%</span></div><div style="height:6px;background:#ECE9E1;border-radius:99px;overflow:hidden"><div style="height:100%;width:{{ m.pctW }};background:#1F5E5B;border-radius:99px"></div></div></div>
+                <div style="font-size:13px;color:#1C2826;background:#F8F7F3;border-radius:8px;padding:8px 10px">{{ m.curText }}</div>
+                <div style="font-size:12px;color:#5E6966">ตรงเวลา 7 วันล่าสุด <span style="font-family:'IBM Plex Mono';color:#1C2826">{{ m.rate7 }}</span></div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="background:#fff;border:1px solid #E4E0D6;border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px">
+            <div style="font-weight:600;font-size:15px">งานค้างเกินเวลาของทีม</div>
+            <sc-for list="{{ teamOverdue }}" as="t"><div style="display:grid;grid-template-columns:{{ t.rowCols }};gap:8px 14px;align-items:center;padding:12px 14px;border-radius:10px;background:{{ t.rowBg }};border:1px solid #E4E0D6;font-family:'IBM Plex Sans Thai',sans-serif">
+  <div style="font-family:'IBM Plex Mono';font-size:14px;color:#1C2826;display:flex;flex-direction:column;grid-row:{{ t.spanRow }};align-self:start"><span>{{ t.start }}</span><span style="font-size:11px;color:#5E6966">{{ t.durLabel }}</span></div>
+  <div style="width:4px;align-self:stretch;border-radius:2px;background:{{ t.priC }};grid-row:{{ t.spanRow }}"></div>
+  <button onClick="{{ t.open }}" style="border:none;background:none;padding:0;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:5px;min-width:0;font-family:inherit">
+    <span style="font-size:15px;font-weight:500;text-decoration:{{ t.deco }};color:{{ t.titleC }};text-wrap:pretty">{{ t.title }}</span>
+    <span style="display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-size:12px;color:#5E6966">
+      <span style="background:#F0EDE6;color:#3E4A48;padding:1px 8px;border-radius:5px">{{ t.type }}</span>
+      <span style="color:{{ t.priC }};font-weight:600">{{ t.priLabel }}</span>
+      <sc-if value="{{ t.hasRepeat }}"><span>↻ {{ t.repeatLabel }}</span></sc-if>
+      <sc-if value="{{ t.showAssignee }}"><span>{{ t.assigneeName }}</span></sc-if>
+      <sc-if value="{{ t.hasFlag }}"><span style="color:{{ t.flagC }};background:{{ t.flagBg }};padding:1px 8px;border-radius:99px;font-weight:600">{{ t.flag }}</span></sc-if>
+      <sc-if value="{{ t.hasNote }}"><span>· มีบันทึก</span></sc-if>
+    </span>
+  </button>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:{{ t.actJust }};grid-column:{{ t.actCol }}">
+    <span style="font-size:12px;padding:3px 10px;border-radius:99px;background:{{ t.statusBg }};color:{{ t.statusC }};white-space:nowrap">{{ t.statusG }} {{ t.statusLabel }}</span>
+    <sc-if value="{{ t.hasNext }}"><button onClick="{{ t.onNext }}" style="border:1px solid #1F5E5B;background:{{ t.nextBg }};color:{{ t.nextC }};border-radius:8px;padding:5px 12px;font-size:13px;cursor:pointer;white-space:nowrap;font-family:inherit">{{ t.nextLabel }}</button></sc-if>
+  </div>
+</div></sc-for>
+            <sc-if value="{{ teamOverdueEmpty }}"><div style="font-size:13px;color:#5E6966;padding:8px 0">ไม่มีงานค้าง</div></sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isReport }}">
+        <div data-print-auto="1" style="display:flex;flex-direction:column;gap:16px;max-width:1100px">
+          <div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap">
+            <div style="margin-right:auto"><div style="font-size:13px;color:#5E6966">{{ rWho }}</div><h1 style="margin:4px 0 0;font-size:24px;font-weight:600">รายงานสรุปงาน</h1><div style="font-size:14px;color:#5E6966;margin-top:2px">{{ rPeriod }}</div></div>
+            <div data-noprint="1" style="display:flex;background:#ECE9E1;border-radius:9px;padding:3px;gap:2px"><sc-for list="{{ rRanges }}" as="o"><button onClick="{{ o.onClick }}" style="border:none;border-radius:7px;padding:6px 12px;font-size:13px;cursor:pointer;background:{{ o.bg }};color:{{ o.c }};box-shadow:{{ o.sh }}">{{ o.label }}</button></sc-for></div>
+            <button data-noprint="1" onClick="{{ exportPdf }}" style="height:36px;border:none;border-radius:9px;background:#1F5E5B;color:#fff;padding:0 14px;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11"></path></svg>Export PDF</button>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">
+            <sc-for list="{{ rKpis }}" as="s" hint-placeholder-count="5"><div style="background:#fff;border:1px solid #E4E0D6;border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;color:#5E6966">{{ s.label }}</span><span style="font-size:28px;font-weight:500;font-family:'IBM Plex Mono';color:{{ s.c }};line-height:1.1">{{ s.value }}</span></div></sc-for>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px">
+            <div style="background:#fff;border:1px solid #E4E0D6;border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px">
+              <div style="font-weight:600;font-size:15px">แยกตามประเภทงาน</div>
+              <sc-for list="{{ rByType }}" as="r"><div style="display:grid;grid-template-columns:96px minmax(0,1fr) 88px;gap:10px;align-items:center;font-size:13px"><span>{{ r.label }}</span><div style="height:10px;background:#ECE9E1;border-radius:99px;overflow:hidden;display:flex"><div style="width:{{ r.doneW }};background:#1F5E5B"></div><div style="width:{{ r.lateW }};background:#D97A5E"></div></div><span style="font-family:'IBM Plex Mono';font-size:12px;color:#5E6966;text-align:right">{{ r.done }}/{{ r.total }} · {{ r.pct }}%</span></div></sc-for>
+            </div>
+            <sc-if value="{{ hasByPerson }}">
+              <div style="background:#fff;border:1px solid #E4E0D6;border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px">
+                <div style="font-weight:600;font-size:15px">แยกตามผู้รับผิดชอบ</div>
+                <sc-for list="{{ rByPerson }}" as="r"><div style="display:grid;grid-template-columns:120px minmax(0,1fr) 88px;gap:10px;align-items:center;font-size:13px"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.label }}</span><div style="height:10px;background:#ECE9E1;border-radius:99px;overflow:hidden;display:flex"><div style="width:{{ r.doneW }};background:#1F5E5B"></div><div style="width:{{ r.lateW }};background:#D97A5E"></div></div><span style="font-family:'IBM Plex Mono';font-size:12px;color:#5E6966;text-align:right">{{ r.done }}/{{ r.total }} · {{ r.pct }}%</span></div></sc-for>
+              </div>
+            </sc-if>
+          </div>
+          <div style="background:#fff;border:1px solid #E4E0D6;border-radius:12px;overflow:auto">
+            <div style="padding:14px 16px 6px;font-weight:600;font-size:15px">บันทึกงานล่าสุด</div>
+            <div style="min-width:760px">
+              <div style="display:grid;grid-template-columns:88px minmax(0,2fr) 90px 70px 96px 104px minmax(0,1.4fr);gap:10px;padding:8px 16px;font-size:12px;color:#5E6966;border-bottom:1px solid #E4E0D6"><span>วันที่</span><span>งาน</span><span>ประเภท</span><span>สำคัญ</span><span>สถานะ</span><span>เริ่ม–เสร็จ</span><span>หมายเหตุ / ผลลัพธ์</span></div>
+              <sc-for list="{{ rRows }}" as="r"><div style="display:grid;grid-template-columns:88px minmax(0,2fr) 90px 70px 96px 104px minmax(0,1.4fr);gap:10px;padding:9px 16px;font-size:13px;border-bottom:1px solid #F0EDE6;align-items:center"><span style="font-family:'IBM Plex Mono';font-size:12px">{{ r.dateS }}</span><span style="display:flex;flex-direction:column;min-width:0"><span>{{ r.title }}</span><span style="font-size:11px;color:#5E6966">{{ r.assigneeName }}</span></span><span>{{ r.type }}</span><span style="color:{{ r.priC }};font-weight:600">{{ r.priLabel }}</span><span style="font-size:12px;padding:2px 8px;border-radius:99px;background:{{ r.statusBg }};color:{{ r.statusC }};justify-self:start;white-space:nowrap">{{ r.statusLabel }}</span><span style="font-family:'IBM Plex Mono';font-size:12px;color:{{ r.timeC }}">{{ r.times }}</span><span style="font-size:12px;color:#3E4A48">{{ r.noteS }}</span></div></sc-for>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isUsers }}">
+        <div style="display:flex;flex-direction:column;gap:16px;max-width:1180px">
+          <div><h1 style="margin:0;font-size:24px;font-weight:600">จัดการผู้ใช้</h1><div style="font-size:14px;color:#5E6966;margin-top:4px;text-wrap:pretty">กำหนดบทบาทให้แต่ละบัญชี เมื่อผู้ใช้เข้าสู่ระบบ ระบบจะแสดงหน้าจอและสิทธิ์ตามบทบาทนั้นโดยอัตโนมัติ</div></div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px">
+            <sc-for list="{{ userKpis }}" as="k" hint-placeholder-count="5"><div style="background:#fff;border:1px solid #E4E0D6;border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:4px"><span style="font-size:13px;color:#5E6966">{{ k.label }}</span><span style="font-size:28px;font-family:'IBM Plex Mono';font-weight:500">{{ k.value }}</span></div></sc-for>
+          </div>
+          <div style="background:#fff;border:1px solid #E4E0D6;border-radius:12px;overflow:auto">
+            <div style="min-width:820px">
+              <div style="display:grid;grid-template-columns:minmax(0,1.6fr) 110px 140px minmax(0,1.3fr) 80px 130px;gap:12px;padding:10px 16px;font-size:12px;color:#5E6966;border-bottom:1px solid #E4E0D6"><span>ผู้ใช้</span><span>ชื่อผู้ใช้</span><span>บทบาท</span><span>ผู้บริหารที่ดูแล</span><span>สถานะ</span><span></span></div>
+              <sc-for list="{{ usersRows }}" as="r">
+                <div style="display:grid;grid-template-columns:minmax(0,1.6fr) 110px 140px minmax(0,1.3fr) 80px 130px;gap:12px;padding:10px 16px;border-bottom:1px solid #F0EDE6;align-items:center;font-size:13px;opacity:{{ r.rowOp }}">
+                  <span style="display:flex;align-items:center;gap:10px;min-width:0"><span style="width:34px;height:34px;flex:none;border-radius:50%;background:#16302E;color:#E7EFEC;display:grid;place-items:center;font-size:12px;font-weight:600">{{ r.short }}</span><span style="display:flex;flex-direction:column;min-width:0"><span style="font-size:14px;font-weight:500">{{ r.name }}</span><span style="font-size:12px;color:#5E6966">{{ r.role }}</span></span></span>
+                  <span style="font-family:'IBM Plex Mono';font-size:12px">{{ r.username }}</span>
+                  <span style="display:flex"><span style="font-size:12px;padding:2px 9px;border-radius:99px;white-space:nowrap;background:{{ r.roleBg }};color:{{ r.roleC }}">{{ r.roleLabel }}</span></span>
+                  <span style="font-size:12px;color:#3E4A48">{{ r.managesText }}</span>
+                  <span style="display:flex"><span style="font-size:12px;padding:2px 9px;border-radius:99px;white-space:nowrap;background:{{ r.statusBg }};color:{{ r.statusC }}">{{ r.statusText }}</span></span>
+                  <span style="display:flex;gap:6px;justify-content:flex-end"><button onClick="{{ r.onEdit }}" style="border:1px solid #DDD8CC;background:#fff;border-radius:8px;padding:5px 12px;font-size:13px;cursor:pointer;white-space:nowrap">แก้ไข</button><sc-if value="{{ r.canToggle }}"><button onClick="{{ r.onToggle }}" style="border:none;background:none;color:#5E6966;font-size:13px;cursor:pointer;white-space:nowrap">{{ r.toggleLabel }}</button></sc-if></span>
+                </div>
+              </sc-for>
+              <sc-if value="{{ usersEmpty }}"><div style="padding:24px 16px;font-size:13px;color:#5E6966">ไม่พบผู้ใช้</div></sc-if>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #E4E0D6;border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px">
+            <div style="font-weight:600;font-size:15px">สิทธิ์ของแต่ละบทบาท</div>
+            <sc-for list="{{ roleDefs }}" as="d"><div style="display:grid;grid-template-columns:150px minmax(0,1fr);gap:12px;align-items:center;padding:6px 0;border-top:1px solid #F0EDE6"><span style="display:flex"><span style="font-size:12px;padding:2px 9px;border-radius:99px;white-space:nowrap;background:{{ d.bg }};color:{{ d.c }}">{{ d.label }}</span></span><span style="font-size:13px;color:#3E4A48">{{ d.desc }}</span></div></sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isAlerts }}">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;max-width:1180px;align-items:start">
+          <div style="background:#fff;border:1px solid #E4E0D6;border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:14px">
+            <div style="font-weight:600;font-size:15px">รูปแบบการแจ้งเตือน</div>
+            <sc-for list="{{ channelToggles }}" as="x">
+              <div style="display:flex;align-items:center;gap:12px"><div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;font-weight:500">{{ x.label }}</span><span style="font-size:12px;color:#5E6966">{{ x.desc }}</span></div><button onClick="{{ x.onClick }}" style="width:40px;height:24px;border-radius:99px;border:none;background:{{ x.trackBg }};cursor:pointer;padding:0;display:flex;align-items:center;flex:none"><span style="width:20px;height:20px;border-radius:50%;background:#fff;margin-left:{{ x.knobL }};box-shadow:0 1px 3px rgba(0,0,0,0.2)"></span></button></div>
+            </sc-for>
+            <div style="border-top:1px solid #F0EDE6;padding-top:14px;display:flex;flex-direction:column;gap:10px">
+              <span style="font-size:13px;color:#5E6966">เสียงแจ้งเตือน</span>
+              <div style="display:flex;gap:8px;flex-wrap:wrap"><sc-for list="{{ toneChips }}" as="c"><button onClick="{{ c.onClick }}" style="padding:7px 14px;border-radius:9px;border:1px solid {{ c.border }};background:{{ c.bg }};color:{{ c.c }};font-size:13px;cursor:pointer">{{ c.label }}</button></sc-for><button onClick="{{ testSound }}" style="padding:7px 14px;border-radius:9px;border:1px solid #DDD8CC;background:#F8F7F3;font-size:13px;cursor:pointer">▶ ฟังเสียง</button></div>
+              <div style="display:flex;align-items:center;gap:12px"><span style="font-size:13px;color:#5E6966;width:60px">ระดับเสียง</span><input type="range" min="0" max="100" value="{{ volume }}" onChange="{{ onVolume }}" style="flex:1"><span style="font-family:'IBM Plex Mono';font-size:13px;width:36px;text-align:right">{{ volume }}</span></div>
+            </div>
+            <button onClick="{{ testAlert }}" style="align-self:flex-start;padding:8px 14px;border-radius:9px;border:none;background:#1F5E5B;color:#fff;font-size:13px;cursor:pointer">ทดสอบการแจ้งเตือน</button>
+          </div>
+          <div style="background:#fff;border:1px solid #E4E0D6;border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:14px">
+            <div style="font-weight:600;font-size:15px">ความเข้มของการเตือนตามความสำคัญ</div>
+            <sc-for list="{{ intensityRows }}" as="r">
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <div style="display:flex;align-items:center;gap:8px"><span style="width:10px;height:10px;border-radius:3px;background:{{ r.c }}"></span><span style="font-size:14px;font-weight:500">{{ r.label }}</span></div>
+                <div style="display:flex;background:#ECE9E1;border-radius:9px;padding:3px;gap:2px"><sc-for list="{{ r.opts }}" as="o"><button onClick="{{ o.onClick }}" style="flex:1;border:none;border-radius:7px;padding:6px 8px;font-size:13px;cursor:pointer;background:{{ o.bg }};color:{{ o.c }};box-shadow:{{ o.sh }}">{{ o.label }}</button></sc-for></div>
+                <span style="font-size:12px;color:#5E6966">{{ r.desc }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="background:#fff;border:1px solid #E4E0D6;border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:14px">
+            <div style="font-weight:600;font-size:15px">เวลาและการเตือนซ้ำ</div>
+            <div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:13px;color:#5E6966">เตือนล่วงหน้า (ค่าเริ่มต้นของงานใหม่)</span><div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ offChips }}" as="c"><button onClick="{{ c.onClick }}" style="padding:5px 12px;border-radius:99px;border:1px solid {{ c.border }};background:{{ c.bg }};color:{{ c.c }};font-size:13px;cursor:pointer">{{ c.label }}</button></sc-for></div></div>
+            <sc-for list="{{ renagToggle }}" as="x">
+              <div style="display:flex;align-items:center;gap:12px"><div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;font-weight:500">{{ x.label }}</span><span style="font-size:12px;color:#5E6966">{{ x.desc }}</span></div><button onClick="{{ x.onClick }}" style="width:40px;height:24px;border-radius:99px;border:none;background:{{ x.trackBg }};cursor:pointer;padding:0;display:flex;align-items:center;flex:none"><span style="width:20px;height:20px;border-radius:50%;background:#fff;margin-left:{{ x.knobL }};box-shadow:0 1px 3px rgba(0,0,0,0.2)"></span></button></div>
+            </sc-for>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><span style="font-size:13px;color:#5E6966;margin-right:4px">เตือนซ้ำทุก</span><sc-for list="{{ everyChips }}" as="c"><button onClick="{{ c.onClick }}" style="padding:5px 12px;border-radius:99px;border:1px solid {{ c.border }};background:{{ c.bg }};color:{{ c.c }};font-size:13px;cursor:pointer">{{ c.label }}</button></sc-for></div>
+          </div>
+          <div style="background:#fff;border:1px solid #E4E0D6;border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:14px">
+            <div style="font-weight:600;font-size:15px">การแจ้งเตือนเชิงรุก</div>
+            <sc-for list="{{ proToggles }}" as="x">
+              <div style="display:flex;align-items:center;gap:12px"><div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;font-weight:500">{{ x.label }}</span><span style="font-size:12px;color:#5E6966">{{ x.desc }}</span></div><button onClick="{{ x.onClick }}" style="width:40px;height:24px;border-radius:99px;border:none;background:{{ x.trackBg }};cursor:pointer;padding:0;display:flex;align-items:center;flex:none"><span style="width:20px;height:20px;border-radius:50%;background:#fff;margin-left:{{ x.knobL }};box-shadow:0 1px 3px rgba(0,0,0,0.2)"></span></button></div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+
+    <sc-if value="{{ isMobile }}">
+      <nav data-noprint="1" style="display:grid;grid-template-columns:{{ tabCols }};border-top:1px solid #E4E0D6;background:#fff;padding:6px 4px 10px">
+        <sc-for list="{{ tabItems }}" as="n"><button onClick="{{ n.onClick }}" style="border:none;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;min-height:48px;cursor:pointer;color:{{ n.tc }};position:relative"><svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="{{ n.d }}"></path></svg><span style="font-size:11px">{{ n.short }}</span><sc-if value="{{ n.hasBadge }}"><span style="position:absolute;top:2px;left:calc(50% + 6px);min-width:16px;height:16px;border-radius:99px;background:#B83A32;color:#fff;font-size:10px;font-family:'IBM Plex Mono';display:grid;place-items:center;padding:0 3px">{{ n.badge }}</span></sc-if></button></sc-for>
+      </nav>
+    </sc-if>
+  </main>
+</div>
+
+<sc-if value="{{ hasSel }}">
+  <div data-noprint="1" onClick="{{ closeSel }}" style="position:fixed;inset:0;background:rgba(22,48,46,0.28);z-index:40"></div>
+  <aside data-noprint="1" style="position:fixed;top:0;right:0;bottom:0;width:min(460px,100%);background:#fff;z-index:41;overflow:auto;padding:22px;display:flex;flex-direction:column;gap:18px;box-shadow:-20px 0 40px rgba(22,48,46,0.14)">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <span style="background:#F0EDE6;color:#3E4A48;padding:2px 10px;border-radius:5px;font-size:12px">{{ sel.type }}</span>
+      <span style="background:{{ sel.priBg }};color:{{ sel.priC }};padding:2px 10px;border-radius:99px;font-size:12px;font-weight:600">ความสำคัญ{{ sel.priLabel }}</span>
+      <sc-if value="{{ sel.hasFlag }}"><span style="color:{{ sel.flagC }};background:{{ sel.flagBg }};padding:2px 10px;border-radius:99px;font-size:12px;font-weight:600">{{ sel.flag }}</span></sc-if>
+      <button onClick="{{ closeSel }}" style="margin-left:auto;border:none;background:#F3F1EB;width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:16px">✕</button>
+    </div>
+    <h2 style="margin:0;font-size:21px;font-weight:600;line-height:1.35;text-wrap:pretty">{{ sel.title }}</h2>
+    <div style="display:grid;grid-template-columns:104px minmax(0,1fr);gap:10px 12px;font-size:14px">
+      <span style="color:#5E6966">วันที่</span><span>{{ sel.dateLabel }}</span>
+      <span style="color:#5E6966">เวลา</span><span style="font-family:'IBM Plex Mono'">{{ sel.timeRange }} <span style="font-family:'IBM Plex Sans Thai';color:#5E6966">({{ sel.durLabel }})</span></span>
+      <span style="color:#5E6966">ผู้รับผิดชอบ</span><span>{{ sel.assigneeName }}</span>
+      <span style="color:#5E6966">สร้างโดย</span><span>{{ sel.creatorName }}</span>
+      <span style="color:#5E6966">รูปแบบงาน</span><span>{{ sel.repeatLabel }}</span>
+      <span style="color:#5E6966">เตือนล่วงหน้า</span><span>{{ sel.remText }}</span>
+      <span style="color:#5E6966">ช่องทาง</span><span>{{ sel.chanText }}</span>
+    </div>
+    <sc-if value="{{ sel.isMeeting }}">
+      <div style="display:flex;flex-direction:column;gap:8px;background:#EEF4F2;border-radius:10px;padding:12px 14px;font-size:13px">
+        <span style="font-size:13px;font-weight:600">การประชุม · {{ sel.modeLabel }}</span>
+        <sc-if value="{{ sel.hasLocation }}"><span><span style="color:#5E6966">สถานที่ </span>{{ sel.location }}</span></sc-if>
+        <span><span style="color:#5E6966">ผู้เข้าร่วม </span>{{ sel.attText }}</span>
+        <sc-if value="{{ sel.hasLink }}"><div style="display:flex;flex-direction:column;gap:6px;margin-top:2px"><a href="{{ sel.link }}" target="_blank" rel="noopener noreferrer" style="align-self:flex-start;display:flex;align-items:center;gap:6px;background:#2D8CFF;color:#fff;text-decoration:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:500" style-hover="background:#1F74E0;color:#fff"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="4" width="9" height="8" rx="1.5"></rect><path d="m10.5 7 4-2.5v7l-4-2.5"></path></svg>เข้าร่วมประชุมออนไลน์</a><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5E6966;overflow-wrap:anywhere">{{ sel.link }}</span></div></sc-if>
+      </div>
+    </sc-if>
+    <sc-if value="{{ sel.readOnly }}"><div style="font-size:13px;color:#5E6966;background:#F8F7F3;border-radius:9px;padding:10px 12px">{{ sel.roText }}</div></sc-if>
+    <sc-if value="{{ sel.canEdit }}">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <span style="font-size:13px;color:#5E6966">อัปเดตสถานะ</span>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">
+          <sc-for list="{{ statusOpts }}" as="o"><button onClick="{{ o.onClick }}" style="display:flex;align-items:center;gap:8px;padding:11px 12px;min-height:48px;border-radius:10px;border:1.5px solid {{ o.border }};background:{{ o.bg }};color:{{ o.c }};cursor:pointer;font-size:14px;text-align:left"><span style="font-size:13px;width:16px;text-align:center">{{ o.g }}</span><span style="display:flex;flex-direction:column"><span style="font-weight:500">{{ o.label }}</span><span style="font-size:11px;opacity:0.8">{{ o.en }}</span></span></button></sc-for>
+        </div>
+      </div>
+    </sc-if>
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;background:#F8F7F3;border-radius:10px;padding:12px">
+      <div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:11px;color:#5E6966">เริ่ม (อัตโนมัติ)</span><span style="font-family:'IBM Plex Mono';font-size:16px">{{ sel.startedText }}</span></div>
+      <div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:11px;color:#5E6966">เสร็จ (อัตโนมัติ)</span><span style="font-family:'IBM Plex Mono';font-size:16px">{{ sel.doneText }}</span></div>
+      <div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:11px;color:#5E6966">ใช้เวลา</span><span style="font-family:'IBM Plex Mono';font-size:16px">{{ sel.spentText }}</span></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="font-size:13px;color:#5E6966">หมายเหตุ / ผลลัพธ์งาน</span>
+      <textarea value="{{ sel.note }}" onChange="{{ onNote }}" readOnly="{{ sel.readOnly }}" rows="5" placeholder="บันทึกผลการดำเนินงาน เช่น ส่งเอกสารแล้ว เลขที่รับ 123/2569" style="border:1px solid #DDD8CC;border-radius:10px;padding:10px 12px;font-size:14px;resize:vertical;outline:none;color:#1C2826;background:{{ sel.noteBg }}"></textarea>
+    </div>
+    <sc-if value="{{ sel.canEdit }}"><button onClick="{{ onDelete }}" style="align-self:flex-start;border:none;background:none;color:#B83A32;font-size:13px;cursor:pointer;padding:0">ลบงานนี้</button></sc-if>
+  </aside>
+</sc-if>
+
+<sc-if value="{{ showCreate }}">
+  <div data-noprint="1" onClick="{{ closeCreate }}" style="position:fixed;inset:0;background:rgba(22,48,46,0.32);z-index:50"></div>
+  <div data-noprint="1" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(640px,calc(100% - 20px));max-height:calc(100% - 24px);overflow:auto;background:#fff;border-radius:16px;z-index:51;box-shadow:0 30px 60px rgba(22,48,46,0.25);display:flex;flex-direction:column">
+    <div style="display:flex;align-items:center;padding:16px 20px;border-bottom:1px solid #F0EDE6"><span style="font-size:18px;font-weight:600;margin-right:auto">สร้างงาน / กิจกรรมใหม่</span><button onClick="{{ closeCreate }}" style="border:none;background:#F3F1EB;width:36px;height:36px;border-radius:8px;cursor:pointer">✕</button></div>
+    <div style="padding:16px 20px;display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;color:#5E6966">ชื่องาน</span><input value="{{ form.title }}" onChange="{{ onFTitle }}" placeholder="เช่น ตรวจสอบเอกสารเบิกจ่าย" style="border:1px solid {{ formErrBorder }};border-radius:9px;padding:10px 12px;font-size:15px;outline:none;color:#1C2826"></div>
+      <sc-if value="{{ canAssign }}">
+        <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;color:#5E6966">สร้างในตารางของ</span><div style="display:flex;background:#ECE9E1;border-radius:9px;padding:3px;gap:2px"><sc-for list="{{ fUserChips }}" as="o"><button onClick="{{ o.onClick }}" style="flex:1;border:none;border-radius:7px;padding:8px;font-size:13px;cursor:pointer;background:{{ o.bg }};color:{{ o.c }};box-shadow:{{ o.sh }}">{{ o.label }}</button></sc-for></div><span style="font-size:12px;color:#5E6966">เลขานุการจัดการตารางผู้บริหารได้ ผู้ใช้อื่นสร้างได้เฉพาะตารางของตนเอง</span></div>
+      </sc-if>
+      <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;color:#5E6966">ประเภทงาน</span><div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ fTypeChips }}" as="c"><button onClick="{{ c.onClick }}" style="padding:6px 12px;border-radius:99px;border:1px solid {{ c.border }};background:{{ c.bg }};color:{{ c.c }};font-size:13px;cursor:pointer;white-space:nowrap;flex:none">{{ c.label }}</button></sc-for></div></div>
+      <sc-if value="{{ isMeeting }}">
+        <div style="display:flex;flex-direction:column;gap:12px;background:#EEF4F2;border-radius:12px;padding:14px">
+          <span style="font-size:14px;font-weight:600">รายละเอียดการประชุม</span>
+          <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;color:#5E6966">รูปแบบการประชุม</span><div style="display:flex;background:#DCE7E4;border-radius:9px;padding:3px;gap:2px"><sc-for list="{{ fModeChips }}" as="o"><button onClick="{{ o.onClick }}" style="flex:1;border:none;border-radius:7px;padding:8px 4px;font-size:13px;cursor:pointer;background:{{ o.bg }};color:{{ o.c }};box-shadow:{{ o.sh }};white-space:nowrap">{{ o.label }}</button></sc-for></div></div>
+          <sc-if value="{{ showLocation }}"><label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;color:#5E6966">สถานที่ / ห้องประชุม</span><input value="{{ form.location }}" onChange="{{ onFLocation }}" placeholder="เช่น ห้องประชุม 1 ชั้น 3" style="border:1px solid #DDD8CC;border-radius:9px;padding:10px 12px;font-size:14px;outline:none;color:#1C2826;background:#fff;width:100%"></label></sc-if>
+          <sc-if value="{{ showLink }}"><label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;color:#5E6966">ลิงก์ประชุมออนไลน์ (Zoom / Google Meet / Teams)</span><input type="url" value="{{ form.link }}" onChange="{{ onFLink }}" placeholder="https://zoom.us/j/..." style="border:1px solid #DDD8CC;border-radius:9px;padding:10px 12px;font-size:14px;outline:none;color:#1C2826;background:#fff;width:100%;font-family:'IBM Plex Mono',monospace;font-size:13px"><sc-if value="{{ linkWarn }}"><span style="font-size:12px;color:#B83A32">ลิงก์ควรขึ้นต้นด้วย https://</span></sc-if></label></sc-if>
+          <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;color:#5E6966">ผู้เข้าร่วมประชุม · {{ attCount }} คน</span>
+            <div style="position:relative">
+              <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;border:1px solid #DDD8CC;border-radius:9px;padding:6px 8px;background:#fff;min-height:46px">
+                <sc-for list="{{ attTokens }}" as="p"><span style="display:flex;align-items:center;gap:4px;background:{{ p.bg }};color:{{ p.c }};border-radius:99px;padding:4px 6px 4px 11px;font-size:13px;white-space:nowrap">{{ p.label }}<button onClick="{{ p.onRemove }}" title="นำออก" style="border:none;background:transparent;color:inherit;cursor:pointer;font-size:13px;line-height:1;width:20px;height:20px;border-radius:50%;padding:0" style-hover="background:rgba(0,0,0,0.08)">✕</button></span></sc-for>
+                <input value="{{ attQ }}" onChange="{{ onAttQ }}" onKeyDown="{{ onAttKey }}" onFocus="{{ onAttFocus }}" onBlur="{{ onAttBlur }}" placeholder="พิมพ์ชื่อผู้เข้าร่วม แล้วกด Enter" style="flex:1;min-width:150px;border:none;outline:none;font-size:14px;padding:5px 4px;background:transparent;color:#1C2826">
+              </div>
+              <sc-if value="{{ hasAttSuggest }}">
+                <div style="position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1px solid #E4E0D6;border-radius:10px;box-shadow:0 14px 30px rgba(22,48,46,0.16);max-height:220px;overflow:auto;z-index:5;padding:4px">
+                  <sc-for list="{{ attSuggest }}" as="o"><button onMouseDown="{{ o.onPick }}" style="display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:9px 10px;border:none;border-radius:7px;background:#fff;text-align:left;cursor:pointer;font-size:14px;color:#1C2826" style-hover="background:#F3F1EB"><span style="font-weight:{{ o.w }}">{{ o.label }}</span><span style="font-size:12px;color:#5E6966;white-space:nowrap">{{ o.sub }}</span></button></sc-for>
+                </div>
+              </sc-if>
+            </div>
+            <span style="font-size:12px;color:#5E6966">เลือกจากรายชื่อในระบบ หรือพิมพ์ชื่อใหม่ ชื่อที่เพิ่มจะถูกเก็บไว้ในรายการให้เลือกครั้งต่อไป</span>
+          </div>
+        </div>
+      </sc-if>
+      <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;color:#5E6966">ความสำคัญ</span><div style="display:flex;gap:6px"><sc-for list="{{ fPriChips }}" as="c"><button onClick="{{ c.onClick }}" style="flex:1;padding:9px 8px;border-radius:9px;border:1.5px solid {{ c.border }};background:{{ c.bg }};color:{{ c.c }};font-size:13px;font-weight:500;cursor:pointer">{{ c.label }}</button></sc-for></div></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px">
+        <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;color:#5E6966">วันที่</span><input type="date" value="{{ form.date }}" onChange="{{ onFDate }}" style="border:1px solid #DDD8CC;border-radius:9px;padding:9px 10px;font-size:14px"></div>
+        <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;color:#5E6966">เวลาเริ่ม</span><input type="time" value="{{ form.start }}" onChange="{{ onFStart }}" style="border:1px solid #DDD8CC;border-radius:9px;padding:9px 10px;font-size:14px"></div>
+        <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;color:#5E6966">ระยะเวลา</span><select value="{{ form.dur }}" onChange="{{ onFDur }}" style="border:1px solid #DDD8CC;border-radius:9px;padding:9px 10px;font-size:14px;background:#fff"><option value="15">15 นาที</option><option value="30">30 นาที</option><option value="45">45 นาที</option><option value="60">1 ชม.</option><option value="90">1 ชม. 30 น.</option><option value="120">2 ชม.</option><option value="180">3 ชม.</option></select></div>
+      </div>
+      <sc-if value="{{ hasSuggest }}"><div style="display:flex;align-items:center;gap:10px;background:#EEF4F2;border-radius:10px;padding:10px 12px;flex-wrap:wrap"><span style="font-size:11px;font-weight:600;color:#1F5E5B;background:#fff;border-radius:5px;padding:2px 7px">AI</span><span style="font-size:13px;color:#1C2826;flex:1;min-width:160px">{{ suggestText }}</span><button onClick="{{ applySuggest }}" style="border:1px solid #1F5E5B;background:#fff;color:#1F5E5B;border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer;white-space:nowrap">ใช้เวลานี้</button></div></sc-if>
+      <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;color:#5E6966">รูปแบบงาน</span><div style="display:flex;background:#ECE9E1;border-radius:9px;padding:3px;gap:2px"><sc-for list="{{ fRepChips }}" as="o"><button onClick="{{ o.onClick }}" style="flex:1;border:none;border-radius:7px;padding:8px 4px;font-size:13px;cursor:pointer;background:{{ o.bg }};color:{{ o.c }};box-shadow:{{ o.sh }}">{{ o.label }}</button></sc-for></div></div>
+      <div style="display:flex;flex-direction:column;gap:10px;background:#F8F7F3;border-radius:12px;padding:14px">
+        <span style="font-size:14px;font-weight:600">การแจ้งเตือนของงานนี้</span>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><span style="font-size:13px;color:#5E6966;width:72px">เตือนก่อน</span><sc-for list="{{ fRemChips }}" as="c"><button onClick="{{ c.onClick }}" style="padding:6px 12px;border-radius:99px;border:1px solid {{ c.border }};background:{{ c.bg }};color:{{ c.c }};font-size:13px;cursor:pointer;white-space:nowrap;flex:none">{{ c.label }}</button></sc-for></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><span style="font-size:13px;color:#5E6966;width:72px">ช่องทาง</span><sc-for list="{{ fChanChips }}" as="c"><button onClick="{{ c.onClick }}" style="padding:6px 12px;border-radius:99px;border:1px solid {{ c.border }};background:{{ c.bg }};color:{{ c.c }};font-size:13px;cursor:pointer;white-space:nowrap;flex:none">{{ c.label }}</button></sc-for></div>
+        <sc-for list="{{ fRenag }}" as="x"><div style="display:flex;align-items:center;gap:12px"><span style="flex:1;font-size:13px;color:#1C2826">{{ x.label }}</span><button onClick="{{ x.onClick }}" style="width:40px;height:24px;border-radius:99px;border:none;background:{{ x.trackBg }};cursor:pointer;padding:0;display:flex;align-items:center;flex:none"><span style="width:20px;height:20px;border-radius:50%;background:#fff;margin-left:{{ x.knobL }};box-shadow:0 1px 3px rgba(0,0,0,0.2)"></span></button></div></sc-for>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;padding:14px 20px;border-top:1px solid #F0EDE6">
+      <button onClick="{{ closeCreate }}" style="border:1px solid #DDD8CC;background:#fff;border-radius:9px;padding:10px 16px;font-size:14px;cursor:pointer">ยกเลิก</button>
+      <button onClick="{{ saveTask }}" style="border:none;background:#1F5E5B;color:#fff;border-radius:9px;padding:10px 18px;font-size:14px;font-weight:500;cursor:pointer">บันทึกงาน</button>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ showUserForm }}">
+  <div data-noprint="1" onClick="{{ closeUserForm }}" style="position:fixed;inset:0;background:rgba(22,48,46,0.32);z-index:50"></div>
+  <div data-noprint="1" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(560px,calc(100% - 20px));max-height:calc(100% - 24px);overflow:auto;background:#fff;border-radius:16px;z-index:51;box-shadow:0 30px 60px rgba(22,48,46,0.25);display:flex;flex-direction:column">
+    <div style="display:flex;align-items:center;padding:16px 20px;border-bottom:1px solid #F0EDE6"><span style="font-size:18px;font-weight:600;margin-right:auto">{{ uf.titleText }}</span><button onClick="{{ closeUserForm }}" style="border:none;background:#F3F1EB;width:36px;height:36px;border-radius:8px;cursor:pointer">✕</button></div>
+    <div style="padding:16px 20px;display:flex;flex-direction:column;gap:14px">
+      <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;color:#5E6966">ชื่อ-นามสกุล</span><input value="{{ uf.name }}" onChange="{{ onUfName }}" placeholder="เช่น คุณมานี รักงาน" style="height:42px;border:1px solid #DDD8CC;border-radius:9px;padding:0 12px;font-size:15px;outline:none;color:#1C2826;background:#fff;width:100%"></label>
+      <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;color:#5E6966">ตำแหน่ง</span><input value="{{ uf.role }}" onChange="{{ onUfTitle }}" placeholder="เช่น เลขานุการผู้อำนวยการ" style="height:42px;border:1px solid #DDD8CC;border-radius:9px;padding:0 12px;font-size:15px;outline:none;color:#1C2826;background:#fff;width:100%"></label>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
+        <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;color:#5E6966">ชื่อผู้ใช้ (สำหรับเข้าสู่ระบบ)</span><input value="{{ uf.username }}" onChange="{{ onUfUser }}" placeholder="เช่น manee" style="height:42px;border:1px solid #DDD8CC;border-radius:9px;padding:0 12px;font-size:15px;outline:none;color:#1C2826;background:#fff;width:100%;font-family:'IBM Plex Mono'"></label>
+        <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;color:#5E6966">รหัสผ่าน</span><input value="{{ uf.pw }}" onChange="{{ onUfPw }}" placeholder="{{ uf.pwPh }}" style="height:42px;border:1px solid #DDD8CC;border-radius:9px;padding:0 12px;font-size:15px;outline:none;color:#1C2826;background:#fff;width:100%"></label>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;color:#5E6966">บทบาท (Role)</span><div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ rkChips }}" as="c"><button onClick="{{ c.onClick }}" style="padding:7px 13px;border-radius:99px;border:1px solid {{ c.border }};background:{{ c.bg }};color:{{ c.c }};font-size:13px;cursor:pointer;white-space:nowrap;flex:none">{{ c.label }}</button></sc-for></div><span style="font-size:12px;color:#5E6966">{{ uf.rkDesc }}</span></div>
+      <sc-if value="{{ ufIsSec }}"><div style="display:flex;flex-direction:column;gap:6px;background:#F8F7F3;border-radius:10px;padding:12px"><span style="font-size:13px;font-weight:600">ผู้บริหารที่ดูแล</span><span style="font-size:12px;color:#5E6966">เลขาจะลงนัด แก้ไขตาราง และรับการแจ้งเตือนแทนผู้บริหารที่เลือกได้</span><div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ execChips }}" as="c"><button onClick="{{ c.onClick }}" style="padding:6px 12px;border-radius:99px;border:1px solid {{ c.border }};background:{{ c.bg }};color:{{ c.c }};font-size:13px;cursor:pointer;white-space:nowrap;flex:none">{{ c.label }}</button></sc-for></div><sc-if value="{{ noExecs }}"><span style="font-size:12px;color:#5E6966">ยังไม่มีบัญชีบทบาทผู้บริหาร</span></sc-if></div></sc-if>
+      <sc-for list="{{ ufActive }}" as="x"><div style="display:flex;align-items:center;gap:12px"><div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;font-weight:500">{{ x.label }}</span><span style="font-size:12px;color:#5E6966">{{ x.desc }}</span></div><button onClick="{{ x.onClick }}" style="width:40px;height:24px;border-radius:99px;border:none;background:{{ x.trackBg }};cursor:pointer;padding:0;display:flex;align-items:center;flex:none"><span style="width:20px;height:20px;border-radius:50%;background:#fff;margin-left:{{ x.knobL }};box-shadow:0 1px 3px rgba(0,0,0,0.2)"></span></button></div></sc-for>
+      <sc-if value="{{ ufHasErr }}"><div style="font-size:13px;color:#B83A32;background:#FAE8E5;border-radius:8px;padding:8px 12px">{{ ufErr }}</div></sc-if>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;padding:14px 20px;border-top:1px solid #F0EDE6">
+      <button onClick="{{ closeUserForm }}" style="border:1px solid #DDD8CC;background:#fff;border-radius:9px;padding:10px 16px;font-size:14px;cursor:pointer">ยกเลิก</button>
+      <button onClick="{{ saveUser }}" style="border:none;background:#1F5E5B;color:#fff;border-radius:9px;padding:10px 18px;font-size:14px;font-weight:500;cursor:pointer">บันทึก</button>
+    </div>
+  </div>
+</sc-if>
+
+<div data-noprint="1" style="position:fixed;bottom:{{ toastBottom }};right:14px;z-index:70;display:flex;flex-direction:column-reverse;gap:10px;width:min(340px,calc(100% - 28px));max-height:calc(100% - 120px);overflow:auto;pointer-events:none">
+  <sc-for list="{{ toasts }}" as="n">
+    <div style="pointer-events:auto;background:#fff;border:1px solid #E4E0D6;border-left:4px solid {{ n.c }};border-radius:10px;box-shadow:0 14px 34px rgba(22,48,46,0.2);padding:12px 14px;display:flex;flex-direction:column;gap:6px">
+      <div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;font-weight:600;color:{{ n.c }}">{{ n.tag }}</span><span style="font-size:12px;color:#8A8780;font-family:'IBM Plex Mono'">{{ n.time }}</span><button onClick="{{ n.close }}" style="margin-left:auto;border:none;background:none;cursor:pointer;color:#8A8780;font-size:14px">✕</button></div>
+      <div style="font-size:14px;font-weight:600;color:#1C2826">{{ n.task }}</div>
+      <div style="font-size:13px;color:#3E4A48">{{ n.title }} · {{ n.msg }}</div>
+      <sc-if value="{{ n.hasTask }}"><div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap"><button onClick="{{ n.start }}" style="border:none;background:#1F5E5B;color:#fff;border-radius:7px;padding:6px 10px;font-size:12px;cursor:pointer;white-space:nowrap">เริ่มงาน</button><button onClick="{{ n.snooze }}" style="border:1px solid #DDD8CC;background:#fff;border-radius:7px;padding:6px 10px;font-size:12px;cursor:pointer;white-space:nowrap">เลื่อน 5 นาที</button><button onClick="{{ n.open }}" style="border:none;background:none;color:#1F5E5B;font-size:12px;cursor:pointer;white-space:nowrap">รายละเอียด</button></div></sc-if>
+    </div>
+  </sc-for>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;preview&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;อัตโนมัติ&quot;,&quot;เดสก์ท็อป&quot;,&quot;มือถือ&quot;],&quot;default&quot;:&quot;อัตโนมัติ&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;ทดลองใช้งาน&quot;}}">
+const pad=n=>String(n).padStart(2,'0');
+const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const addDays=(d,n)=>{const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()+n);return x;};
+const parse=s=>{const[a,b,c]=s.split('-').map(Number);return new Date(a,b-1,c);};
+const toMin=s=>{const[h,m]=s.split(':').map(Number);return h*60+m;};
+const fmt=m=>pad(Math.floor(m/60)%24)+':'+pad(((m%60)+60)%60);
+const durTxt=m=>m>=60?(Math.floor(m/60)+' ชม.'+(m%60?' '+(m%60)+' น.':'')):m+' นาที';
+const offTxt=m=>m>=1440?(m/1440)+' วัน':m>=60?(m/60)+' ชม.':m+' นาที';
+const SEED_USERS=[{id:'sec',name:'คุณสุดา ใจดี',role:'เลขานุการ',short:'สด',defType:'เอกสาร',rk:'sec',username:'suda',pw:'1234',manages:['dir'],active:true},{id:'dir',name:'นพ.ประเสริฐ วงศ์ไทย',role:'ผู้อำนวยการ รพ.',short:'ปส',defType:'ประชุม',rk:'dir',username:'prasert',pw:'1234',active:true},{id:'nur',name:'พว.อรทัย สายบุญ',role:'พยาบาลวิชาชีพ',short:'อท',defType:'ดูแลผู้ป่วย',rk:'nur',username:'orathai',pw:'1234',active:true},{id:'gen',name:'คุณวิชัย แก้วมณี',role:'บุคคลทั่วไป',short:'วช',defType:'นัดหมาย',rk:'gen',username:'wichai',pw:'1234',active:true},{id:'admin',name:'ผู้ดูแลระบบ',role:'ฝ่ายเทคโนโลยีสารสนเทศ',short:'AD',defType:'เอกสาร',rk:'admin',username:'admin',pw:'1234',active:true}];
+let USERS=SEED_USERS;
+const ROLE_LABEL={sec:'เลขานุการ',dir:'ผู้บริหาร',nur:'พยาบาล / พนักงาน',gen:'บุคคลทั่วไป',admin:'ผู้ดูแลระบบ'};
+const ROLE_DESC={sec:'จัดการตารางของตนเองและตารางผู้บริหารที่ได้รับมอบหมาย · รับการแจ้งเตือนแทนผู้บริหาร',dir:'ดูภาพรวมทีมทั้งหมด · แก้ไขได้เฉพาะงานของตนเอง',nur:'เห็นและจัดการเฉพาะงานของตนเอง',gen:'เห็นและจัดการเฉพาะงานของตนเอง',admin:'สร้างบัญชี กำหนดบทบาท และกำหนดเลขาที่ดูแลผู้บริหาร · ไม่มีตารางงาน'};
+const RC={sec:['#1F5E5B','#DCEBE7'],dir:['#5B3E8C','#ECE6F4'],nur:['#9A6210','#FAF0DC'],gen:['#4E5957','#EDEBE5'],admin:['#B83A32','#FAE8E5']};
+const uName=id=>(USERS.find(u=>u.id===id)||USERS[0]).name;
+const SCOPES={sec:[['mine','งานของฉัน'],['dir','ตารางผู้บริหาร'],['all','ทั้งหมด']],dir:[['mine','งานของฉัน'],['all','ทั้งทีม']]};
+const TYPES=['เอกสาร','นัดหมาย','เคลม','ตรวจสอบ','ประชุม','ดูแลผู้ป่วย'];
+const PRI={high:{label:'สูง',en:'High',c:'#B83A32',bg:'#FAE8E5'},medium:{label:'กลาง',en:'Medium',c:'#9A6210',bg:'#FAF0DC'},low:{label:'ต่ำ',en:'Low',c:'#44706D',bg:'#E4EFED'}};
+const ST={pending:{label:'ยังไม่ทำ',en:'Pending',g:'○',c:'#4E5957',bg:'#EDEBE5'},inprogress:{label:'กำลังทำ',en:'In Progress',g:'▶',c:'#1F5E5B',bg:'#DCEBE7'},completed:{label:'เสร็จแล้ว',en:'Completed',g:'✓',c:'#2E7040',bg:'#E1F0E3'},cancelled:{label:'ยกเลิก',en:'Cancelled',g:'✕',c:'#7A7770',bg:'#F0EEE9'}};
+const REP={none:'ครั้งเดียว',daily:'รายวัน',weekly:'รายสัปดาห์',monthly:'รายเดือน'};
+const CHAN={sound:'เสียง',push:'Push',popup:'Popup'};
+const KIND={reminder:{tag:'ใกล้ถึงเวลา',c:'#1F5E5B'},high:{tag:'งานสำคัญยังไม่เริ่ม',c:'#B83A32'},renag:{tag:'เตือนซ้ำ',c:'#9A6210'},overdue:{tag:'งานค้างเกินเวลา',c:'#B83A32'},snooze:{tag:'เลื่อนเตือน',c:'#1F5E5B'}};
+const ICON={dashboard:'M2 2h5v6H2zM9 2h5v4H9zM2 10h5v4H2zM9 8h5v6H9z',list:'M5.5 4h8.5M5.5 8h8.5M5.5 12h8.5M2 4h.6M2 8h.6M2 12h.6',calendar:'M2 3h12v11H2zM2 6.5h12M5 1.5v3M11 1.5v3',team:'M6 7a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM1.5 14c0-2.5 2-4.5 4.5-4.5s4.5 2 4.5 4.5M11 2.5a2.2 2.2 0 0 1 0 4.4M12 9.6c1.5.5 2.5 2 2.5 4.4',report:'M3 1.5h7l3 3v10H3zM10 1.5v3h3M5.5 12v-2M8 12V7.5M10.5 12V9',alerts:'M4 11V7a4 4 0 0 1 8 0v4l1.2 1.5H2.8L4 11zM6.5 14a1.6 1.6 0 0 0 3 0'};
+ICON.users=ICON.team;
+const BASE=10*60+40,HOUR=56;
+const startToday=()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),d.getDate());};
+const rng=seed=>()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
+const POOL={sec:[['จัดทำหนังสือราชการ','เอกสาร'],['นัดหมายประชุม ผอ.','นัดหมาย'],['ยื่นเคลม สปสช.','เคลม'],['ตรวจทานรายงานการประชุม','ตรวจสอบ'],['ประสานงานหน่วยงานภายนอก','นัดหมาย']],dir:[['ประชุมหัวหน้ากลุ่มงาน','ประชุม'],['ลงนามเอกสารอนุมัติ','ตรวจสอบ'],['ตรวจเยี่ยมหอผู้ป่วย','ตรวจสอบ'],['พิจารณางบประมาณ','เอกสาร']],nur:[['ตรวจสัญญาณชีพผู้ป่วย','ดูแลผู้ป่วย'],['ให้ยาผู้ป่วยตามรอบ','ดูแลผู้ป่วย'],['ส่งเวร / Handover','ประชุม'],['ตรวจเช็ครถฉุกเฉิน','ตรวจสอบ'],['บันทึกทางการพยาบาล','เอกสาร']],gen:[['ชำระค่าสาธารณูปโภค','เอกสาร'],['นัดพบแพทย์','นัดหมาย'],['เคลมประกันสุขภาพ','เคลม'],['ตรวจสอบบัญชีครัวเรือน','ตรวจสอบ']]};
+const NOTES=['ดำเนินการเรียบร้อย','ส่งเอกสารแล้ว รอผลตอบกลับ','แจ้งผู้เกี่ยวข้องครบถ้วน','บันทึกในระบบแล้ว'];
+const genHist=today=>{const r=rng(42),out=[];for(let d=-35;d<=-2;d++){USERS.filter(u=>POOL[u.id]).forEach(u=>{const n=u.id==='gen'?1+Math.floor(r()*2):3+Math.floor(r()*3);for(let k=0;k<n;k++){const[title,type]=POOL[u.id][Math.floor(r()*POOL[u.id].length)];const st=480+Math.floor(r()*34)*15,dur=[15,30,30,45,60,90][Math.floor(r()*6)],x=r(),status=x<0.07?'cancelled':x<0.11?'pending':'completed',late=status==='completed'&&r()<0.18,s0=st+Math.floor(r()*10),done=s0+dur+(late?15+Math.floor(r()*50):-Math.floor(r()*8)),pr=r();
+  out.push({id:'h'+out.length,hist:true,title,type,priority:pr<0.35?'high':pr<0.75?'medium':'low',assignee:u.id,creator:u.id==='dir'&&r()<0.6?'sec':u.id,date:iso(addDays(today,d)),start:fmt(st),dur,status,startedAt:status==='completed'?fmt(s0):'',doneAt:status==='completed'?fmt(done):'',note:status==='completed'&&r()<0.35?NOTES[Math.floor(r()*NOTES.length)]:'',repeat:'none',reminders:[],channels:[],renag:false});}});}return out;};
+const seed=today=>{let i=0;const mk=o=>({id:'t'+(++i),repeat:'none',reminders:[30,5],renag:true,channels:['sound','popup','push'],note:'',startedAt:'',doneAt:'',status:'pending',...o,creator:o.creator||o.assignee,date:iso(addDays(today,o.d||0))});return [
+ mk({title:'จัดทำวาระการประชุมคณะกรรมการบริหาร',type:'เอกสาร',priority:'high',start:'08:30',dur:60,assignee:'sec',status:'completed',startedAt:'08:32',doneAt:'09:24',note:'ส่งวาระทางอีเมลถึงกรรมการครบ 9 ท่าน'}),
+ mk({title:'ยืนยันนัดหมาย ผอ. กับ สสจ.',type:'นัดหมาย',priority:'high',start:'10:00',dur:30,assignee:'sec'}),
+ mk({title:'ส่งหนังสือเวียนถึงหัวหน้าแผนก',type:'เอกสาร',priority:'medium',start:'10:45',dur:30,assignee:'sec',reminders:[5]}),
+ mk({title:'ยื่นเคลมประกันสังคม ผู้ป่วยใน',type:'เคลม',priority:'high',start:'14:00',dur:120,assignee:'sec',repeat:'monthly'}),
+ mk({title:'สรุปรายงานประจำสัปดาห์เสนอ ผอ.',type:'เอกสาร',priority:'medium',start:'16:15',dur:45,assignee:'sec',repeat:'weekly'}),
+ mk({title:'เคลม พ.ร.บ. ผู้ป่วยอุบัติเหตุ',type:'เคลม',priority:'high',start:'13:00',dur:60,assignee:'sec',d:-1}),
+ mk({title:'เตรียมเอกสารตรวจประเมิน HA',type:'เอกสาร',priority:'high',start:'10:00',dur:90,assignee:'sec',d:-1,status:'completed',startedAt:'10:05',doneAt:'12:10'}),
+ mk({title:'จองห้องประชุมใหญ่ งานวันพยาบาล',type:'นัดหมาย',priority:'low',start:'09:00',dur:15,assignee:'sec',d:2}),
+ mk({title:'ลงนามอนุมัติงบจัดซื้อครุภัณฑ์',type:'ตรวจสอบ',priority:'high',start:'09:00',dur:30,assignee:'dir',creator:'sec',status:'inprogress',startedAt:'09:10'}),
+ mk({title:'ตรวจเยี่ยมหอผู้ป่วยใน',type:'ตรวจสอบ',priority:'medium',start:'10:30',dur:60,assignee:'dir',creator:'sec',repeat:'weekly',status:'inprogress',startedAt:'10:31'}),
+ mk({title:'ประชุมคณะกรรมการบริหาร รพ.',type:'ประชุม',priority:'high',start:'13:00',dur:90,assignee:'dir',creator:'sec',mode:'hybrid',location:'ห้องประชุมใหญ่ ชั้น 5',link:'https://zoom.us/j/81234567890',attendees:['sec','nur'],ext:'ผู้แทน สสจ.'}),
+ mk({title:'ประชุมเขตสุขภาพ',type:'ประชุม',priority:'high',start:'09:30',dur:180,assignee:'dir',creator:'sec',d:2,reminders:[1440,30]}),
+ mk({title:'พบผู้แทนบริษัทเวชภัณฑ์',type:'นัดหมาย',priority:'low',start:'15:00',dur:30,assignee:'dir',creator:'sec',d:1}),
+ mk({title:'ตรวจสัญญาณชีพผู้ป่วยวอร์ด 5',type:'ดูแลผู้ป่วย',priority:'high',start:'08:00',dur:60,assignee:'nur',repeat:'daily',status:'completed',startedAt:'08:00',doneAt:'08:55'}),
+ mk({title:'ตรวจเช็ครถฉุกเฉิน (Emergency cart)',type:'ตรวจสอบ',priority:'high',start:'11:00',dur:30,assignee:'nur',repeat:'daily'}),
+ mk({title:'ให้ยาผู้ป่วยรอบเที่ยง',type:'ดูแลผู้ป่วย',priority:'high',start:'12:00',dur:45,assignee:'nur',repeat:'daily',reminders:[15,5]}),
+ mk({title:'ส่งเวร / Handover',type:'ประชุม',priority:'medium',start:'15:30',dur:30,assignee:'nur',repeat:'daily'}),
+ mk({title:'บันทึกทางการพยาบาลเวรเช้า',type:'เอกสาร',priority:'medium',start:'09:30',dur:45,assignee:'nur',d:-1}),
+ mk({title:'อบรม CPR ประจำปี',type:'ประชุม',priority:'medium',start:'13:00',dur:120,assignee:'nur',d:1,reminders:[1440,30]}),
+ mk({title:'ตรวจสอบใบแจ้งหนี้ค่าไฟ',type:'ตรวจสอบ',priority:'low',start:'16:00',dur:30,assignee:'gen',repeat:'monthly'}),
+ mk({title:'ชำระค่าประกันรถยนต์',type:'เอกสาร',priority:'low',start:'12:00',dur:15,assignee:'gen',status:'cancelled'}),
+ mk({title:'ส่งเอกสารเคลมประกันสุขภาพ',type:'เคลม',priority:'medium',start:'10:00',dur:30,assignee:'gen'}),
+ mk({title:'นัดตรวจสุขภาพประจำปี',type:'นัดหมาย',priority:'medium',start:'09:00',dur:60,assignee:'gen',d:1,reminders:[1440,60]}),
+];};
+
+class Component extends DCLogic {
+  today=startToday(); t0=Date.now();
+  state={attQ:'',attOpen:false,attHistory:['ผู้แทน สสจ.','หัวหน้ากลุ่มงานการพยาบาล','ทีมบริษัท ABC','คณะกรรมการ HA'],accounts:SEED_USERS,authUid:null,login:{u:'',p:'',err:''},userForm:null,view:'dashboard',scope:'mine',tasks:seed(this.today),history:genHist(this.today),q:'',fStatus:'all',fPri:'all',fType:'all',fDate:'all',fDateVal:'',sel:null,showCreate:false,form:null,formErr:false,toasts:[],log:[],showLog:false,unread:0,fired:{},snooze:{},weekOff:0,monthOff:0,calMode:null,selDay:null,rRange:7,vw:typeof window!=='undefined'?window.innerWidth:1200,
+    settings:{sound:true,push:true,popup:true,tone:'chime',volume:70,intensity:{high:'urgent',medium:'normal',low:'quiet'},offsets:[30,5],renag:true,renagEvery:10,overdue:true,highNotStarted:true,ai:true}};
+  componentDidMount(){this.iv=setInterval(()=>this.tick(),15000);this.to=setTimeout(()=>this.tick(),1500);this.onR=()=>{this.setState({vw:document.documentElement.clientWidth||window.innerWidth});};this.onR();requestAnimationFrame(this.onR);this.t2=setTimeout(this.onR,300);window.addEventListener('resize',this.onR);if(window.ResizeObserver){this.ro=new ResizeObserver(this.onR);this.ro.observe(document.documentElement);}}
+  componentWillUnmount(){clearInterval(this.iv);clearTimeout(this.to);window.removeEventListener('resize',this.onR);if(this.ro)this.ro.disconnect();}
+  uid(){return this.state.authUid||'sec';}
+  rk(id){return (USERS.find(u=>u.id===(id||this.uid()))||{}).rk;}
+  mg(id){const u=USERS.find(x=>x.id===id);return u&&u.rk==='sec'?(u.manages||[]).filter(e=>USERS.some(x=>x.id===e&&x.rk==='dir')):[];}
+  vis(id){const r=this.rk(id);return r==='dir'?USERS.filter(u=>u.rk!=='admin').map(u=>u.id):r==='sec'?[id,...this.mg(id)]:[id];}
+  doLogin(){const L=this.state.login,ux=L.u.trim().toLowerCase(),a=this.state.accounts.find(x=>x.username.toLowerCase()===ux||x.username.toLowerCase()===ux.split('@')[0]);if(!a||a.pw!==L.p){this.setState({login:{...L,err:'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง'}});return;}if(a.active===false){this.setState({login:{...L,err:'บัญชีนี้ถูกระงับ กรุณาติดต่อผู้ดูแลระบบ'}});return;}this.setState({authUid:a.id,view:a.rk==='admin'?'users':'dashboard',scope:'mine',sel:null,toasts:[],log:[],unread:0,fired:{},q:'',login:{u:'',p:'',err:'',remember:L.remember}},()=>setTimeout(()=>this.tick(),800));}
+  logout(){this.setState({authUid:null,toasts:[],showLog:false,sel:null,showCreate:false,userForm:null,log:[],unread:0,q:''});}
+  openUserForm(id){const u=id&&this.state.accounts.find(a=>a.id===id);this.setState({userForm:u?{id:u.id,name:u.name,role:u.role,username:u.username,pw:'',rk:u.rk,manages:[...(u.manages||[])],active:u.active!==false,err:''}:{id:null,name:'',role:'',username:'',pw:'',rk:'nur',manages:[],active:true,err:''}});}
+  setUF(p){this.setState(s=>({userForm:{...s.userForm,...p,err:''}}));}
+  saveUser(){const f=this.state.userForm,acc=this.state.accounts;const err=!f.name.trim()?'กรุณาใส่ชื่อ-นามสกุล':!f.username.trim()?'กรุณาใส่ชื่อผู้ใช้':acc.some(a=>a.username.toLowerCase()===f.username.trim().toLowerCase()&&a.id!==f.id)?'ชื่อผู้ใช้นี้ถูกใช้แล้ว':(!f.id&&!f.pw)?'กรุณาตั้งรหัสผ่านเริ่มต้น':'';if(err){this.setState({userForm:{...f,err}});return;}
+    const short=f.name.replace(/^(นพ\.|พญ\.|พว\.|ดร\.|คุณ|นางสาว|นาย|นาง)\s*/,'').trim().slice(0,2);
+    const rec={name:f.name.trim(),role:f.role.trim()||ROLE_LABEL[f.rk],username:f.username.trim(),rk:f.rk,manages:f.rk==='sec'?f.manages:[],active:f.active,short,defType:f.rk==='nur'?'ดูแลผู้ป่วย':f.rk==='dir'?'ประชุม':'เอกสาร'};
+    this.setState(s=>({accounts:f.id?s.accounts.map(a=>a.id===f.id?{...a,...rec,pw:f.pw||a.pw}:a):[...s.accounts,{id:'u'+Date.now(),...rec,pw:f.pw}],userForm:null}),()=>this.info(f.id?'บันทึกการแก้ไขแล้ว':'เพิ่มผู้ใช้แล้ว',rec.name+' · '+ROLE_LABEL[rec.rk]));}
+  authVals(s,uid){
+    const L=s.login,q=s.q.trim().toLowerCase(),f=s.userForm,execs=s.accounts.filter(u=>u.rk==='dir'),cnt=k=>s.accounts.filter(u=>u.rk===k).length;
+    const rows=s.accounts.filter(u=>!q||(u.name+' '+u.username+' '+u.role+' '+ROLE_LABEL[u.rk]).toLowerCase().includes(q)).map(u=>{const on=u.active!==false;return {...u,roleLabel:ROLE_LABEL[u.rk],roleC:RC[u.rk][0],roleBg:RC[u.rk][1],managesText:u.rk==='sec'?((u.manages||[]).map(uName).join(', ')||'ยังไม่กำหนด'):'—',statusText:on?'ใช้งาน':'ระงับ',statusC:on?'#2E7040':'#7A7770',statusBg:on?'#E1F0E3':'#F0EEE9',toggleLabel:on?'ระงับ':'เปิดใช้',canToggle:u.id!==uid,rowOp:on?1:0.6,onEdit:()=>this.openUserForm(u.id),onToggle:()=>this.setState(st=>({accounts:st.accounts.map(a=>a.id===u.id?{...a,active:a.active===false}:a)}))};});
+    return {
+      loggedOut:!s.authUid,loginU:L.u,loginP:L.p,loginErr:L.err,hasLoginErr:!!L.err,
+      onLoginU:e=>this.setState({login:{...L,u:e.target.value,err:''}}),onLoginP:e=>this.setState({login:{...L,p:e.target.value,err:''}}),onLoginKey:e=>{if(e.key==='Enter')this.doLogin();},loginRemember:!!L.remember,onLoginRemember:e=>this.setState({login:{...L,remember:e.target.checked}}),onForgot:e=>{e.preventDefault();this.info('ลืมรหัสผ่าน?','กรุณาติดต่อผู้ดูแลระบบเพื่อรีเซ็ตรหัสผ่าน');},doLogin:()=>this.doLogin(),logout:()=>this.logout(),
+      demoAccounts:s.accounts.filter(u=>u.active!==false).map(u=>({name:u.name,username:u.username,roleLabel:ROLE_LABEL[u.rk],roleC:RC[u.rk][0],roleBg:RC[u.rk][1],onClick:()=>this.setState({login:{u:u.username,p:u.pw||'',err:''}})})),
+      usersRows:rows,usersEmpty:!rows.length,
+      userKpis:[['บัญชีทั้งหมด',s.accounts.length],['เลขานุการ',cnt('sec')],['ผู้บริหาร',cnt('dir')],['พยาบาล / พนักงาน',cnt('nur')],['บุคคลทั่วไป',cnt('gen')]].map(([label,value])=>({label,value})),
+      roleDefs:['sec','dir','nur','gen','admin'].map(k=>({label:ROLE_LABEL[k],desc:ROLE_DESC[k],c:RC[k][0],bg:RC[k][1]})),
+      showUserForm:!!f,uf:f?{...f,titleText:f.id?'แก้ไขผู้ใช้':'เพิ่มผู้ใช้ใหม่',pwPh:f.id?'เว้นว่างถ้าไม่เปลี่ยนรหัสผ่าน':'ตั้งรหัสผ่านเริ่มต้น',rkDesc:ROLE_DESC[f.rk]}:{},closeUserForm:()=>this.setState({userForm:null}),saveUser:()=>this.saveUser(),
+      onUfName:e=>this.setUF({name:e.target.value}),onUfTitle:e=>this.setUF({role:e.target.value}),onUfUser:e=>this.setUF({username:e.target.value}),onUfPw:e=>this.setUF({pw:e.target.value}),
+      rkChips:f?['sec','dir','nur','gen','admin'].map(k=>this.chip(ROLE_LABEL[k],f.rk===k,()=>this.setUF({rk:k}))):[],
+      ufIsSec:!!f&&f.rk==='sec',noExecs:!execs.length,execChips:f?execs.filter(e=>e.id!==f.id).map(e=>this.chip(e.name,(f.manages||[]).includes(e.id),()=>this.setUF({manages:(f.manages||[]).includes(e.id)?f.manages.filter(x=>x!==e.id):[...(f.manages||[]),e.id]}))):[],
+      ufActive:f?[this.tog('เปิดใช้งานบัญชี','ปิดเพื่อระงับการเข้าสู่ระบบชั่วคราว',f.active!==false,()=>this.setUF({active:f.active===false}))]:[],
+      ufHasErr:!!(f&&f.err),ufErr:f?f.err:'',
+    };
+  }
+  curW(){try{return document.documentElement.clientWidth||window.innerWidth||this.state.vw;}catch(e){return this.state.vw;}}
+  isMob(){const p=this.props.preview;return p==='มือถือ'||(p!=='เดสก์ท็อป'&&this.curW()<760);}
+  nowMin(){return BASE+Math.floor((Date.now()-this.t0)/60000);}
+  dd(date){return Math.round((parse(date)-this.today)/86400000);}
+  canEdit(t,uid){return !t.hist&&(t.assignee===uid||this.mg(uid).includes(t.assignee));}
+  tick(){
+    USERS=this.state.accounts;if(!this.state.authUid){this.forceUpdate();return;}
+    const s=this.state,now=this.nowMin(),set=s.settings,uid=this.uid(),fired={...s.fired},out=[];
+    const add=(k,t,kind,title,msg)=>{k=uid+':'+k;if(fired[k])return;fired[k]=1;out.push({t,kind,title,msg});};
+    const watch=[uid,...this.mg(uid)];
+    s.tasks.filter(t=>watch.includes(t.assignee)).forEach(t=>{
+      const dd=this.dd(t.date),st=toMin(t.start),en=st+t.dur,until=dd*1440+st-now,pre=t.assignee!==uid?'[ตารางผู้บริหาร] ':'';
+      if(t.status==='pending'){
+        const offs=[...t.reminders].sort((a,b)=>a-b),hit=offs.find(o=>until>0&&until<=o);
+        if(hit!==undefined){add(t.id+'-r'+hit,t,'reminder',pre+'อีก '+offTxt(until)+' ถึงเวลา',t.start+' · '+t.type);offs.filter(o=>o>hit).forEach(o=>fired[uid+':'+t.id+'-r'+o]=1);}
+        if(dd===0&&until<=0&&now<en){
+          if(t.priority==='high'&&set.highNotStarted)add(t.id+'-hns',t,'high',pre+'ถึงเวลาแล้วแต่ยังไม่เริ่ม','กำหนด '+t.start);
+          const k=Math.floor(-until/set.renagEvery);
+          if(t.renag&&set.renag&&k>=1)add(t.id+'-n'+k,t,'renag',pre+'ยังไม่ได้เริ่มงาน','เลยเวลาเริ่มมา '+(-until)+' นาที');
+        }
+      }
+      if((t.status==='pending'||t.status==='inprogress')&&set.overdue&&(dd<0||(dd===0&&now>en)))add(t.id+'-od',t,'overdue',pre+'เลยกำหนดเสร็จ',dd<0?'ค้างจากวันก่อน':'ควรเสร็จ '+fmt(en));
+      const sz=s.snooze[t.id];if(sz&&now>=sz&&t.status==='pending')add(t.id+'-s'+sz,t,'snooze','ครบเวลาที่เลื่อนไว้',t.start+' · '+t.type);
+    });
+    if(out.length)this.deliver(out,fired);else this.forceUpdate();
+  }
+  deliver(out,fired){
+    const s=this.state,set=s.settings,now=this.nowMin(),lvl=o=>set.intensity[o.t.priority]||'normal';
+    const items=out.map((o,i)=>({id:'n'+Date.now()+'-'+i,taskId:o.t.id,kind:o.kind,tag:KIND[o.kind].tag,c:KIND[o.kind].c,title:o.title,task:o.t.title,msg:o.msg,time:fmt(now),sticky:lvl(o)==='urgent'}));
+    const snd=out.filter(o=>lvl(o)!=='quiet'&&(o.t.channels||[]).includes('sound'));
+    if(set.sound&&snd.length){const u=snd.some(o=>lvl(o)==='urgent');this.play(set.tone,set.volume/100*(u?1:0.7),u?3:1);}
+    if(set.push&&typeof Notification!=='undefined'&&Notification.permission==='granted')out.forEach(o=>{if(lvl(o)!=='quiet'&&(o.t.channels||[]).includes('push')){try{new Notification(KIND[o.kind].tag+': '+o.t.title,{body:o.title+' · '+o.msg});}catch(e){}}});
+    const pops=set.popup?items.filter((it,i)=>(out[i].t.channels||['popup']).includes('popup')):[];
+    this.setState(st=>({fired:fired||st.fired,log:[...items,...st.log].slice(0,40),unread:st.unread+items.length,toasts:[...pops.slice(0,2),...st.toasts].slice(0,2)}));
+    pops.forEach(p=>setTimeout(()=>this.dismiss(p.id),p.sticky?30000:9000));
+  }
+  dismiss(id){this.setState(s=>({toasts:s.toasts.filter(t=>t.id!==id)}));}
+  info(title,msg){const it={id:'i'+Date.now(),tag:'ระบบ',c:'#1F5E5B',title:'',task:title,msg,time:fmt(this.nowMin()),noTask:true};this.setState(s=>({toasts:[it,...s.toasts].slice(0,2)}));setTimeout(()=>this.dismiss(it.id),4000);}
+  play(tone,vol,times=1){try{const AC=window.AudioContext||window.webkitAudioContext;this.ac=this.ac||new AC();const ctx=this.ac;if(ctx.state==='suspended')ctx.resume();
+    const notes=tone==='bell'?[[830,0,1.6],[1660,0,0.9],[2490,0,0.5]]:[[659.25,0,1],[987.77,0.16,1],[1318.5,0.32,1.2]];
+    for(let r=0;r<times;r++){const b=ctx.currentTime+0.03+r*(tone==='bell'?0.75:0.95);notes.forEach(([f,off,len])=>{const o=ctx.createOscillator(),g=ctx.createGain(),t=b+off;o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(Math.max(0.001,vol*0.35),t+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t+len);o.connect(g);g.connect(ctx.destination);o.start(t);o.stop(t+len+0.05);});}}catch(e){}}
+  setStatus(id,status){const now=fmt(this.nowMin());this.setState(s=>({tasks:s.tasks.map(t=>{if(t.id!==id)return t;const n={...t,status};if(status==='inprogress'){if(!t.startedAt)n.startedAt=now;n.doneAt='';}if(status==='completed'){if(!n.startedAt)n.startedAt=now;n.doneAt=now;}if(status==='pending'){n.startedAt='';n.doneAt='';}if(status==='cancelled')n.doneAt='';return n;})}));}
+  updTask(id,patch){this.setState(s=>({tasks:s.tasks.map(t=>t.id===id?{...t,...patch}:t)}));}
+  gaps(userId,date,now){const dd=this.dd(date);let cur=Math.max(480,dd===0?Math.ceil(now/15)*15:480);const busy=this.state.tasks.filter(t=>t.assignee===userId&&t.date===date&&t.status!=='cancelled').map(t=>[toMin(t.start),toMin(t.start)+t.dur]).sort((a,b)=>a[0]-b[0]);const g=[];busy.forEach(([a,b])=>{if(a>cur)g.push([cur,a]);cur=Math.max(cur,b);});if(cur<1080)g.push([cur,1080]);return g;}
+  dec(t,now,uid,mob,multi){
+    const dd=this.dd(t.date),st=toMin(t.start),en=st+t.dur,p=PRI[t.priority],S=ST[t.status];
+    const act=t.status==='pending'||t.status==='inprogress',overdue=act&&(dd<0||(dd===0&&now>en));
+    const notStarted=t.status==='pending'&&dd===0&&now>=st&&now<=en,until=dd*1440+st-now,soon=t.status==='pending'&&until>0&&until<=60;
+    const late=t.status==='completed'&&!!t.doneAt&&toMin(t.doneAt)>en;
+    let flag='',fc='',fb='';
+    if(overdue){flag=t.hist?'ไม่ได้ดำเนินการ':'เกินเวลา';fc='#B83A32';fb='#FAE8E5';}else if(notStarted){flag='ถึงเวลาแล้ว · ยังไม่เริ่ม';fc='#9A6210';fb='#FAF0DC';}else if(soon){flag='อีก '+until+' นาที';fc='#1F5E5B';fb='#DCEBE7';}else if(late){flag='เสร็จล่าช้า';fc='#9A6210';fb='#FAF0DC';}
+    const ce=this.canEdit(t,uid),nx=!ce?null:t.status==='pending'?['เริ่มงาน','inprogress']:t.status==='inprogress'?['เสร็จแล้ว','completed']:null,done=t.status==='completed'||t.status==='cancelled';
+    return {...t,dd,st,en,overdue,soon,late,notStarted,canEdit:ce,timeRange:t.start+'–'+fmt(en),durLabel:durTxt(t.dur),priLabel:p.label,priC:p.c,priBg:p.bg,statusLabel:S.label,statusG:S.g,statusC:S.c,statusBg:S.bg,hasRepeat:t.repeat!=='none',repeatLabel:t.repeat==='none'?'ครั้งเดียว':'วนซ้ำ'+REP[t.repeat],assigneeName:uName(t.assignee),showAssignee:t.assignee!==uid||!!multi,flag,hasFlag:!!flag,flagC:fc,flagBg:fb,hasNext:!!nx,nextLabel:nx?nx[0]:'',onNext:()=>nx&&this.setStatus(t.id,nx[1]),open:()=>this.setState({sel:t.id}),deco:done?'line-through':'none',titleC:done?'#8A8780':'#1C2826',nextBg:nx&&nx[1]==='completed'?'#1F5E5B':'#fff',nextC:nx&&nx[1]==='completed'?'#fff':'#1F5E5B',hasNote:!!t.note,rowBg:overdue&&!t.hist?'#FDF6F4':'#fff',
+      rowCols:mob?'46px 4px minmax(0,1fr)':'64px 4px minmax(0,1fr) auto',spanRow:mob?'span 2':'auto',actCol:mob?'3':'auto',actJust:mob?'flex-start':'flex-end'};
+  }
+  chip(label,on,onClick){return {label,onClick,bg:on?'#1F5E5B':'#fff',c:on?'#fff':'#1C2826',border:on?'#1F5E5B':'#D9D4C8'};}
+  seg(label,on,onClick){return {label,onClick,bg:on?'#fff':'transparent',c:on?'#1C2826':'#5E6966',sh:on?'0 1px 2px rgba(0,0,0,0.12)':'none'};}
+  tog(label,desc,on,onClick){return {label,desc,onClick,trackBg:on?'#1F5E5B':'#CFCAC0',knobL:on?'18px':'2px'};}
+  setS(patch){this.setState(s=>({settings:{...s.settings,...patch}}));}
+  setF(patch){this.setState(s=>({form:{...s.form,...patch},formErr:false}));}
+  openCreate(){const s=this.state,now=this.nowMin(),uid=this.uid(),u=USERS.find(x=>x.id===uid);if(this.rk(uid)==='admin'&&s.view==='users'){this.openUserForm(null);return;}const mgA=this.mg(uid),asg=s.scope==='dir'&&mgA[0]?mgA[0]:uid;this.setState({attQ:'',attOpen:false,showCreate:true,showLog:false,formErr:false,form:{title:'',type:asg!==uid?'ประชุม':(u.defType||'เอกสาร'),priority:'medium',date:iso(this.today),start:fmt(Math.ceil(now/15)*15+15),dur:30,repeat:'none',assignee:asg,reminders:[...s.settings.offsets],renag:true,channels:['sound','popup','push'],mode:'onsite',location:'',link:'',attendees:[],ext:''}});}
+  saveTask(){const f=this.state.form;if(!f.title.trim()){this.setState({formErr:true});return;}const t={...f,id:'t'+Date.now(),creator:this.uid(),title:f.title.trim(),dur:Number(f.dur),status:'pending',note:'',startedAt:'',doneAt:''};this.setState(s=>({tasks:[...s.tasks,t],showCreate:false}),()=>{this.info('สร้างงานแล้ว',(t.assignee!==this.uid()?'ในตารางผู้บริหาร · ':'')+t.start+' · '+REP[t.repeat]);this.tick();});}
+  extArr(f){return (f.ext||'').split(',').map(x=>x.trim()).filter(Boolean);}
+  addAtt(name){name=(name||'').trim();if(!name)return;const f=this.state.form,u=USERS.find(x=>x.name===name&&x.rk!=='admin');if(u){if(u.id!==f.assignee&&!(f.attendees||[]).includes(u.id))this.setF({attendees:[...(f.attendees||[]),u.id]});}else{const ex=this.extArr(f);if(!ex.includes(name))this.setF({ext:[...ex,name].join(', ')});this.setState(s=>({attHistory:s.attHistory.includes(name)?s.attHistory:[...s.attHistory,name]}));}this.setState({attQ:''});}
+  meetV(d){const MODE={"onsite":"ในสถานที่","online":"ออนไลน์","hybrid":"ผสม (Hybrid)"};const isM=d.type==='ประชุม';const att=[...(d.attendees||[]).map(uName),...((d.ext||'').split(',').map(x=>x.trim()).filter(Boolean))];return {isMeeting:isM,modeLabel:MODE[d.mode||'onsite'],hasLocation:isM&&d.mode!=='online'&&!!d.location,hasLink:isM&&d.mode!=='onsite'&&!!d.link,attText:att.length?att.join(', '):'ยังไม่ได้ระบุ'};}
+  renderVals(){
+    USERS=this.state.accounts;
+    const s=this.state,now=this.nowMin(),todayIso=iso(this.today),uid=this.uid(),user=USERS.find(u=>u.id===uid),set=s.settings,mob=this.isMob();
+    const rk=this.rk(uid),mgL=this.mg(uid),visL=this.vis(uid),scopeList=(SCOPES[rk]||[]).filter(x=>x[0]!=='dir'||mgL.length),scope=scopeList.some(x=>x[0]===s.scope)?s.scope:'mine';
+    const inScope=a=>scope==='mine'?a===uid:scope==='dir'?mgL.includes(a):visL.includes(a);
+    const multi=scope!=='mine';
+    const q=s.q.trim().toLowerCase(),mq=t=>!q||(t.title+' '+t.type+' '+uName(t.assignee)+' '+t.note).toLowerCase().includes(q);
+    const D=t=>this.dec(t,now,uid,mob,multi);
+    const all=s.tasks.filter(t=>(inScope(t.assignee)||(t.attendees||[]).includes(uid))&&mq(t)).map(D);
+    const histS=s.history.filter(t=>inScope(t.assignee)&&mq(t));
+    const todayT=all.filter(t=>t.dd===0).sort((a,b)=>a.st-b.st);
+    const todayAct=todayT.filter(t=>t.status!=='cancelled'),doneT=todayT.filter(t=>t.status==='completed');
+    const overdueT=all.filter(t=>t.overdue),soonT=all.filter(t=>t.soon);
+    let view=s.view;if(view==='team'&&rk!=='dir')view='dashboard';if(view==='users'&&rk!=='admin')view='dashboard';
+    const go=(v,extra={})=>()=>this.setState({view:v,showLog:false,...extra});
+    const pct=todayAct.length?Math.round(doneT.length/todayAct.length*100):0;
+    const stats=[
+      {label:'งานวันนี้',value:todayAct.length,sub:'เสร็จ '+doneT.length+' จาก '+todayAct.length,c:'#1F5E5B',onClick:go('list',{fStatus:'all',fDate:'today'})},
+      {label:'ใกล้ถึงเวลา',value:soonT.length,sub:'ภายใน 60 นาที',c:'#9A6210',onClick:go('list',{fStatus:'soon'})},
+      {label:'งานค้าง / เกินเวลา',value:overdueT.length,sub:'ค้างจากวันก่อน '+overdueT.filter(t=>t.dd<0).length,c:'#B83A32',onClick:go('list',{fStatus:'overdue'})},
+      {label:'เสร็จแล้ววันนี้',value:doneT.length,sub:'ล่าช้า '+doneT.filter(t=>t.late).length+' งาน',c:'#2E7040',onClick:go('list',{fStatus:'completed'})},
+    ];
+    const cnt=k=>todayT.filter(t=>t.status===k).length;
+    const breakdown=['completed','inprogress','pending','cancelled'].map(k=>({label:ST[k].label,count:cnt(k),c:k==='completed'?'#1F5E5B':k==='inprogress'?'#7FB3AB':k==='pending'?'#E1DCD0':'#B9B5AC'}));
+    const tot=todayT.length||1,a1=cnt('completed')/tot*360,a2=a1+cnt('inprogress')/tot*360,a3=a2+cnt('pending')/tot*360;
+    const ringBg=todayT.length?`conic-gradient(#1F5E5B 0 ${a1}deg,#7FB3AB ${a1}deg ${a2}deg,#E1DCD0 ${a2}deg ${a3}deg,#B9B5AC ${a3}deg 360deg)`:'#E1DCD0';
+    const isLate=t=>(t.status==='completed'&&t.doneAt&&toMin(t.doneAt)>toMin(t.start)+t.dur)||t.status==='pending'||t.status==='inprogress';
+    const scopedAll=[...s.history,...s.tasks].filter(t=>inScope(t.assignee));
+    const hist7=[...Array(7)].map((_,i)=>{const d=i-6;if(d===0)return [doneT.filter(t=>!t.late).length,doneT.filter(t=>t.late).length+todayT.filter(t=>t.overdue).length];const di=iso(addDays(this.today,d));const r=scopedAll.filter(t=>t.date===di&&t.status!=='cancelled');const l=r.filter(isLate).length;return [r.length-l,l];});
+    const mx=Math.max(...hist7.map(([d,l])=>d+l),1);
+    const week7=hist7.map(([d,l],i)=>{const day=addDays(this.today,i-6),isT=i===6;return {label:isT?'วันนี้':day.toLocaleDateString('th-TH',{weekday:'short'}),doneH:Math.round(d/mx*100)+'px',lateH:Math.round(l/mx*100)+'px',pctText:(d+l)?Math.round(d/(d+l)*100)+'%':'–',c:isT?'#1C2826':'#5E6966',w:isT?'600':'400'};});
+    const proactive=[];
+    [...overdueT].sort((a,b)=>(a.priority==='high'?0:1)-(b.priority==='high'?0:1)).slice(0,3).forEach(t=>proactive.push({tag:'งานค้างเกินเวลา',title:t.title,msg:'กำหนด '+t.timeRange+(t.dd<0?' (เมื่อวาน)':'')+(t.assignee!==uid?' · '+t.assigneeName:''),c:'#B83A32',bg:'#FDF3F1',onClick:t.open}));
+    all.filter(t=>t.priority==='high'&&t.notStarted).forEach(t=>proactive.push({tag:'งานสำคัญยังไม่เริ่ม',title:t.title,msg:'ควรเริ่ม '+t.start,c:'#9A6210',bg:'#FCF6EA',onClick:t.open}));
+    if(set.ai){const cand=all.filter(t=>t.overdue&&t.status==='pending'&&t.canEdit).sort((a,b)=>(a.priority==='high'?0:1)-(b.priority==='high'?0:1))[0];
+      if(cand){const g=this.gaps(cand.assignee,todayIso,now).find(([a,b])=>b-a>=cand.dur);if(g)proactive.push({tag:'AI แนะนำเวลา',title:'ย้าย "'+cand.title+'" ไป '+fmt(g[0])+'–'+fmt(g[0]+cand.dur),msg:'ช่วงว่างถัดไป '+fmt(g[0])+'–'+fmt(g[1])+' · แตะเพื่อจัดตารางใหม่',c:'#1F5E5B',bg:'#EEF4F2',onClick:()=>{this.updTask(cand.id,{date:todayIso,start:fmt(g[0])});this.info('จัดตารางใหม่แล้ว',cand.title+' → '+fmt(g[0]));}});}}
+    let fl=all;
+    if(s.fStatus==='overdue')fl=fl.filter(t=>t.overdue);else if(s.fStatus==='soon')fl=fl.filter(t=>t.soon);else if(s.fStatus!=='all')fl=fl.filter(t=>t.status===s.fStatus);
+    if(s.fPri!=='all')fl=fl.filter(t=>t.priority===s.fPri);
+    if(s.fType!=='all')fl=fl.filter(t=>t.type===s.fType);
+    const dowT=(this.today.getDay()+6)%7,fd=s.fDate;
+    if(fd==='today')fl=fl.filter(t=>t.dd===0);else if(fd==='yesterday')fl=fl.filter(t=>t.dd===-1);else if(fd==='tomorrow')fl=fl.filter(t=>t.dd===1);else if(fd==='week')fl=fl.filter(t=>t.dd>=-dowT&&t.dd<=6-dowT);else if(fd==='next7')fl=fl.filter(t=>t.dd>=0&&t.dd<=6);else if(fd==='past')fl=fl.filter(t=>t.dd<0);else if(fd==='custom'&&s.fDateVal)fl=fl.filter(t=>t.date===s.fDateVal);
+    fl=[...fl].sort((a,b)=>a.dd-b.dd||a.st-b.st);
+    const gm={};fl.forEach(t=>{(gm[t.dd]=gm[t.dd]||[]).push(t);});
+    const groups=Object.keys(gm).map(Number).sort((a,b)=>a-b).map(k=>{const d=addDays(this.today,k);return {label:k===0?'วันนี้':k===-1?'เมื่อวาน':k===1?'พรุ่งนี้':d.toLocaleDateString('th-TH',{weekday:'long'}),sub:d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'}),count:gm[k].length,items:gm[k]};});
+    const statusChips=[['all','ทั้งหมด'],['pending','ยังไม่ทำ'],['inprogress','กำลังทำ'],['completed','เสร็จแล้ว'],['cancelled','ยกเลิก'],['overdue','เกินเวลา'],['soon','ใกล้ถึงเวลา']].map(([k,l])=>this.chip(l,s.fStatus===k,()=>this.setState({fStatus:k})));
+    const priChips=[['all','ทั้งหมด'],['high','สูง · High'],['medium','กลาง · Medium'],['low','ต่ำ · Low']].map(([k,l])=>this.chip(l,s.fPri===k,()=>this.setState({fPri:k})));
+    const typeChips=['all',...TYPES].map(k=>this.chip(k==='all'?'ทั้งหมด':k,s.fType===k,()=>this.setState({fType:k})));
+    const occurs=(t,day)=>{const b=parse(t.date);if(t.date===iso(day))return 'base';if(t.repeat==='none'||day<b)return null;if(t.repeat==='daily')return 'ghost';if(t.repeat==='weekly'&&day.getDay()===b.getDay())return 'ghost';if(t.repeat==='monthly'&&day.getDate()===b.getDate())return 'ghost';return null;};
+    const calMode=s.calMode||(mob?'month':'week');
+    const histByDate={};histS.forEach(t=>{(histByDate[t.date]=histByDate[t.date]||[]).push(t);});
+    const eventsFor=day=>{const di=iso(day);const a=all.map(t=>({t,k:occurs(t,day)})).filter(x=>x.k);const h=(histByDate[di]||[]).map(t=>({t:D(t),k:'base'}));return [...h,...a].sort((x,y)=>x.t.st-y.t.st);};
+    let calDays=[],monthCells=[],calLabel='',calPrev,calNext,calNow;
+    if(calMode==='week'){
+      const dow=(this.today.getDay()+6)%7,ws=addDays(this.today,-dow+s.weekOff*7),we=addDays(ws,6);
+      calDays=[...Array(7)].map((_,i)=>{const day=addDays(ws,i),isToday=iso(day)===todayIso,ev=eventsFor(day);
+        const lanes=[];ev.forEach(x=>{let l=lanes.findIndex(e=>e<=x.t.st);if(l<0){l=lanes.length;lanes.push(0);}lanes[l]=x.t.en;x.lane=l;});
+        const n=Math.max(lanes.length,1);
+        return {wd:day.toLocaleDateString('th-TH',{weekday:'short'}),num:day.getDate(),isToday,bg:isToday?'#FBFAF6':'#fff',numC:isToday?'#fff':'#1C2826',numBg:isToday?'#1F5E5B':'transparent',
+          events:ev.map(({t,k,lane})=>{const g=k==='ghost';return {title:t.title,time:t.start,open:t.open,top:Math.max(0,(t.st-420)/60*HOUR)+'px',height:Math.max(24,t.dur/60*HOUR-3)+'px',left:`calc(${lane*100/n}% + 2px)`,width:`calc(${100/n}% - 4px)`,bg:g?'#fff':t.priBg,c:t.priC,bs:g?'dashed':'solid',bc:g?t.priC:'transparent',op:(!g&&(t.status==='completed'||t.status==='cancelled'))?0.55:1,deco:(!g&&(t.status==='completed'||t.status==='cancelled'))?'line-through':'none'};})};});
+      calLabel=ws.toLocaleDateString('th-TH',{day:'numeric',month:'short'})+' – '+we.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'});
+      calPrev=()=>this.setState({weekOff:s.weekOff-1});calNext=()=>this.setState({weekOff:s.weekOff+1});calNow=()=>this.setState({weekOff:0});
+    }
+    const selDay=s.selDay||todayIso;
+    if(calMode==='month'){
+      const m0=new Date(this.today.getFullYear(),this.today.getMonth()+s.monthOff,1),gs=addDays(m0,-((m0.getDay()+6)%7));
+      const weeks=Math.ceil((((m0.getDay()+6)%7)+new Date(m0.getFullYear(),m0.getMonth()+1,0).getDate())/7);
+      monthCells=[...Array(weeks*7)].map((_,i)=>{const day=addDays(gs,i),di=iso(day),inM=day.getMonth()===m0.getMonth(),isT=di===todayIso,isS=di===selDay,ev=eventsFor(day);
+        return {num:day.getDate(),op:inM?1:0.45,bg:isS?'#EEF4F2':'#fff',ring:isS?'inset 0 0 0 2px #1F5E5B':'none',numC:isT?'#fff':'#1C2826',numBg:isT?'#1F5E5B':'transparent',
+          chips:ev.slice(0,3).map(({t,k})=>({time:t.start,title:t.title,c:t.priC,bg:k==='ghost'?'#fff':t.priBg,deco:k!=='ghost'&&(t.status==='completed'||t.status==='cancelled')?'line-through':'none'})),
+          hasMore:ev.length>3,more:'+'+(ev.length-3)+' งาน',dots:ev.slice(0,5).map(({t})=>({c:t.priC})),onClick:()=>this.setState({selDay:di})};});
+      calLabel=m0.toLocaleDateString('th-TH',{month:'long',year:'numeric'});
+      calPrev=()=>this.setState({monthOff:s.monthOff-1});calNext=()=>this.setState({monthOff:s.monthOff+1});calNow=()=>this.setState({monthOff:0,selDay:todayIso});
+    }
+    const sdItems=calMode==='month'?eventsFor(parse(selDay)).map(({t,k})=>k==='ghost'?{...t,statusLabel:'ตามกำหนด',statusG:'↻',statusC:'#5E6966',statusBg:'#F0EDE6',hasNext:false,hasFlag:true,flag:'รอบวนซ้ำ',flagC:'#5E6966',flagBg:'#F0EDE6',deco:'none',titleC:'#1C2826',rowBg:'#fff'}:t):[];
+    const team=USERS.filter(u=>u.rk!=='admin'&&u.active!==false).map(u=>{const tt=s.tasks.filter(t=>t.assignee===u.id).map(D),td=tt.filter(t=>t.dd===0&&t.status!=='cancelled'),dn=td.filter(t=>t.status==='completed').length,od=tt.filter(t=>t.overdue).length,cur=td.find(t=>t.status==='inprogress'),nx=td.filter(t=>t.status==='pending'&&t.st>=now).sort((a,b)=>a.st-b.st)[0];
+      const h=s.history.filter(t=>t.assignee===u.id&&this.dd(t.date)>=-8&&t.status!=='cancelled'),hr=h.length?Math.round(h.filter(t=>!isLate(t)).length/h.length*100):0,p=td.length?Math.round(dn/td.length*100):0;
+      return {...u,total:td.length,done:dn,overdue:od,odC:od?'#B83A32':'#1C2826',pct:p,pctW:p+'%',curText:cur?'กำลังทำ: '+cur.title:nx?'ถัดไป '+nx.start+' · '+nx.title:'ไม่มีงานรอในวันนี้',rate7:hr+'%'};});
+    const teamOverdue=s.tasks.map(D).filter(t=>t.overdue).map(t=>({...t,showAssignee:true}));
+    const tAll=team.reduce((a,m)=>a+m.total,0),tDone=team.reduce((a,m)=>a+m.done,0);
+    const teamKpis=[{label:'งานทั้งทีมวันนี้',value:tAll,c:'#1C2826'},{label:'เสร็จแล้ว',value:tDone,c:'#2E7040'},{label:'ค้างเกินเวลา',value:teamOverdue.length,c:'#B83A32'},{label:'ความคืบหน้า',value:(tAll?Math.round(tDone/tAll*100):0)+'%',c:'#1F5E5B'}];
+    const rr=s.rRange,inR=t=>{const d=this.dd(t.date);return d<=0&&d>-rr;};
+    const recs=[...histS,...s.tasks.filter(t=>inScope(t.assignee)&&mq(t))].filter(inR).map(D);
+    const valid=recs.filter(t=>t.status!=='cancelled'),comp=valid.filter(t=>t.status==='completed'),lateR=valid.filter(t=>t.late||t.overdue);
+    const spent=comp.filter(t=>t.startedAt&&t.doneAt).map(t=>toMin(t.doneAt)-toMin(t.startedAt));
+    const rKpis=[{label:'งานทั้งหมด',value:valid.length,c:'#1C2826'},{label:'อัตราสำเร็จ',value:(valid.length?Math.round(comp.length/valid.length*100):0)+'%',c:'#1F5E5B'},{label:'ล่าช้า / ค้าง',value:lateR.length,c:'#B83A32'},{label:'ยกเลิก',value:recs.length-valid.length,c:'#7A7770'},{label:'เวลาเฉลี่ยต่องาน',value:spent.length?Math.round(spent.reduce((a,b)=>a+b,0)/spent.length)+' น.':'–',c:'#1C2826'}];
+    const agg=(key,labels)=>labels.map(([k,l])=>{const r=valid.filter(t=>t[key]===k),dn=r.filter(t=>t.status==='completed'&&!t.late).length,lt=r.filter(t=>t.late||t.overdue).length,tt=r.length||1;return {label:l,total:r.length,done:r.filter(t=>t.status==='completed').length,pct:r.length?Math.round(r.filter(t=>t.status==='completed').length/r.length*100):0,doneW:(dn/tt*100)+'%',lateW:(lt/tt*100)+'%'};}).filter(x=>x.total>0);
+    const rByType=agg('type',TYPES.map(t=>[t,t]));
+    const people=USERS.filter(u=>inScope(u.id));
+    const rByPerson=agg('assignee',people.map(u=>[u.id,u.name]));
+    const rRows=[...recs].sort((a,b)=>b.date.localeCompare(a.date)||b.st-a.st).slice(0,40).map(t=>({...t,dateS:parse(t.date).toLocaleDateString('th-TH',{day:'2-digit',month:'short'}),times:t.startedAt?t.startedAt+'–'+(t.doneAt||'…'):'–',timeC:t.late?'#9A6210':'#1C2826',noteS:t.note||'–',statusLabel:t.overdue?'ค้าง':t.statusLabel,statusC:t.overdue?'#B83A32':t.statusC,statusBg:t.overdue?'#FAE8E5':t.statusBg}));
+    const rStart=addDays(this.today,-(rr-1));
+    const lvlDesc={quiet:'Popup อย่างเดียว ไม่มีเสียง',normal:'เสียง 1 ครั้ง + Popup + Push (ปิดเองใน 9 วินาที)',urgent:'เสียง 3 ครั้ง ดังเต็มระดับ + Popup ค้าง 30 วินาที'};
+    const intensityRows=['high','medium','low'].map(p=>({label:'ความสำคัญ'+PRI[p].label+' · '+PRI[p].en,c:PRI[p].c,desc:lvlDesc[set.intensity[p]],opts:[['quiet','เงียบ'],['normal','ปกติ'],['urgent','เร่งด่วน']].map(([k,l])=>this.seg(l,set.intensity[p]===k,()=>this.setS({intensity:{...set.intensity,[p]:k}})))}));
+    const perm=typeof Notification==='undefined'?'เบราว์เซอร์ไม่รองรับ':Notification.permission==='granted'?'อนุญาตแล้ว':Notification.permission==='denied'?'ถูกปฏิเสธในเบราว์เซอร์':'แตะเพื่อขอสิทธิ์';
+    const channelToggles=[
+      this.tog('เสียง (Bell / Chime)','เล่นเสียงตามระดับความสำคัญ',set.sound,()=>this.setS({sound:!set.sound})),
+      this.tog('Push Notification','แจ้งเตือนของระบบปฏิบัติการ · '+perm,set.push,()=>{const on=!set.push;this.setS({push:on});if(on&&typeof Notification!=='undefined'&&Notification.permission==='default'){try{Notification.requestPermission().then(()=>this.forceUpdate());}catch(e){}}}),
+      this.tog('Popup ในระบบ','การ์ดแจ้งเตือนมุมขวาล่าง พร้อมปุ่มเริ่มงาน / เลื่อน',set.popup,()=>this.setS({popup:!set.popup})),
+    ];
+    const toneChips=[['chime','Chime · กระดิ่งสามโน้ต'],['bell','Bell · ระฆัง']].map(([k,l])=>this.chip(l,set.tone===k,()=>{this.setS({tone:k});this.play(k,set.volume/100);}));
+    const offChips=[5,15,30,60,1440].map(o=>this.chip(offTxt(o),set.offsets.includes(o),()=>this.setS({offsets:set.offsets.includes(o)?set.offsets.filter(x=>x!==o):[...set.offsets,o]})));
+    const renagToggle=[this.tog('เตือนซ้ำถ้ายังไม่ทำ','แจ้งซ้ำเป็นระยะหลังถึงเวลาเริ่ม จนกว่าจะกดเริ่มงาน',set.renag,()=>this.setS({renag:!set.renag}))];
+    const everyChips=[5,10,15,30].map(m=>this.chip(m+' นาที',set.renagEvery===m,()=>this.setS({renagEvery:m})));
+    const proToggles=[
+      this.tog('งานค้างเกินเวลา','แจ้งเมื่องานเลยเวลาสิ้นสุดแต่ยังไม่เสร็จ',set.overdue,()=>this.setS({overdue:!set.overdue})),
+      this.tog('งานสำคัญยังไม่เริ่ม','แจ้งทันทีเมื่อถึงเวลาเริ่มงานความสำคัญสูง',set.highNotStarted,()=>this.setS({highNotStarted:!set.highNotStarted})),
+      this.tog('AI แนะนำเวลาที่เหมาะสม','หาช่วงว่างในตารางเพื่อจัดงานค้างหรืองานใหม่',set.ai,()=>this.setS({ai:!set.ai})),
+    ];
+    let selV={},statusOpts=[];
+    const selT=s.tasks.find(t=>t.id===s.sel)||s.history.find(t=>t.id===s.sel);
+    if(selT){const d=D(selT);const sp=(d.startedAt&&d.doneAt)?durTxt(Math.max(0,toMin(d.doneAt)-toMin(d.startedAt))):d.status==='inprogress'&&d.startedAt&&d.dd===0?durTxt(Math.max(0,now-toMin(d.startedAt)))+'…':'–';
+      selV={...d,readOnly:!d.canEdit,roText:d.hist?'บันทึกย้อนหลัง · แก้ไขไม่ได้':uid==='dir'&&d.assignee==='dir'?'':'ดูได้อย่างเดียว · งานนี้อยู่ในความรับผิดชอบของ '+d.assigneeName,noteBg:d.canEdit?'#fff':'#F8F7F3',creatorName:uName(d.creator||d.assignee),dateLabel:parse(d.date).toLocaleDateString('th-TH',{weekday:'long',day:'numeric',month:'long',year:'numeric'}),remText:d.reminders.length?[...d.reminders].sort((a,b)=>b-a).map(offTxt).join(', ')+(d.renag?' · เตือนซ้ำ':''):'ไม่เตือน',chanText:(d.channels||[]).map(c=>CHAN[c]).join(' + ')||'–',startedText:d.startedAt||'–',doneText:d.doneAt||'–',spentText:sp,...this.meetV(d)};
+      statusOpts=Object.keys(ST).map(k=>{const on=d.status===k;return {label:ST[k].label,en:ST[k].en,g:ST[k].g,bg:on?ST[k].bg:'#fff',c:on?ST[k].c:'#3E4A48',border:on?ST[k].c:'#E4E0D6',onClick:()=>this.setStatus(d.id,k)};});}
+    const f=s.form||{reminders:[],channels:[]};
+    let hasSuggest=false,suggestText='',sugStart='';
+    if(s.showCreate&&set.ai&&f.date){const g=this.gaps(f.assignee,f.date,now).find(([a,b])=>b-a>=Number(f.dur));if(g&&fmt(g[0])!==f.start){hasSuggest=true;sugStart=fmt(g[0]);suggestText='ช่วงว่างที่เหมาะสม '+fmt(g[0])+'–'+fmt(g[1])+' ในตารางของ'+uName(f.assignee);}}
+    const tgl=(arr,v)=>arr.includes(v)?arr.filter(x=>x!==v):[...arr,v];
+    const navDef=[['dashboard','ภาพรวม','ภาพรวม'],['list','รายการ Schedule','Schedule'],['calendar','ปฏิทิน','ปฏิทิน'],...(rk==='dir'?[['team','ภาพรวมทีม','ทีม']]:[]),['report','รายงาน','รายงาน'],['alerts','ตั้งค่าแจ้งเตือน','ตั้งค่า'],...(rk==='admin'?[['users','จัดการผู้ใช้','ผู้ใช้']]:[])];
+    const navItems=navDef.map(([k,l,sh])=>({label:l,short:sh,d:ICON[k],onClick:go(k),bg:view===k?'rgba(231,239,236,0.13)':'transparent',c:view===k?'#FFFFFF':'#B7CBC6',tc:view===k?'#1F5E5B':'#6B7472',hasBadge:k==='list'&&overdueT.length>0,badge:overdueT.length}));
+    const titles={users:'จัดการผู้ใช้',dashboard:'ภาพรวม',list:'รายการ Schedule',calendar:'ปฏิทิน',team:'ภาพรวมทีม',report:'รายงาน',alerts:'ตั้งค่าการแจ้งเตือน'};
+    const framed=mob&&this.props.preview==='มือถือ'&&this.curW()>=500;
+    const fr=framed?{w:'390px',h:'844px',m:'24px auto',r:'44px',b:'10px solid #1C2826',t:'translateZ(0)'}:{w:'100%',h:'100vh',m:'0',r:'0',b:'none',t:mob?'translateZ(0)':'none'};
+    return {
+      fr,shellCols:mob?'minmax(0,1fr)':'232px minmax(0,1fr)',sideDisplay:mob?'none':'flex',headerPad:mob?'10px 14px':'14px 28px',contentPad:mob?'16px 14px 28px':'24px 28px 56px',searchFlex:mob?'1 1 100%':'0 1 180px',searchOrder:mob?'5':'0',createLabel:mob?'':view==='users'?'เพิ่มผู้ใช้':'สร้างงาน',toastBottom:mob?'84px':'18px',isMobile:mob,notMobile:!mob,loginNowLeft:Math.max(0,Math.min(100,(this.nowMin()-480)/600*100))+'%',...(()=>{const w=!mob&&this.curW()>=1024;return {loginCols:w?'minmax(0,1fr) minmax(0,1fr)':'minmax(0,1fr)',loginRows:w?'minmax(0,100%)':'max-content max-content',loginInnerOv:w?'auto':'visible',loginRightOv:w?'auto':'visible',loginOv:w?'hidden':'auto',loginPanelH:w?'100%':'auto',loginPad:mob?'32px 24px':'48px',loginCardPad:mob?'32px':'40px',loginTitleSize:mob?'19px':'24px',loginHeadSize:mob?'clamp(16px,5.2vw,24px)':'clamp(20px,2.3vw,32px)'};})(),cellH:mob?'52px':'108px',
+      navItems,tabItems:navItems,tabCols:'repeat('+navItems.length+',minmax(0,1fr))',goCal:go('calendar'),
+      user,nowText:fmt(now),viewTitle:titles[view],q:s.q,onQ:e=>this.setState({q:e.target.value}),
+      hasScope:scopeList.length>0,scopeOpts:scopeList.map(([k,l])=>this.seg(l,scope===k,()=>this.setState({scope:k}))),
+      toggleLog:()=>this.setState(st=>({showLog:!st.showLog,unread:0})),hasUnread:s.unread>0,unread:s.unread,showLog:s.showLog,
+      log:s.log.map(l=>({...l,open:()=>this.setState({sel:l.taskId,showLog:false})})),logEmpty:!s.log.length,
+      openCreate:()=>this.openCreate(),
+      isDash:view==='dashboard',isList:view==='list',isCal:view==='calendar',isTeam:view==='team',isReport:view==='report',isAlerts:view==='alerts',isUsers:view==='users',
+      todayLabel:this.today.toLocaleDateString('th-TH',{weekday:'long',day:'numeric',month:'long',year:'numeric'}),scopeLabel:scope==='all'?(rk==='dir'?'มุมมองทั้งทีม':'งานของฉันและตารางผู้บริหาร'):scope==='dir'?'ตารางผู้บริหาร':'เฉพาะงานของฉัน',
+      stats,pct,pctSub:doneT.length+'/'+todayAct.length+' งาน',ringBg,breakdown,week7,proactive,proactiveCount:proactive.length,noProactive:!proactive.length,
+      todayTasks:todayT,todayEmpty:!todayT.length,
+      statusChips,priChips,typeChips,groups,fDate:s.fDate,fStatus:s.fStatus,fPri:s.fPri,fType:s.fType,fDateVal:s.fDateVal,isCustomDate:s.fDate==='custom',
+      dateOpts:[['all','ทุกวัน'],['today','วันนี้'],['yesterday','เมื่อวาน'],['tomorrow','พรุ่งนี้'],['week','สัปดาห์นี้'],['next7','7 วันข้างหน้า'],['past','ย้อนหลัง (ค้างจากวันก่อน)'],['custom','เลือกวันที่…']].map(([v,l])=>({v,l})),
+      statusOpts2:[['all','ทุกสถานะ'],['pending','⏳ ยังไม่ทำ (Pending)'],['inprogress','▶ กำลังทำ (In Progress)'],['completed','✓ เสร็จแล้ว (Completed)'],['cancelled','✕ ยกเลิก (Cancelled)'],['overdue','เกินเวลา'],['soon','ใกล้ถึงเวลา (60 นาที)']].map(([v,l])=>({v,l})),
+      priOpts2:[['all','ทุกระดับ'],['high','สูง · High'],['medium','กลาง · Medium'],['low','ต่ำ · Low']].map(([v,l])=>({v,l})),
+      typeOpts2:[{v:'all',l:'ทุกประเภท'},...TYPES.map(t=>({v:t,l:t}))],
+      onFDateSel:e=>this.setState({fDate:e.target.value,fDateVal:e.target.value==='custom'&&!s.fDateVal?todayIso:s.fDateVal}),onFDateVal:e=>this.setState({fDateVal:e.target.value}),onFStatusSel:e=>this.setState({fStatus:e.target.value}),onFPriSel:e=>this.setState({fPri:e.target.value}),onFTypeSel:e=>this.setState({fType:e.target.value}),
+      activeFilterCount:[s.fDate,s.fStatus,s.fPri,s.fType].filter(x=>x!=='all').length,hasActiveFilter:[s.fDate,s.fStatus,s.fPri,s.fType].some(x=>x!=='all'),clearFilters:()=>this.setState({fDate:'all',fStatus:'all',fPri:'all',fType:'all'}),listCount:fl.length,listEmpty:!fl.length,
+      calModes:[this.seg('สัปดาห์',calMode==='week',()=>this.setState({calMode:'week'})),this.seg('เดือน',calMode==='month',()=>this.setState({calMode:'month'}))],
+      isWeek:calMode==='week',isMonth:calMode==='month',calLabel,calPrev,calNext,calNow,calDays,hours:[...Array(13)].map((_,i)=>({label:pad(7+i)+':00',top:(i*HOUR)+'px'})),nowTop:((now-420)/60*HOUR)+'px',
+      monthWd:['จ.','อ.','พ.','พฤ.','ศ.','ส.','อา.'].map(label=>({label})),monthCells,
+      selDayLabel:parse(selDay).toLocaleDateString('th-TH',{weekday:'long',day:'numeric',month:'long'}),selDayItems:sdItems,selDayCount:sdItems.length,selDayEmpty:!sdItems.length,
+      team,teamOverdue,teamOverdueEmpty:!teamOverdue.length,teamKpis,
+      rWho:user.name+' · '+(scope==='mine'?'งานของฉัน':scope==='dir'?'ตารางผู้บริหาร':rk==='dir'?'ทั้งทีม':'งานของฉันและผู้บริหาร'),rPeriod:rr===1?'วันนี้ '+this.today.toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'}):rStart.toLocaleDateString('th-TH',{day:'numeric',month:'short'})+' – '+this.today.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'}),
+      rRanges:[[1,'วันนี้'],[7,'7 วัน'],[30,'30 วัน']].map(([k,l])=>this.seg(l,rr===k,()=>this.setState({rRange:k}))),exportPdf:()=>window.print(),
+      rKpis,rByType,rByPerson,hasByPerson:people.length>1,rRows,
+      channelToggles,toneChips,testSound:()=>this.play(set.tone,set.volume/100),volume:set.volume,onVolume:e=>this.setS({volume:Number(e.target.value)}),
+      testAlert:()=>{const t=s.tasks.find(x=>x.assignee===uid&&x.status==='pending')||s.tasks[0];this.deliver([{t,kind:'reminder',title:'ทดสอบการแจ้งเตือน',msg:t.start+' · '+t.type}],null);},
+      intensityRows,offChips,renagToggle,everyChips,proToggles,
+      hasSel:!!selT,sel:selV,statusOpts,closeSel:()=>this.setState({sel:null}),onNote:e=>{if(selV.canEdit)this.updTask(s.sel,{note:e.target.value});},onDelete:()=>{this.setState(st=>({tasks:st.tasks.filter(t=>t.id!==st.sel),sel:null}));this.info('ลบงานแล้ว','');},
+      showCreate:s.showCreate,form:f,closeCreate:()=>this.setState({showCreate:false}),saveTask:()=>this.saveTask(),formErrBorder:s.formErr?'#B83A32':'#DDD8CC',
+      canAssign:mgL.length>0,fUserChips:[[uid,'ตารางของฉัน'],...mgL.map(id=>[id,'ตาราง '+uName(id)])].map(([k,l])=>this.seg(l,f.assignee===k,()=>this.setF({assignee:k}))),
+      onFTitle:e=>this.setF({title:e.target.value}),onFDate:e=>this.setF({date:e.target.value}),onFStart:e=>this.setF({start:e.target.value}),onFDur:e=>this.setF({dur:Number(e.target.value)}),
+      fTypeChips:TYPES.map(k=>this.chip(k,f.type===k,()=>this.setF({type:k}))),
+      fPriChips:['high','medium','low'].map(k=>{const on=f.priority===k;return {label:PRI[k].label+' · '+PRI[k].en,onClick:()=>this.setF({priority:k}),bg:on?PRI[k].bg:'#fff',c:on?PRI[k].c:'#3E4A48',border:on?PRI[k].c:'#E4E0D6'};}),
+      fRepChips:Object.keys(REP).map(k=>this.seg(REP[k],f.repeat===k,()=>this.setF({repeat:k}))),
+      fRemChips:[5,15,30,60,1440].map(o=>this.chip(offTxt(o),f.reminders.includes(o),()=>this.setF({reminders:tgl(f.reminders,o)}))),
+      fChanChips:Object.keys(CHAN).map(c=>this.chip(CHAN[c],f.channels.includes(c),()=>this.setF({channels:tgl(f.channels,c)}))),
+      fRenag:[this.tog('เตือนซ้ำทุก '+set.renagEvery+' นาที ถ้ายังไม่เริ่มงาน','',!!f.renag,()=>this.setF({renag:!f.renag}))],
+      isMeeting:f.type==='ประชุม',showLocation:(f.mode||'onsite')!=='online',showLink:(f.mode||'onsite')!=='onsite',linkWarn:!!f.link&&!/^https?:\/\//.test(f.link),
+      fModeChips:[["onsite","ในสถานที่"],["online","ออนไลน์"],["hybrid","ผสม (Hybrid)"]].map(([k,l])=>this.seg(l,(f.mode||'onsite')===k,()=>this.setF({mode:k}))),
+      fAttChips:USERS.filter(u=>u.rk!=='admin'&&u.active!==false&&u.id!==f.assignee).map(u=>this.chip(u.name,(f.attendees||[]).includes(u.id),()=>this.setF({attendees:tgl(f.attendees||[],u.id)}))),attCount:(f.attendees||[]).length+((f.ext||'').split(',').map(x=>x.trim()).filter(Boolean).length),
+      ...(()=>{const ex=this.extArr(f),sel=f.attendees||[],q=s.attQ.trim(),ql=q.toLowerCase();
+        const users=USERS.filter(u=>u.rk!=='admin'&&u.active!==false&&u.id!==f.assignee&&!sel.includes(u.id)).map(u=>({label:u.name,sub:u.role,name:u.name,w:'500'}));
+        const hist=s.attHistory.filter(n=>!ex.includes(n)).map(n=>({label:n,sub:'บุคคลภายนอก',name:n,w:'400'}));
+        let list=[...users,...hist].filter(o=>!ql||o.label.toLowerCase().includes(ql));
+        if(q&&![...USERS.map(u=>u.name),...ex,...s.attHistory].some(n=>n.toLowerCase()===ql))list=[{label:'เพิ่ม “'+q+'”',sub:'ชื่อใหม่',name:q,w:'600'},...list];
+        return {attQ:s.attQ,onAttQ:e=>this.setState({attQ:e.target.value,attOpen:true}),onAttFocus:()=>this.setState({attOpen:true}),onAttBlur:()=>setTimeout(()=>this.setState({attOpen:false}),150),
+          onAttKey:e=>{if(e.key==='Enter'){e.preventDefault();const hit=list.find(o=>o.label.toLowerCase()===ql);this.addAtt(hit?hit.name:(list[0]&&ql?list[0].name:q));}else if(e.key==='Backspace'&&!s.attQ){if(ex.length)this.setF({ext:ex.slice(0,-1).join(', ')});else if(sel.length)this.setF({attendees:sel.slice(0,-1)});}else if(e.key==='Escape')this.setState({attOpen:false});},
+          attTokens:[...sel.map(id=>({label:uName(id),bg:'#DCEBE7',c:'#1F5E5B',onRemove:()=>this.setF({attendees:sel.filter(x=>x!==id)})})),...ex.map(n=>({label:n,bg:'#F0EDE6',c:'#3E4A48',onRemove:()=>this.setF({ext:ex.filter(x=>x!==n).join(', ')})}))],
+          attSuggest:list.slice(0,8).map(o=>({...o,onPick:ev=>{ev.preventDefault();this.addAtt(o.name);}})),hasAttSuggest:s.attOpen&&list.length>0};})(),
+      onFLocation:e=>this.setF({location:e.target.value}),onFLink:e=>this.setF({link:e.target.value.trim()}),onFExt:e=>this.setF({ext:e.target.value}),
+      hasSuggest,suggestText,applySuggest:()=>this.setF({start:sugStart}),
+      ...this.authVals(s,uid),
+      toasts:s.toasts.map(n=>({...n,hasTask:!n.noTask,close:()=>this.dismiss(n.id),start:()=>{this.setStatus(n.taskId,'inprogress');this.dismiss(n.id);},snooze:()=>{this.setState(st=>({snooze:{...st.snooze,[n.taskId]:this.nowMin()+5}}));this.dismiss(n.id);},open:()=>{this.setState({sel:n.taskId});this.dismiss(n.id);}})),
+    };
+  }
+}
+</script>
+</body>
+</html>
