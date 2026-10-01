@@ -238,6 +238,10 @@ footer{max-width:900px;padding:0 clamp(20px,4vw,64px) 60px;color:var(--muted);fo
         <svg class="ic" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="7.5"/><path d="M10 9v4.5M10 6.6v.1"/></svg>
         <p>ติ๊ก <b>“จดจำการใช้งาน”</b> ไว้ที่หน้าเข้าสู่ระบบ เพื่อให้ระบบจำชื่อผู้ใช้ของคุณไว้ในครั้งถัดไป (ไม่ได้จำรหัสผ่าน)</p>
       </div>
+      <div class="callout c-warn">
+        <svg class="ic" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 3 2.5 16h15L10 3z"/><path d="M10 8v3.5M10 14v.1"/></svg>
+        <p><b>สำหรับผู้ติดตั้งระบบครั้งแรก (ยังไม่เคยมีผู้ใช้ในระบบเลย):</b> ระบบจะสร้างบัญชีผู้ดูแลระบบเริ่มต้นให้อัตโนมัติ — ชื่อผู้ใช้ <b>admin</b> รหัสผ่านชั่วคราว <b>1234</b> (หรือค่าที่กำหนดเองผ่านตัวแปรแวดล้อม <code class="mono">ADMIN_PASSWORD</code> ก่อนรันระบบครั้งแรก) ระบบจะบังคับให้ตั้งรหัสผ่านใหม่ทันทีที่ล็อกอินครั้งแรกเช่นเดียวกับบัญชีอื่น จากนั้น admin จึงใช้เมนู <b>“จัดการผู้ใช้”</b> สร้างบัญชีเลขานุการ ผู้บริหาร พยาบาล และบุคคลทั่วไปต่อไป (ดูหัวข้อ <a href="#admin">25</a>)</p>
+      </div>
     </section>
 
     <section id="roles">
