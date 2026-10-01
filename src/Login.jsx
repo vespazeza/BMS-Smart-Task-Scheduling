@@ -114,6 +114,15 @@ export default function Login({ V }) {
             {V.hasLoginErr && <div style={{ fontSize: 13, color: '#b91c1c', background: '#fee2e2', borderRadius: 10, padding: '9px 12px' }}>{V.loginErr}</div>}
             <button className="login-btn" type="button" onClick={V.doLogin} disabled={V.loginBusy} style={{ opacity: V.loginBusy ? 0.7 : 1, width: '100%', height: 50, background: 'linear-gradient(90deg,#2f6fe0,#5aa9f0)', color: '#fff', fontWeight: 600, border: 'none', borderRadius: 12, boxShadow: '0 12px 24px -8px rgba(47,111,224,0.55)', fontSize: 16, cursor: 'pointer', marginTop: 4 }}>{V.loginBusy ? 'กำลังเข้าสู่ระบบ…' : 'เข้าสู่ระบบ'}</button>
           </div>
+          {V.bootstrapFresh ? (
+            <div style={{ marginTop: 18, padding: '12px 14px', borderRadius: 10, background: '#fffbeb', border: '1px solid #fde68a', fontSize: 12.5, color: '#334155', lineHeight: 1.6 }}>
+              <b>ติดตั้งระบบครั้งแรก?</b> ยังไม่มีผู้ใช้ในระบบนี้ — เข้าสู่ระบบด้วยบัญชีผู้ดูแลระบบเริ่มต้น ชื่อผู้ใช้ <b>admin</b> รหัสผ่าน <b>1234</b> ระบบจะให้ตั้งรหัสผ่านใหม่ทันที จากนั้นใช้เมนู “จัดการผู้ใช้” สร้างบัญชีอื่น ๆ ต่อไป (ข้อความนี้จะหายไปเองหลังตั้งค่าเสร็จ)
+            </div>
+          ) : (
+            <div style={{ marginTop: 18, padding: '12px 14px', borderRadius: 10, background: '#eff6ff', border: '1px solid #dbeafe', fontSize: 12.5, color: '#334155', lineHeight: 1.6 }}>
+              <b>เข้าใช้งานครั้งแรก?</b> ท่านต้องได้รับ <b>ชื่อผู้ใช้</b> และ <b>รหัสผ่านชั่วคราว</b> จากฝ่ายไอทีหรือผู้ดูแลระบบของหน่วยงานท่านก่อน จึงจะเข้าสู่ระบบได้ — ระบบจะให้ตั้งรหัสผ่านใหม่ของตนเองทันทีในการเข้าสู่ระบบครั้งแรก หากยังไม่เคยได้รับ กรุณาติดต่อฝ่ายไอทีหรือหัวหน้างานของท่าน
+            </div>
+          )}
         </div>
         <div style={{ textAlign: 'center', fontSize: 13, color: '#475569', lineHeight: 1.6, marginTop: 24 }}>
           <div>Smart Task System</div>

@@ -202,6 +202,12 @@ app.use(express.json({ limit: '1mb' }));
 const api = express.Router();
 app.use('/api', api);
 
+api.get('/bootstrap-status', (req, res) => {
+  const count = db.prepare('SELECT COUNT(*) c FROM users').get().c;
+  const admin = db.prepare("SELECT must_change FROM users WHERE username='admin'").get();
+  res.json({ fresh: count === 1 && !!admin && admin.must_change === 1 });
+});
+
 api.post('/login', (req, res) => {
   const { username, password } = req.body || {};
   if (!str(username, 100) || !str(password, 200) || !username || !password) return res.status(400).json({ error: 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน' });

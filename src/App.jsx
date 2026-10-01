@@ -57,7 +57,7 @@ export default class App extends React.Component {
   render(){return <View V={this.renderVals()}/>;}
   get today(){return startToday();}
   lastAct=Date.now(); pending=0; patchQ={};
-  state={attQ:'',attOpen:false,attHistory:[],accounts:[],authUid:null,booting:hasToken(),mustChange:false,pwForm:null,uploading:false,cancelAsk:null,conf:{key:'',list:[]},feed:{token:'',loading:false},rsvpReason:'',quick:{text:'',busy:false,err:''},approveAsk:null,
+  state={attQ:'',attOpen:false,attHistory:[],accounts:[],authUid:null,booting:hasToken(),mustChange:false,pwForm:null,uploading:false,cancelAsk:null,conf:{key:'',list:[]},feed:{token:'',loading:false},rsvpReason:'',quick:{text:'',busy:false,err:''},approveAsk:null,bootstrapFresh:false,
     nurse:{loading:false,shiftMap:{},colDate:'',colleagues:[],swaps:[],swapForm:null,swapBusy:false,swapErr:'',handoverNote:'',handoverHistory:[],handoverBusy:false},
     digest:{loaded:false,loading:false,busy:false,msg:'',err:'',prefs:{enabled:false,time:'07:30',email:'',emailOn:false,lineId:'',lineOn:false},status:{email:'',line:''},log:[]},settingsSec:'account',audit:{rows:[],q:'',loading:false},login:{u:this.savedUser(),p:'',err:'',remember:!!this.savedUser(),busy:false},userForm:null,view:'dashboard',scope:'mine',tasks:[],history:[],q:'',fStatus:'all',fPri:'all',fType:'all',fDate:'all',fDateVal:'',sel:null,showCreate:false,form:null,formErr:false,toasts:[],log:[],showLog:false,unread:0,fired:{},snooze:{},weekOff:0,monthOff:0,calMode:null,selDay:null,rRange:7,vw:typeof window!=='undefined'?window.innerWidth:1200,
     settings:{sound:true,push:true,popup:true,tone:'chime',volume:70,intensity:{high:'urgent',medium:'normal',low:'quiet'},offsets:[30,5],renag:true,renagEvery:10,overdue:true,highNotStarted:true,ai:true,theme:(()=>{try{return localStorage.getItem('st_theme')||'light';}catch(e){return 'light';}})()}};
@@ -68,8 +68,9 @@ export default class App extends React.Component {
     this.act=()=>{this.lastAct=Date.now();};['mousemove','mousedown','keydown','touchstart','scroll'].forEach(ev=>window.addEventListener(ev,this.act,{passive:true}));
     this.idleIv=setInterval(()=>{if(this.state.authUid&&Date.now()-this.lastAct>IDLE_MIN*60000)this.idleLogout();},20000);
     this.applyTheme();if(window.matchMedia){this.mq=window.matchMedia('(prefers-color-scheme: dark)');this.mqh=()=>this.applyTheme();if(this.mq.addEventListener)this.mq.addEventListener('change',this.mqh);}
-    if(hasToken())this.boot();
+    if(hasToken())this.boot();else this.loadBootstrapStatus();
   }
+  async loadBootstrapStatus(){try{const r=await api('GET','/api/bootstrap-status');this.setState({bootstrapFresh:!!r.fresh});}catch(e){/* non-fatal: login hint just won't show */}}
   componentDidUpdate(_,ps){
     if(ps.settings.theme!==this.state.settings.theme)this.applyTheme();
     const s=this.state;
@@ -216,7 +217,7 @@ export default class App extends React.Component {
     const L=s.login,q=s.q.trim().toLowerCase(),f=s.userForm,execs=s.accounts.filter(u=>u.rk==='dir'),cnt=k=>s.accounts.filter(u=>u.rk===k).length;
     const rows=s.accounts.filter(u=>!q||(u.name+' '+u.username+' '+u.role+' '+ROLE_LABEL[u.rk]).toLowerCase().includes(q)).map(u=>{const on=u.active!==false;return {...u,roleLabel:ROLE_LABEL[u.rk],roleC:RC[u.rk][0],roleBg:RC[u.rk][1],managesText:u.rk==='sec'?((u.manages||[]).map(uName).join(', ')||'ยังไม่กำหนด'):'—',statusText:on?'ใช้งาน':'ระงับ',statusC:on?'#2E7040':'#7A7770',statusBg:on?'#E1F0E3':'#F0EEE9',toggleLabel:on?'ระงับ':'เปิดใช้',canToggle:u.id!==uid,rowOp:on?1:0.6,onEdit:()=>this.openUserForm(u.id),onToggle:()=>this.toggleUser(u)};});
     return {
-      loggedOut:!s.authUid,loginBusy:!!L.busy,booting:s.booting,mustChange:s.mustChange,loginU:L.u,loginP:L.p,loginErr:L.err,hasLoginErr:!!L.err,
+      loggedOut:!s.authUid,loginBusy:!!L.busy,booting:s.booting,mustChange:s.mustChange,loginU:L.u,loginP:L.p,loginErr:L.err,hasLoginErr:!!L.err,bootstrapFresh:s.bootstrapFresh,
       onLoginU:e=>this.setState({login:{...L,u:e.target.value,err:''}}),onLoginP:e=>this.setState({login:{...L,p:e.target.value,err:''}}),onLoginKey:e=>{if(e.key==='Enter')this.doLogin();},loginRemember:!!L.remember,onLoginRemember:e=>this.setState({login:{...L,remember:e.target.checked}}),onForgot:e=>{e.preventDefault();this.info('ลืมรหัสผ่าน?','กรุณาติดต่อผู้ดูแลระบบเพื่อรีเซ็ตรหัสผ่าน');},doLogin:()=>this.doLogin(),logout:()=>this.logout(),
       usersRows:rows,usersEmpty:!rows.length,
       userKpis:[['บัญชีทั้งหมด',s.accounts.length],['เลขานุการ',cnt('sec')],['ผู้บริหาร',cnt('dir')],['พยาบาล / พนักงาน',cnt('nur')],['บุคคลทั่วไป',cnt('gen')]].map(([label,value])=>({label,value})),
