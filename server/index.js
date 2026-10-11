@@ -1,7 +1,9 @@
-// Smart Task Scheduling — self-hosted API (Express + built-in SQLite).
-// Data lives in DATA_DIR (default ./server/data): smart-schedule.db + files/.
+// Smart Task Scheduling — self-hosted API (Express + libSQL/Turso).
+// Data lives in a libSQL database: local file by default (DATA_DIR), or a remote Turso
+// database when TURSO_URL (+ TURSO_AUTH_TOKEN) is set — needed because the hospital's
+// deploy platform doesn't persist local disk across redeploys.
 import express from 'express';
-import { DatabaseSync } from 'node:sqlite';
+import { createClient } from '@libsql/client';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -18,8 +20,27 @@ const MAX_FILE = 15 * 1024 * 1024;
 const MAX_FILES_PER_TASK = 10;
 
 fs.mkdirSync(path.join(DATA_DIR, 'files'), { recursive: true });
-const db = new DatabaseSync(path.join(DATA_DIR, 'smart-schedule.db'));
-db.exec(`
+
+/* ---------- db: thin async wrapper over @libsql/client, shaped like node:sqlite's prepare().get/all/run ---------- */
+const client = createClient(
+  process.env.TURSO_URL
+    ? { url: process.env.TURSO_URL, authToken: process.env.TURSO_AUTH_TOKEN }
+    : { url: 'file:' + path.join(DATA_DIR, 'smart-schedule.db') }
+);
+const db = {
+  exec: (sql) => client.executeMultiple(sql),
+  prepare(sql) {
+    return {
+      get: async (...args) => (await client.execute({ sql, args })).rows[0],
+      all: async (...args) => (await client.execute({ sql, args })).rows,
+      run: async (...args) => { const r = await client.execute({ sql, args }); return { changes: Number(r.rowsAffected), lastInsertRowid: r.lastInsertRowid }; },
+    };
+  },
+};
+/** wraps an async Express handler/middleware so a rejected promise reaches the error middleware instead of hanging the request */
+const ah = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+
+const SCHEMA_SQL = `
 PRAGMA journal_mode=WAL;
 CREATE TABLE IF NOT EXISTS users(
   id TEXT PRIMARY KEY, username TEXT UNIQUE NOT NULL COLLATE NOCASE, name TEXT NOT NULL, role TEXT, short TEXT,
@@ -35,7 +56,7 @@ CREATE TABLE IF NOT EXISTS audit(
   action TEXT NOT NULL, entity TEXT, entity_id TEXT, detail TEXT);
 CREATE INDEX IF NOT EXISTS idx_tasks_assignee ON tasks(assignee);
 CREATE INDEX IF NOT EXISTS idx_files_task ON files(task_id);
-`);
+`;
 
 /* ---------- helpers ---------- */
 const now = () => new Date().toISOString();
@@ -57,30 +78,33 @@ const defType = (rk) => (rk === 'nur' ? 'ดูแลผู้ป่วย' : rk
 const shortOf = (name) => name.replace(/^(นพ\.|พญ\.|พว\.|ดร\.|คุณ|นางสาว|นาย|นาง)\s*/, '').trim().slice(0, 2);
 
 const getUser = (id) => db.prepare('SELECT * FROM users WHERE id=?').get(id);
-const allUsers = () => db.prepare('SELECT * FROM users ORDER BY created_at, rowid').all();
+const allUsersRows = () => db.prepare('SELECT * FROM users ORDER BY created_at, rowid').all();
+/** fetch every user once per request; pass the resulting Map into the sync helpers below instead of re-querying per row */
+const loadUsersMap = async () => { const m = new Map(); for (const u of await allUsersRows()) m.set(u.id, u); return m; };
 const pub = (u, viewer) => ({
   id: u.id, name: u.name, role: u.role, short: u.short, rk: u.rk, active: !!u.active, defType: defType(u.rk),
   ...(viewer && (viewer.rk === 'admin' || viewer.id === u.id) ? { username: u.username, manages: JSON.parse(u.manages) } : {}),
 });
 
-function audit(user, action, entity, entityId, detail) {
-  db.prepare('INSERT INTO audit(ts,user_id,user_name,action,entity,entity_id,detail) VALUES(?,?,?,?,?,?,?)').run(
+async function audit(user, action, entity, entityId, detail) {
+  await db.prepare('INSERT INTO audit(ts,user_id,user_name,action,entity,entity_id,detail) VALUES(?,?,?,?,?,?,?)').run(
     now(), user ? user.id : null, user ? user.name : null, action, entity || null, entityId || null,
     detail == null ? null : JSON.stringify(detail));
 }
 
-function mgOf(u) {
+/** pure, synchronous — usersMap must already hold every user (see loadUsersMap) */
+function mgOf(u, usersMap) {
   if (u.rk !== 'sec') return [];
-  return JSON.parse(u.manages).filter((id) => { const x = getUser(id); return x && x.rk === 'dir'; });
+  return JSON.parse(u.manages).filter((id) => { const x = usersMap.get(id); return x && x.rk === 'dir'; });
 }
-function visIds(u) {
+function visIds(u, usersMap) {
   if (u.rk === 'admin') return [];
-  if (u.rk === 'dir') return allUsers().filter((x) => x.rk !== 'admin').map((x) => x.id);
-  if (u.rk === 'sec') return [u.id, ...mgOf(u)];
+  if (u.rk === 'dir') return [...usersMap.values()].filter((x) => x.rk !== 'admin').map((x) => x.id);
+  if (u.rk === 'sec') return [u.id, ...mgOf(u, usersMap)];
   return [u.id];
 }
-const canEditAssignee = (u, assignee) => u.rk !== 'admin' && (assignee === u.id || mgOf(u).includes(assignee));
-const canSee = (u, t) => visIds(u).includes(t.assignee) || (t.attendees || []).includes(u.id);
+const canEditAssignee = (u, assignee, usersMap) => u.rk !== 'admin' && (assignee === u.id || mgOf(u, usersMap).includes(assignee));
+const canSee = (u, t, usersMap) => visIds(u, usersMap).includes(t.assignee) || (t.attendees || []).includes(u.id);
 
 /* ---------- tasks ---------- */
 const TYPES = ['เอกสาร', 'นัดหมาย', 'เคลม', 'ตรวจสอบ', 'ประชุม', 'ดูแลผู้ป่วย'];
@@ -89,8 +113,8 @@ const HHMM = /^([01]\d|2[0-3]):[0-5]\d$/;
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const str = (v, max) => typeof v === 'string' && v.length <= max;
 
-/** validates only the fields present; returns {patch} or {error} */
-function cleanTask(b) {
+/** validates only the fields present; returns {patch} or {error}. usersMap only needed when 'attendees' is in b */
+function cleanTask(b, usersMap) {
   const p = {};
   const bad = (m) => ({ error: m });
   if ('title' in b) { if (!str(b.title, 200) || !b.title.trim()) return bad('ชื่องานไม่ถูกต้อง'); p.title = b.title.trim(); }
@@ -113,7 +137,7 @@ function cleanTask(b) {
   if ('location' in b) { if (!str(b.location, 200)) return bad('สถานที่ยาวเกินไป'); p.location = b.location; }
   if ('link' in b) { if (!str(b.link, 500) || (b.link && !/^https?:\/\//i.test(b.link))) return bad('ลิงก์ต้องขึ้นต้นด้วย https://'); p.link = b.link; }
   if ('attendees' in b) {
-    if (!Array.isArray(b.attendees) || b.attendees.length > 50 || !b.attendees.every((id) => { const u = getUser(id); return u && u.rk !== 'admin'; })) return bad('ผู้เข้าร่วมไม่ถูกต้อง');
+    if (!Array.isArray(b.attendees) || b.attendees.length > 50 || !b.attendees.every((id) => { const u = usersMap.get(id); return u && u.rk !== 'admin'; })) return bad('ผู้เข้าร่วมไม่ถูกต้อง');
     p.attendees = b.attendees;
   }
   if ('ext' in b) { if (!str(b.ext, 500)) return bad('รายชื่อภายนอกยาวเกินไป'); p.ext = b.ext; }
@@ -124,19 +148,19 @@ function cleanTask(b) {
   return { patch: p };
 }
 
-function filesFor(ids) {
+async function filesFor(ids) {
   if (!ids.length) return {};
-  const rows = db.prepare(`SELECT * FROM files WHERE task_id IN (${ids.map(() => '?').join(',')}) ORDER BY uploaded_at`).all(...ids);
+  const rows = await db.prepare(`SELECT * FROM files WHERE task_id IN (${ids.map(() => '?').join(',')}) ORDER BY uploaded_at`).all(...ids);
   const m = {};
   rows.forEach((f) => (m[f.task_id] = m[f.task_id] || []).push({ id: f.id, name: f.name, size: f.size, mime: f.mime, by: f.uploaded_by, at: f.uploaded_at }));
   return m;
 }
 const taskOut = (row, files) => ({ ...JSON.parse(row.data), id: row.id, assignee: row.assignee, files: (files && files[row.id]) || [] });
-function visibleTasks(u) {
+async function visibleTasks(u) {
   if (u.rk === 'admin') return [];
-  const rows = db.prepare('SELECT * FROM tasks').all();
-  const ok = rows.filter((r) => canSee(u, { assignee: r.assignee, ...JSON.parse(r.data) }));
-  const files = filesFor(ok.map((r) => r.id));
+  const [rows, usersMap] = await Promise.all([db.prepare('SELECT * FROM tasks').all(), loadUsersMap()]);
+  const ok = rows.filter((r) => canSee(u, { assignee: r.assignee, ...JSON.parse(r.data) }, usersMap));
+  const files = await filesFor(ok.map((r) => r.id));
   return ok.map((r) => taskOut(r, files));
 }
 
@@ -148,14 +172,6 @@ function pwProblem(pw, user) {
   if (!/[A-Za-z฀-๿]/.test(pw) || !/\d/.test(pw)) return 'รหัสผ่านต้องมีทั้งตัวอักษรและตัวเลข';
   if (user && pw.toLowerCase() === user.username.toLowerCase()) return 'รหัสผ่านต้องไม่ตรงกับชื่อผู้ใช้';
   return '';
-}
-
-if (!db.prepare('SELECT 1 FROM users LIMIT 1').get()) {
-  const initial = process.env.ADMIN_PASSWORD || '1234';
-  db.prepare('INSERT INTO users(id,username,name,role,short,rk,manages,active,pw_hash,must_change,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)')
-    .run('admin', 'admin', 'ผู้ดูแลระบบ', 'ฝ่ายเทคโนโลยีสารสนเทศ', 'AD', 'admin', '[]', 1, hashPw(initial), 1, now());
-  audit(null, 'system.init', 'user', 'admin', { note: 'สร้างบัญชี admin เริ่มต้น' });
-  console.log(`[init] created default account admin / ${initial} (must change on first login)`);
 }
 
 const failures = new Map(); // key -> {n, until}
@@ -171,23 +187,23 @@ function noteFail(key) {
 }
 
 function auth({ allowMustChange = false } = {}) {
-  return (req, res, next) => {
+  return ah(async (req, res, next) => {
     const h = req.headers.authorization || '';
     const token = h.startsWith('Bearer ') ? h.slice(7) : '';
     const th = token && sha(token);
-    const s = th && db.prepare('SELECT * FROM sessions WHERE token=?').get(th);
+    const s = th && await db.prepare('SELECT * FROM sessions WHERE token=?').get(th);
     const t = Date.now();
     if (!s || t - s.last_seen > IDLE_MS || t - s.created_at > MAX_SESSION_MS) {
-      if (s) db.prepare('DELETE FROM sessions WHERE token=?').run(th);
+      if (s) await db.prepare('DELETE FROM sessions WHERE token=?').run(th);
       return res.status(401).json({ error: 'เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่', code: 'SESSION' });
     }
-    const u = getUser(s.user_id);
+    const u = await getUser(s.user_id);
     if (!u || !u.active) return res.status(401).json({ error: 'บัญชีนี้ถูกระงับ', code: 'SESSION' });
-    if (t - s.last_seen > 15000) db.prepare('UPDATE sessions SET last_seen=? WHERE token=?').run(t, th);
+    if (t - s.last_seen > 15000) await db.prepare('UPDATE sessions SET last_seen=? WHERE token=?').run(t, th);
     if (u.must_change && !allowMustChange) return res.status(403).json({ error: 'ต้องเปลี่ยนรหัสผ่านก่อนใช้งาน', code: 'MUST_CHANGE' });
     req.user = u; req.tokenHash = th;
     next();
-  };
+  });
 }
 const adminOnly = (req, res, next) => (req.user.rk === 'admin' ? next() : res.status(403).json({ error: 'เฉพาะผู้ดูแลระบบ' }));
 
@@ -202,101 +218,106 @@ app.use(express.json({ limit: '1mb' }));
 const api = express.Router();
 app.use('/api', api);
 
-api.get('/bootstrap-status', (req, res) => {
-  const count = db.prepare('SELECT COUNT(*) c FROM users').get().c;
-  const admin = db.prepare("SELECT must_change FROM users WHERE username='admin'").get();
+api.get('/bootstrap-status', ah(async (req, res) => {
+  const count = (await db.prepare('SELECT COUNT(*) c FROM users').get()).c;
+  const admin = await db.prepare("SELECT must_change FROM users WHERE username='admin'").get();
   res.json({ fresh: count === 1 && !!admin && admin.must_change === 1 });
-});
+}));
 
-api.post('/login', (req, res) => {
+api.post('/login', ah(async (req, res) => {
   const { username, password } = req.body || {};
   if (!str(username, 100) || !str(password, 200) || !username || !password) return res.status(400).json({ error: 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน' });
   const ux = username.trim().toLowerCase();
   const key = ux.split('@')[0] + '|' + req.ip;
   const wait = lockedFor(key);
   if (wait) return res.status(429).json({ error: `ลองผิดหลายครั้ง กรุณารอ ${wait} นาทีแล้วลองใหม่` });
-  const u = db.prepare('SELECT * FROM users WHERE username=?').get(ux) || db.prepare('SELECT * FROM users WHERE username=?').get(ux.split('@')[0]);
+  const u = (await db.prepare('SELECT * FROM users WHERE username=?').get(ux)) || (await db.prepare('SELECT * FROM users WHERE username=?').get(ux.split('@')[0]));
   if (!u || !checkPw(password, u.pw_hash)) {
     noteFail(key);
-    audit(u || null, 'login.fail', 'user', u ? u.id : null, { username: ux.slice(0, 60), ip: req.ip });
+    await audit(u || null, 'login.fail', 'user', u ? u.id : null, { username: ux.slice(0, 60), ip: req.ip });
     return res.status(401).json({ error: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง' });
   }
   if (!u.active) return res.status(403).json({ error: 'บัญชีนี้ถูกระงับ กรุณาติดต่อผู้ดูแลระบบ' });
   failures.delete(key);
   const token = crypto.randomBytes(32).toString('hex');
   const t = Date.now();
-  db.prepare('DELETE FROM sessions WHERE ?-last_seen>?').run(t, IDLE_MS);
-  db.prepare('INSERT INTO sessions(token,user_id,created_at,last_seen) VALUES(?,?,?,?)').run(sha(token), u.id, t, t);
-  audit(u, 'login', 'user', u.id, { ip: req.ip });
+  await db.prepare('DELETE FROM sessions WHERE ?-last_seen>?').run(t, IDLE_MS);
+  await db.prepare('INSERT INTO sessions(token,user_id,created_at,last_seen) VALUES(?,?,?,?)').run(sha(token), u.id, t, t);
+  await audit(u, 'login', 'user', u.id, { ip: req.ip });
   res.json({ token, mustChange: !!u.must_change });
-});
+}));
 
-api.post('/logout', auth({ allowMustChange: true }), (req, res) => {
-  db.prepare('DELETE FROM sessions WHERE token=?').run(req.tokenHash);
-  audit(req.user, 'logout', 'user', req.user.id);
+api.post('/logout', auth({ allowMustChange: true }), ah(async (req, res) => {
+  await db.prepare('DELETE FROM sessions WHERE token=?').run(req.tokenHash);
+  await audit(req.user, 'logout', 'user', req.user.id);
   res.json({ ok: true });
-});
+}));
 
-api.post('/idle-logout', auth({ allowMustChange: true }), (req, res) => {
-  db.prepare('DELETE FROM sessions WHERE token=?').run(req.tokenHash);
-  audit(req.user, 'logout.idle', 'user', req.user.id);
+api.post('/idle-logout', auth({ allowMustChange: true }), ah(async (req, res) => {
+  await db.prepare('DELETE FROM sessions WHERE token=?').run(req.tokenHash);
+  await audit(req.user, 'logout.idle', 'user', req.user.id);
   res.json({ ok: true });
-});
+}));
 
-api.post('/password', auth({ allowMustChange: true }), (req, res) => {
+api.post('/password', auth({ allowMustChange: true }), ah(async (req, res) => {
   const { current, next } = req.body || {};
   const u = req.user;
   if (!str(current, 200) || !checkPw(current || '', u.pw_hash)) return res.status(400).json({ error: 'รหัสผ่านปัจจุบันไม่ถูกต้อง' });
   const prob = pwProblem(next, u);
   if (prob) return res.status(400).json({ error: prob });
   if (next === current) return res.status(400).json({ error: 'รหัสผ่านใหม่ต้องไม่ซ้ำรหัสผ่านเดิม' });
-  db.prepare('UPDATE users SET pw_hash=?, must_change=0 WHERE id=?').run(hashPw(next), u.id);
-  db.prepare('DELETE FROM sessions WHERE user_id=? AND token<>?').run(u.id, req.tokenHash);
-  audit(u, 'password.change', 'user', u.id);
+  await db.prepare('UPDATE users SET pw_hash=?, must_change=0 WHERE id=?').run(hashPw(next), u.id);
+  await db.prepare('DELETE FROM sessions WHERE user_id=? AND token<>?').run(u.id, req.tokenHash);
+  await audit(u, 'password.change', 'user', u.id);
   res.json({ ok: true });
-});
+}));
 
-api.get('/sync', auth({ allowMustChange: true }), (req, res) => {
+api.get('/sync', auth({ allowMustChange: true }), ah(async (req, res) => {
   const u = req.user;
   if (u.must_change) return res.json({ me: pub(u, u), mustChange: true });
-  const st = db.prepare('SELECT data FROM settings WHERE user_id=?').get(u.id);
-  const ah = db.prepare("SELECT v FROM kv WHERE k='attHistory'").get();
+  const [st, ah1, users, tasks] = await Promise.all([
+    db.prepare('SELECT data FROM settings WHERE user_id=?').get(u.id),
+    db.prepare("SELECT v FROM kv WHERE k='attHistory'").get(),
+    allUsersRows(),
+    visibleTasks(u),
+  ]);
   res.json({
     me: pub(u, u), mustChange: false,
-    users: allUsers().map((x) => pub(x, u)),
-    tasks: visibleTasks(u),
+    users: users.map((x) => pub(x, u)),
+    tasks,
     settings: st ? JSON.parse(st.data) : null,
-    attHistory: ah ? JSON.parse(ah.v) : [],
+    attHistory: ah1 ? JSON.parse(ah1.v) : [],
   });
-});
+}));
 
-api.put('/settings', auth(), (req, res) => {
+api.put('/settings', auth(), ah(async (req, res) => {
   const s = req.body;
   if (!s || typeof s !== 'object' || JSON.stringify(s).length > 4000) return res.status(400).json({ error: 'การตั้งค่าไม่ถูกต้อง' });
-  db.prepare('INSERT INTO settings(user_id,data) VALUES(?,?) ON CONFLICT(user_id) DO UPDATE SET data=excluded.data').run(req.user.id, JSON.stringify(s));
+  await db.prepare('INSERT INTO settings(user_id,data) VALUES(?,?) ON CONFLICT(user_id) DO UPDATE SET data=excluded.data').run(req.user.id, JSON.stringify(s));
   res.json({ ok: true });
-});
+}));
 
-api.post('/att-history', auth(), (req, res) => {
+api.post('/att-history', auth(), ah(async (req, res) => {
   const name = (req.body && req.body.name || '').toString().trim().slice(0, 100);
   if (!name) return res.status(400).json({ error: 'ชื่อไม่ถูกต้อง' });
-  const row = db.prepare("SELECT v FROM kv WHERE k='attHistory'").get();
+  const row = await db.prepare("SELECT v FROM kv WHERE k='attHistory'").get();
   const list = row ? JSON.parse(row.v) : [];
   if (!list.includes(name)) list.push(name);
-  db.prepare("INSERT INTO kv(k,v) VALUES('attHistory',?) ON CONFLICT(k) DO UPDATE SET v=excluded.v").run(JSON.stringify(list.slice(-200)));
+  await db.prepare("INSERT INTO kv(k,v) VALUES('attHistory',?) ON CONFLICT(k) DO UPDATE SET v=excluded.v").run(JSON.stringify(list.slice(-200)));
   res.json({ ok: true });
-});
+}));
 
 /* tasks */
 const TRACKED = ['title', 'type', 'priority', 'date', 'start', 'dur', 'repeat', 'status', 'assignee', 'mode', 'location', 'link'];
-api.post('/tasks', auth(), (req, res) => {
+api.post('/tasks', auth(), ah(async (req, res) => {
   const u = req.user;
   const b = req.body || {};
   const assignee = b.assignee || u.id;
-  const target = getUser(assignee);
+  const usersMap = await loadUsersMap();
+  const target = usersMap.get(assignee);
   if (!target || target.rk === 'admin' || !target.active) return res.status(400).json({ error: 'ผู้รับผิดชอบไม่ถูกต้อง' });
-  if (!canEditAssignee(u, assignee)) return res.status(403).json({ error: 'ไม่มีสิทธิ์สร้างงานในตารางนี้' });
-  const { patch, error } = cleanTask({ status: 'pending', note: '', startedAt: '', doneAt: '', repeat: 'none', reminders: [], channels: [], ...b });
+  if (!canEditAssignee(u, assignee, usersMap)) return res.status(403).json({ error: 'ไม่มีสิทธิ์สร้างงานในตารางนี้' });
+  const { patch, error } = cleanTask({ status: 'pending', note: '', startedAt: '', doneAt: '', repeat: 'none', reminders: [], channels: [], ...b }, usersMap);
   if (error) return res.status(400).json({ error });
   for (const k of ['title', 'type', 'priority', 'date', 'start', 'dur']) if (patch[k] == null) return res.status(400).json({ error: 'ข้อมูลงานไม่ครบ' });
   if (patch.status === 'cancelled') return res.status(400).json({ error: 'สร้างงานใหม่เป็นสถานะยกเลิกไม่ได้' });
@@ -305,31 +326,32 @@ api.post('/tasks', auth(), (req, res) => {
   // a task a delegate (e.g. secretary) creates on a director's calendar starts out awaiting that director's confirmation
   const approvalStatus = (target.rk === 'dir' && assignee !== u.id) ? 'pending' : 'none';
   const data = { ...patch, creator: u.id, approvalStatus, approvalReason: '', approvalAt: '', approvalBy: '' };
-  db.prepare('INSERT INTO tasks(id,assignee,data,created_at,updated_at) VALUES(?,?,?,?,?)').run(id, assignee, JSON.stringify(data), now(), now());
-  audit(u, 'task.create', 'task', id, { title: data.title, date: data.date, start: data.start, assignee });
-  res.json({ task: taskOut(db.prepare('SELECT * FROM tasks WHERE id=?').get(id), {}) });
-});
+  await db.prepare('INSERT INTO tasks(id,assignee,data,created_at,updated_at) VALUES(?,?,?,?,?)').run(id, assignee, JSON.stringify(data), now(), now());
+  await audit(u, 'task.create', 'task', id, { title: data.title, date: data.date, start: data.start, assignee });
+  res.json({ task: taskOut(await db.prepare('SELECT * FROM tasks WHERE id=?').get(id), {}) });
+}));
 
-api.patch('/tasks/:id', auth(), (req, res) => {
+api.patch('/tasks/:id', auth(), ah(async (req, res) => {
   const u = req.user;
-  const row = db.prepare('SELECT * FROM tasks WHERE id=?').get(req.params.id);
-  if (!row || !canSee(u, { assignee: row.assignee, ...JSON.parse(row.data) })) return res.status(404).json({ error: 'ไม่พบงาน' });
-  if (!canEditAssignee(u, row.assignee)) return res.status(403).json({ error: 'ไม่มีสิทธิ์แก้ไขงานนี้' });
+  const usersMap = await loadUsersMap();
+  const row = await db.prepare('SELECT * FROM tasks WHERE id=?').get(req.params.id);
+  if (!row || !canSee(u, { assignee: row.assignee, ...JSON.parse(row.data) }, usersMap)) return res.status(404).json({ error: 'ไม่พบงาน' });
+  if (!canEditAssignee(u, row.assignee, usersMap)) return res.status(403).json({ error: 'ไม่มีสิทธิ์แก้ไขงานนี้' });
   const b = { ...req.body };
   let assignee = row.assignee;
   if ('assignee' in b) {
-    const target = getUser(b.assignee);
-    if (!target || target.rk === 'admin' || !target.active || !canEditAssignee(u, b.assignee)) return res.status(400).json({ error: 'ผู้รับผิดชอบไม่ถูกต้อง' });
+    const target = usersMap.get(b.assignee);
+    if (!target || target.rk === 'admin' || !target.active || !canEditAssignee(u, b.assignee, usersMap)) return res.status(400).json({ error: 'ผู้รับผิดชอบไม่ถูกต้อง' });
     assignee = b.assignee; delete b.assignee;
   }
-  const { patch, error } = cleanTask(b);
+  const { patch, error } = cleanTask(b, usersMap);
   if (error) return res.status(400).json({ error });
   const old = JSON.parse(row.data);
   const next = { ...old, ...patch, cancelReason: old.cancelReason || '' };
   // approval: a delegate-created task on a director's calendar needs that director's confirmation again
   // whenever it moves to a new director or its date/time changes after a decision was already made
   const creatorId = old.creator || row.assignee;
-  const newAssigneeUser = getUser(assignee);
+  const newAssigneeUser = usersMap.get(assignee);
   const inApprovalCtx = !!(newAssigneeUser && newAssigneeUser.rk === 'dir' && creatorId !== assignee);
   if (!inApprovalCtx) {
     next.approvalStatus = 'none'; next.approvalReason = ''; next.approvalAt = ''; next.approvalBy = '';
@@ -368,95 +390,100 @@ api.patch('/tasks/:id', auth(), (req, res) => {
   if (cancelEntry) delete changes.status;
   if (patch.note !== undefined && patch.note !== old.note) changes.note = 'แก้ไขบันทึก';
   if (rsvpReset) changes.rsvp = 'ล้างการตอบรับ (เปลี่ยนเวลาประชุม)';
-  db.prepare('UPDATE tasks SET assignee=?, data=?, updated_at=? WHERE id=?').run(assignee, JSON.stringify(next), now(), row.id);
-  if (cancelEntry) audit(u, 'task.cancel', 'task', row.id, { title: next.title, date: next.date, start: next.start, reason: cancelEntry.reason });
-  if (Object.keys(changes).length) audit(u, 'task.update', 'task', row.id, { title: next.title, changes });
-  res.json({ task: taskOut(db.prepare('SELECT * FROM tasks WHERE id=?').get(row.id), filesFor([row.id])) });
-});
+  await db.prepare('UPDATE tasks SET assignee=?, data=?, updated_at=? WHERE id=?').run(assignee, JSON.stringify(next), now(), row.id);
+  if (cancelEntry) await audit(u, 'task.cancel', 'task', row.id, { title: next.title, date: next.date, start: next.start, reason: cancelEntry.reason });
+  if (Object.keys(changes).length) await audit(u, 'task.update', 'task', row.id, { title: next.title, changes });
+  res.json({ task: taskOut(await db.prepare('SELECT * FROM tasks WHERE id=?').get(row.id), await filesFor([row.id])) });
+}));
 
-function removeFileRow(f) {
+async function removeFileRow(f) {
   try { fs.unlinkSync(path.join(DATA_DIR, 'files', f.id)); } catch { /* already gone */ }
-  db.prepare('DELETE FROM files WHERE id=?').run(f.id);
+  await db.prepare('DELETE FROM files WHERE id=?').run(f.id);
 }
-api.delete('/tasks/:id', auth(), (req, res) => {
+api.delete('/tasks/:id', auth(), ah(async (req, res) => {
   const u = req.user;
-  const row = db.prepare('SELECT * FROM tasks WHERE id=?').get(req.params.id);
-  if (!row || !canSee(u, { assignee: row.assignee, ...JSON.parse(row.data) })) return res.status(404).json({ error: 'ไม่พบงาน' });
-  if (!canEditAssignee(u, row.assignee)) return res.status(403).json({ error: 'ไม่มีสิทธิ์ลบงานนี้' });
-  db.prepare('SELECT * FROM files WHERE task_id=?').all(row.id).forEach(removeFileRow);
-  db.prepare('DELETE FROM tasks WHERE id=?').run(row.id);
+  const usersMap = await loadUsersMap();
+  const row = await db.prepare('SELECT * FROM tasks WHERE id=?').get(req.params.id);
+  if (!row || !canSee(u, { assignee: row.assignee, ...JSON.parse(row.data) }, usersMap)) return res.status(404).json({ error: 'ไม่พบงาน' });
+  if (!canEditAssignee(u, row.assignee, usersMap)) return res.status(403).json({ error: 'ไม่มีสิทธิ์ลบงานนี้' });
+  for (const f of await db.prepare('SELECT * FROM files WHERE task_id=?').all(row.id)) await removeFileRow(f);
+  await db.prepare('DELETE FROM tasks WHERE id=?').run(row.id);
   const d = JSON.parse(row.data);
-  audit(u, 'task.delete', 'task', row.id, { title: d.title, date: d.date, start: d.start, assignee: row.assignee });
+  await audit(u, 'task.delete', 'task', row.id, { title: d.title, date: d.date, start: d.start, assignee: row.assignee });
   res.json({ ok: true });
-});
+}));
 
 /* attachments (raw body, filename in X-Filename) */
 const BLOCKED_EXT = /\.(exe|bat|cmd|com|msi|scr|ps1|vbs|js|jar|sh|dll|lnk)$/i;
-api.post('/tasks/:id/files', auth(), express.raw({ type: () => true, limit: MAX_FILE }), (req, res) => {
+api.post('/tasks/:id/files', auth(), express.raw({ type: () => true, limit: MAX_FILE }), ah(async (req, res) => {
   const u = req.user;
-  const row = db.prepare('SELECT * FROM tasks WHERE id=?').get(req.params.id);
+  const usersMap = await loadUsersMap();
+  const row = await db.prepare('SELECT * FROM tasks WHERE id=?').get(req.params.id);
   if (!row) return res.status(404).json({ error: 'ไม่พบงาน' });
-  if (!canEditAssignee(u, row.assignee)) return res.status(403).json({ error: 'ไม่มีสิทธิ์แนบไฟล์ในงานนี้' });
+  if (!canEditAssignee(u, row.assignee, usersMap)) return res.status(403).json({ error: 'ไม่มีสิทธิ์แนบไฟล์ในงานนี้' });
   let name = '';
   try { name = decodeURIComponent(req.headers['x-filename'] || ''); } catch { /* keep empty */ }
   name = path.basename(name).replace(/[\u0000-\u001f]/g, '').slice(0, 150);
   if (!name) return res.status(400).json({ error: 'ไม่พบชื่อไฟล์' });
   if (BLOCKED_EXT.test(name)) return res.status(400).json({ error: 'ไม่อนุญาตไฟล์ประเภทนี้' });
   if (!Buffer.isBuffer(req.body) || !req.body.length) return res.status(400).json({ error: 'ไฟล์ว่างเปล่า' });
-  if (db.prepare('SELECT COUNT(*) c FROM files WHERE task_id=?').get(row.id).c >= MAX_FILES_PER_TASK) return res.status(400).json({ error: `แนบได้สูงสุด ${MAX_FILES_PER_TASK} ไฟล์ต่องาน` });
+  if ((await db.prepare('SELECT COUNT(*) c FROM files WHERE task_id=?').get(row.id)).c >= MAX_FILES_PER_TASK) return res.status(400).json({ error: `แนบได้สูงสุด ${MAX_FILES_PER_TASK} ไฟล์ต่องาน` });
   const id = rid('f');
   fs.writeFileSync(path.join(DATA_DIR, 'files', id), req.body);
-  db.prepare('INSERT INTO files(id,task_id,name,size,mime,uploaded_by,uploaded_at) VALUES(?,?,?,?,?,?,?)')
+  await db.prepare('INSERT INTO files(id,task_id,name,size,mime,uploaded_by,uploaded_at) VALUES(?,?,?,?,?,?,?)')
     .run(id, row.id, name, req.body.length, String(req.headers['content-type'] || 'application/octet-stream').slice(0, 100), u.id, now());
-  audit(u, 'file.upload', 'task', row.id, { file: name, size: req.body.length, title: JSON.parse(row.data).title });
-  res.json({ files: filesFor([row.id])[row.id] });
-});
+  await audit(u, 'file.upload', 'task', row.id, { file: name, size: req.body.length, title: JSON.parse(row.data).title });
+  res.json({ files: (await filesFor([row.id]))[row.id] });
+}));
 
-api.get('/files/:id', auth(), (req, res) => {
-  const f = db.prepare('SELECT * FROM files WHERE id=?').get(req.params.id);
-  const row = f && db.prepare('SELECT * FROM tasks WHERE id=?').get(f.task_id);
-  if (!row || !canSee(req.user, { assignee: row.assignee, ...JSON.parse(row.data) })) return res.status(404).json({ error: 'ไม่พบไฟล์' });
-  audit(req.user, 'file.download', 'task', row.id, { file: f.name });
+api.get('/files/:id', auth(), ah(async (req, res) => {
+  const usersMap = await loadUsersMap();
+  const f = await db.prepare('SELECT * FROM files WHERE id=?').get(req.params.id);
+  const row = f && await db.prepare('SELECT * FROM tasks WHERE id=?').get(f.task_id);
+  if (!row || !canSee(req.user, { assignee: row.assignee, ...JSON.parse(row.data) }, usersMap)) return res.status(404).json({ error: 'ไม่พบไฟล์' });
+  await audit(req.user, 'file.download', 'task', row.id, { file: f.name });
   res.set({
     'Content-Type': 'application/octet-stream',
     'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(f.name)}`,
   });
   res.sendFile(path.join(DATA_DIR, 'files', f.id));
-});
+}));
 
-api.delete('/files/:id', auth(), (req, res) => {
-  const f = db.prepare('SELECT * FROM files WHERE id=?').get(req.params.id);
-  const row = f && db.prepare('SELECT * FROM tasks WHERE id=?').get(f.task_id);
+api.delete('/files/:id', auth(), ah(async (req, res) => {
+  const usersMap = await loadUsersMap();
+  const f = await db.prepare('SELECT * FROM files WHERE id=?').get(req.params.id);
+  const row = f && await db.prepare('SELECT * FROM tasks WHERE id=?').get(f.task_id);
   if (!row) return res.status(404).json({ error: 'ไม่พบไฟล์' });
-  if (!canEditAssignee(req.user, row.assignee)) return res.status(403).json({ error: 'ไม่มีสิทธิ์ลบไฟล์นี้' });
-  removeFileRow(f);
-  audit(req.user, 'file.delete', 'task', row.id, { file: f.name });
-  res.json({ files: filesFor([row.id])[row.id] || [] });
-});
+  if (!canEditAssignee(req.user, row.assignee, usersMap)) return res.status(403).json({ error: 'ไม่มีสิทธิ์ลบไฟล์นี้' });
+  await removeFileRow(f);
+  await audit(req.user, 'file.delete', 'task', row.id, { file: f.name });
+  res.json({ files: (await filesFor([row.id]))[row.id] || [] });
+}));
 
 /* user management (admin) */
 const USERNAME = /^[A-Za-z0-9._@-]{3,40}$/;
-function cleanManages(rk, m) {
+function cleanManages(rk, m, usersMap) {
   if (rk !== 'sec') return [];
-  return (Array.isArray(m) ? m : []).filter((id) => { const x = getUser(id); return x && x.rk === 'dir'; });
+  return (Array.isArray(m) ? m : []).filter((id) => { const x = usersMap.get(id); return x && x.rk === 'dir'; });
 }
-api.post('/users', auth(), adminOnly, (req, res) => {
+api.post('/users', auth(), adminOnly, ah(async (req, res) => {
   const b = req.body || {};
   if (!str(b.name, 100) || !b.name.trim()) return res.status(400).json({ error: 'กรุณาใส่ชื่อ-นามสกุล' });
   if (!str(b.username, 40) || !USERNAME.test(b.username)) return res.status(400).json({ error: 'ชื่อผู้ใช้ใช้ได้เฉพาะ a-z 0-9 . _ - @ (3–40 ตัว)' });
   if (!RKS.includes(b.rk)) return res.status(400).json({ error: 'บทบาทไม่ถูกต้อง' });
-  if (db.prepare('SELECT 1 FROM users WHERE username=?').get(b.username)) return res.status(400).json({ error: 'ชื่อผู้ใช้นี้ถูกใช้แล้ว' });
+  if (await db.prepare('SELECT 1 FROM users WHERE username=?').get(b.username)) return res.status(400).json({ error: 'ชื่อผู้ใช้นี้ถูกใช้แล้ว' });
   if (typeof b.password !== 'string' || b.password.length < 6) return res.status(400).json({ error: 'รหัสผ่านชั่วคราวต้องยาวอย่างน้อย 6 ตัวอักษร' });
+  const usersMap = await loadUsersMap();
   const id = rid('u');
-  db.prepare('INSERT INTO users(id,username,name,role,short,rk,manages,active,pw_hash,must_change,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)').run(
+  await db.prepare('INSERT INTO users(id,username,name,role,short,rk,manages,active,pw_hash,must_change,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)').run(
     id, b.username, b.name.trim(), (str(b.role, 100) && b.role.trim()) || ROLE_LABEL[b.rk], shortOf(b.name), b.rk,
-    JSON.stringify(cleanManages(b.rk, b.manages)), b.active === false ? 0 : 1, hashPw(b.password), 1, now());
-  audit(req.user, 'user.create', 'user', id, { username: b.username, name: b.name.trim(), rk: b.rk });
-  res.json({ user: pub(getUser(id), req.user) });
-});
+    JSON.stringify(cleanManages(b.rk, b.manages, usersMap)), b.active === false ? 0 : 1, hashPw(b.password), 1, now());
+  await audit(req.user, 'user.create', 'user', id, { username: b.username, name: b.name.trim(), rk: b.rk });
+  res.json({ user: pub(await getUser(id), req.user) });
+}));
 
-api.patch('/users/:id', auth(), adminOnly, (req, res) => {
-  const u = getUser(req.params.id);
+api.patch('/users/:id', auth(), adminOnly, ah(async (req, res) => {
+  const u = await getUser(req.params.id);
   if (!u) return res.status(404).json({ error: 'ไม่พบผู้ใช้' });
   const b = req.body || {};
   const self = u.id === req.user.id;
@@ -465,7 +492,7 @@ api.patch('/users/:id', auth(), adminOnly, (req, res) => {
   if ('role' in b) { if (!str(b.role, 100)) return res.status(400).json({ error: 'ตำแหน่งไม่ถูกต้อง' }); set.role = b.role.trim() || ROLE_LABEL[b.rk || u.rk]; }
   if ('username' in b && b.username !== u.username) {
     if (!str(b.username, 40) || !USERNAME.test(b.username)) return res.status(400).json({ error: 'ชื่อผู้ใช้ไม่ถูกต้อง' });
-    if (db.prepare('SELECT 1 FROM users WHERE username=? AND id<>?').get(b.username, u.id)) return res.status(400).json({ error: 'ชื่อผู้ใช้นี้ถูกใช้แล้ว' });
+    if (await db.prepare('SELECT 1 FROM users WHERE username=? AND id<>?').get(b.username, u.id)) return res.status(400).json({ error: 'ชื่อผู้ใช้นี้ถูกใช้แล้ว' });
     set.username = b.username;
   }
   if ('rk' in b && b.rk !== u.rk) {
@@ -474,7 +501,10 @@ api.patch('/users/:id', auth(), adminOnly, (req, res) => {
     set.rk = b.rk;
   }
   const rk = set.rk || u.rk;
-  if ('manages' in b || set.rk) set.manages = JSON.stringify(cleanManages(rk, 'manages' in b ? b.manages : JSON.parse(u.manages)));
+  if ('manages' in b || set.rk) {
+    const usersMap = await loadUsersMap();
+    set.manages = JSON.stringify(cleanManages(rk, 'manages' in b ? b.manages : JSON.parse(u.manages), usersMap));
+  }
   if ('active' in b && !!b.active !== !!u.active) {
     if (self) return res.status(400).json({ error: 'ไม่สามารถระงับบัญชีตัวเองได้' });
     set.active = b.active ? 1 : 0;
@@ -485,37 +515,49 @@ api.patch('/users/:id', auth(), adminOnly, (req, res) => {
   }
   const keys = Object.keys(set);
   if (!keys.length) return res.json({ user: pub(u, req.user) });
-  db.prepare(`UPDATE users SET ${keys.map((k) => k + '=?').join(',')} WHERE id=?`).run(...keys.map((k) => set[k]), u.id);
-  if (set.active === 0 || set.pw_hash) db.prepare('DELETE FROM sessions WHERE user_id=?').run(u.id);
+  await db.prepare(`UPDATE users SET ${keys.map((k) => k + '=?').join(',')} WHERE id=?`).run(...keys.map((k) => set[k]), u.id);
+  if (set.active === 0 || set.pw_hash) await db.prepare('DELETE FROM sessions WHERE user_id=?').run(u.id);
   for (const k of ['name', 'username', 'rk', 'role', 'active', 'manages']) if (k in set) log[k] = k === 'manages' ? 'แก้ไข' : [u[k], set[k]];
-  audit(req.user, log.passwordReset ? 'user.reset-password' : 'user.update', 'user', u.id, { name: set.name || u.name, ...log });
-  res.json({ user: pub(getUser(u.id), req.user) });
-});
+  await audit(req.user, log.passwordReset ? 'user.reset-password' : 'user.update', 'user', u.id, { name: set.name || u.name, ...log });
+  res.json({ user: pub(await getUser(u.id), req.user) });
+}));
 
-api.get('/audit', auth(), adminOnly, (req, res) => {
+api.get('/audit', auth(), adminOnly, ah(async (req, res) => {
   const limit = Math.min(Number(req.query.limit) || 200, 500);
   const q = (req.query.q || '').toString().trim().toLowerCase().slice(0, 60);
-  const rows = db.prepare('SELECT * FROM audit ORDER BY id DESC LIMIT ?').all(q ? 2000 : limit)
+  const rows = (await db.prepare('SELECT * FROM audit ORDER BY id DESC LIMIT ?').all(q ? 2000 : limit))
     .filter((r) => !q || [r.user_name, r.action, r.entity_id, r.detail].join(' ').toLowerCase().includes(q))
     .slice(0, limit)
     .map((r) => ({ id: r.id, ts: r.ts, userId: r.user_id, userName: r.user_name, action: r.action, entity: r.entity, entityId: r.entity_id, detail: r.detail ? JSON.parse(r.detail) : null }));
   res.json({ rows });
-});
+}));
 
-installExtras(api, { db, auth, audit, getUser, allUsers, mgOf, visIds, canSee, canEditAssignee, now });
+async function start() {
+  await db.exec(SCHEMA_SQL);
+  if (!(await db.prepare('SELECT 1 FROM users LIMIT 1').get())) {
+    const initial = process.env.ADMIN_PASSWORD || '1234';
+    await db.prepare('INSERT INTO users(id,username,name,role,short,rk,manages,active,pw_hash,must_change,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)')
+      .run('admin', 'admin', 'ผู้ดูแลระบบ', 'ฝ่ายเทคโนโลยีสารสนเทศ', 'AD', 'admin', '[]', 1, hashPw(initial), 1, now());
+    await audit(null, 'system.init', 'user', 'admin', { note: 'สร้างบัญชี admin เริ่มต้น' });
+    console.log(`[init] created default account admin / ${initial} (must change on first login)`);
+  }
+  await installExtras(api, { db, ah, auth, audit, getUser, allUsersRows, loadUsersMap, mgOf, visIds, canSee, canEditAssignee, now });
 
-api.use((req, res) => res.status(404).json({ error: 'ไม่พบ API' }));
+  // registered only after every route (incl. extras.js's) is in place, so none of them get shadowed
+  api.use((req, res) => res.status(404).json({ error: 'ไม่พบ API' }));
 
-/* production: serve the built frontend */
-const DIST = path.join(__dirname, '..', 'dist');
-if (fs.existsSync(DIST)) {
-  app.use(express.static(DIST));
-  app.use((req, res, next) => (req.method === 'GET' ? res.sendFile(path.join(DIST, 'index.html')) : next()));
+  /* production: serve the built frontend */
+  const DIST = path.join(__dirname, '..', 'dist');
+  if (fs.existsSync(DIST)) {
+    app.use(express.static(DIST));
+    app.use((req, res, next) => (req.method === 'GET' ? res.sendFile(path.join(DIST, 'index.html')) : next()));
+  }
+  app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
+    if (err && err.type === 'entity.too.large') return res.status(413).json({ error: 'ไฟล์ใหญ่เกินไป (สูงสุด 15 MB)' });
+    console.error(err);
+    res.status(500).json({ error: 'เกิดข้อผิดพลาดในระบบ' });
+  });
+
+  app.listen(PORT, HOST, () => console.log(`Smart Schedule API on http://${HOST}:${PORT}  (data: ${process.env.TURSO_URL ? 'turso:' + process.env.TURSO_URL : DATA_DIR})`));
 }
-app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
-  if (err && err.type === 'entity.too.large') return res.status(413).json({ error: 'ไฟล์ใหญ่เกินไป (สูงสุด 15 MB)' });
-  console.error(err);
-  res.status(500).json({ error: 'เกิดข้อผิดพลาดในระบบ' });
-});
-
-app.listen(PORT, HOST, () => console.log(`Smart Schedule API on http://${HOST}:${PORT}  (data: ${DATA_DIR})`));
+start().catch((e) => { console.error('Fatal startup error', e); process.exit(1); });

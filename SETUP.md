@@ -1,7 +1,9 @@
 # Smart Task Scheduling & Alert System
 
-React + Vite front end (`src/`) and a self-hosted Node API with SQLite (`server/`).
-The design prototype stays in `project/` for reference.
+React + Vite front end (`src/`) and a self-hosted Node API (`server/`) on a libSQL database —
+a local SQLite file by default, or a remote [Turso](https://turso.tech) database for platforms
+that don't persist local disk across redeploys (e.g. the BMS Marketplace container). The design
+prototype stays in `project/` for reference.
 
 ## Run
 
@@ -12,7 +14,7 @@ Production (one process serves the built site and the API):
 
     npm start          # http://127.0.0.1:3001   (HOST=0.0.0.0 to serve the LAN — put HTTPS in front)
 
-Requires Node 22.13+ (uses the built-in `node:sqlite`). The API does not hot-reload: restart `npm run dev` after editing `server/`.
+Requires Node 22.13+. The API does not hot-reload: restart `npm run dev` after editing `server/`.
 
 ## First login
 
@@ -22,8 +24,17 @@ first start to choose a different initial password. The admin creates every othe
 
 ## Data
 
-Everything lives in `server/data/` (override with `DATA_DIR`): `smart-schedule.db` and `files/` (attachments).
-**Back this folder up.** Other env vars: `PORT`, `HOST`, `SESSION_IDLE_MIN` (server idle timeout, default 30).
+By default everything lives in `server/data/` (override the directory with `DATA_DIR`):
+`smart-schedule.db` and `files/` (attachments). **Back this folder up** — or better, point it at Turso.
+
+**For platforms with no persistent volume** (containers that rebuild on every deploy, wiping local
+disk — confirmed to happen on the BMS Marketplace pipeline, which redeploys on every push): set
+`TURSO_URL` (and `TURSO_AUTH_TOKEN` if the database isn't public) to use a remote libSQL/Turso
+database instead of the local file. Create one free at [turso.tech](https://turso.tech) → New
+Database → copy its URL and an auth token. `files/` (uploaded attachments) still needs a real
+persistent volume separately — Turso only covers the database.
+
+Other env vars: `PORT`, `HOST`, `SESSION_IDLE_MIN` (server idle timeout, default 30).
 
 ## Security model
 

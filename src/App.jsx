@@ -414,10 +414,12 @@ export default class App extends React.Component {
     if(calMode==='week'){
       const dow=(this.today.getDay()+6)%7,ws=addDays(this.today,-dow+s.weekOff*7),we=addDays(ws,6);
       calDays=[...Array(7)].map((_,i)=>{const day=addDays(ws,i),isToday=iso(day)===todayIso,ev=eventsFor(day);
-        const lanes=[];ev.forEach(x=>{let l=lanes.findIndex(e=>e<=x.t.st);if(l<0){l=lanes.length;lanes.push(0);}lanes[l]=x.t.en;x.lane=l;});
-        const n=Math.max(lanes.length,1);
+        // lane-pack only within each cluster of mutually-overlapping events, so a box's width only
+        // shrinks because of something it actually overlaps — not because of unrelated events earlier/later that day
+        let clusters=[];ev.forEach(x=>{const cur=clusters[clusters.length-1];if(!cur||x.t.st>=cur.end){clusters.push({items:[x],end:x.t.en});}else{cur.items.push(x);if(x.t.en>cur.end)cur.end=x.t.en;}});
+        clusters.forEach(cl=>{const lanes=[];cl.items.forEach(x=>{let l=lanes.findIndex(e=>e<=x.t.st);if(l<0){l=lanes.length;lanes.push(0);}lanes[l]=x.t.en;x.lane=l;});const n=Math.max(lanes.length,1);cl.items.forEach(x=>{x.n=n;});});
         return {iso:iso(day),wd:day.toLocaleDateString('th-TH',{weekday:'short'}),num:day.getDate(),isToday,bg:isToday?'var(--today)':'var(--surface)',numC:isToday?'#fff':'var(--text)',numBg:isToday?'var(--primary)':'transparent',
-          events:ev.map(({t,k,lane})=>{const g=k==='ghost';return {t,ghost:g,textC:g?'var(--text)':'#1C2826',title:t.title,time:t.start,open:t.open,top:Math.max(0,(t.st-420)/60*HOUR)+'px',height:Math.max(24,t.dur/60*HOUR-3)+'px',left:`calc(${lane*100/n}% + 2px)`,width:`calc(${100/n}% - 4px)`,bg:g?'var(--surface)':ST[t.status].bg,c:(g?ST.pending:ST[t.status]).c,stripe:(g?ST.pending:ST[t.status]).sc,bs:g?'dashed':'solid',bc:g?ST.pending.sc:'transparent',op:(!g&&t.status==='cancelled')?0.8:1,deco:(!g&&t.status==='cancelled')?'line-through':'none'};})};});
+          events:ev.map(({t,k,lane,n})=>{const g=k==='ghost';return {t,ghost:g,textC:g?'var(--text)':'#1C2826',title:t.title,time:t.start,open:t.open,top:Math.max(0,(t.st-420)/60*HOUR)+'px',height:Math.max(24,t.dur/60*HOUR-3)+'px',left:`calc(${lane*100/n}% + 2px)`,width:`calc(${100/n}% - 4px)`,bg:g?'var(--surface)':ST[t.status].bg,c:(g?ST.pending:ST[t.status]).c,stripe:(g?ST.pending:ST[t.status]).sc,bs:g?'dashed':'solid',bc:g?ST.pending.sc:'transparent',op:(!g&&t.status==='cancelled')?0.8:1,deco:(!g&&t.status==='cancelled')?'line-through':'none'};})};});
       calLabel=ws.toLocaleDateString('th-TH',{day:'numeric',month:'short'})+' – '+we.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'});
       calPrev=()=>this.setState({weekOff:s.weekOff-1});calNext=()=>this.setState({weekOff:s.weekOff+1});calNow=()=>this.setState({weekOff:0});
     }
