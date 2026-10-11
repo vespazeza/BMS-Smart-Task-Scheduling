@@ -288,6 +288,7 @@ export function CreateTask({ V }) {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(140px,1fr))', gap: 10 }}>
             <Field label="วันที่"><input type="date" value={f.date} onChange={V.onFDate} style={dateField} /></Field>
             <Field label="เวลาเริ่ม"><input type="time" value={f.start} onChange={V.onFStart} style={dateField} /></Field>
+            <Field label="เวลาสิ้นสุด"><input type="time" value={V.fEnd} onChange={V.onFEnd} style={{ ...dateField, borderColor: V.endErr ? '#B83A32' : 'var(--border2)' }} /></Field>
             <Field label="ระยะเวลา">
               <select value={f.dur} onChange={V.onFDur} style={{ ...dateField, background: 'var(--surface)' }}>
                 <option value="15">15 นาที</option><option value="30">30 นาที</option><option value="45">45 นาที</option>
@@ -296,6 +297,7 @@ export function CreateTask({ V }) {
               </select>
             </Field>
           </div>
+          {V.endErr && <span style={{ fontSize: 12, color: '#B83A32' }}>เวลาสิ้นสุดต้องหลังเวลาเริ่มอย่างน้อย 5 นาที และไม่เกิน 24 ชม.</span>}
 
           {V.isEditing && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, background: 'var(--bg2)', borderRadius: 12, padding: '12px 14px' }}>

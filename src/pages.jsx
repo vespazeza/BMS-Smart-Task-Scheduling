@@ -583,35 +583,45 @@ function NurPanel({ V }) {
 }
 
 function GenPanel({ V }) {
+  const hasBills = V.genBills.length > 0;
+  const hasAppt = !!V.genNextAppt;
+  const hasClaims = V.genClaims.length > 0;
+  const hasAny = hasBills || hasAppt || hasClaims;
   return (
     <Stack gap={14} style={{ ...card, padding: 18 }}>
       <div style={cardTitle}>สำหรับคุณ</div>
-      <div style={grid(220, 14)}>
-        <Stack gap={6}>
-          <span style={{ fontSize: 13, fontWeight: 600 }}>บิล / ค่าใช้จ่ายใกล้ครบกำหนด</span>
-          {V.genBills.map((t) => <PendingRow key={t.id} t={t} todayIso={V.todayIso} />)}
-          {!V.genBills.length && <span style={{ fontSize: 12.5, color: 'var(--muted)' }}>ไม่มีรายการค้าง</span>}
-        </Stack>
-        <Stack gap={6}>
-          <span style={{ fontSize: 13, fontWeight: 600 }}>นัดแพทย์ครั้งถัดไป</span>
-          {V.genNextAppt ? (
-            <button onClick={V.genNextAppt.open} style={{ border: 'none', background: 'var(--tint)', borderRadius: 10, padding: '10px 12px', textAlign: 'left', cursor: 'pointer' }}>
-              <div style={{ fontSize: 14, fontWeight: 600 }}>{V.genNextAppt.title}</div>
-              <div style={{ fontSize: 12, color: 'var(--muted)' }}>{V.genNextAppt.date} · {V.genNextAppt.start}</div>
-            </button>
-          ) : <span style={{ fontSize: 12.5, color: 'var(--muted)' }}>ไม่มีนัดที่จะถึง</span>}
-        </Stack>
-        <Stack gap={6}>
-          <span style={{ fontSize: 13, fontWeight: 600 }}>สถานะเคลมที่ยื่นไว้</span>
-          {V.genClaims.map((t) => (
-            <button key={t.id} onClick={t.open} style={{ border: 'none', background: 'var(--bg2)', borderRadius: 8, padding: '8px 10px', textAlign: 'left', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', gap: 8 }}>
-              <span style={{ fontSize: 12.5 }}>{t.title}</span>
-              <span style={{ fontSize: 11.5, padding: '2px 8px', borderRadius: 99, background: t.statusBg, color: t.statusC, whiteSpace: 'nowrap' }}>{t.statusLabel}</span>
-            </button>
-          ))}
-          {!V.genClaims.length && <span style={{ fontSize: 12.5, color: 'var(--muted)' }}>ยังไม่มีการยื่นเคลม</span>}
-        </Stack>
-      </div>
+      {hasAny ? (
+        <div style={grid(220, 14)}>
+          {hasBills && (
+            <Stack gap={6}>
+              <span style={{ fontSize: 13, fontWeight: 600 }}>บิล / ค่าใช้จ่ายใกล้ครบกำหนด</span>
+              {V.genBills.map((t) => <PendingRow key={t.id} t={t} todayIso={V.todayIso} />)}
+            </Stack>
+          )}
+          {hasAppt && (
+            <Stack gap={6}>
+              <span style={{ fontSize: 13, fontWeight: 600 }}>นัดหมายครั้งถัดไป</span>
+              <button onClick={V.genNextAppt.open} style={{ border: 'none', background: 'var(--tint)', borderRadius: 10, padding: '10px 12px', textAlign: 'left', cursor: 'pointer' }}>
+                <div style={{ fontSize: 14, fontWeight: 600 }}>{V.genNextAppt.title}</div>
+                <div style={{ fontSize: 12, color: 'var(--muted)' }}>{V.genNextAppt.date} · {V.genNextAppt.start}</div>
+              </button>
+            </Stack>
+          )}
+          {hasClaims && (
+            <Stack gap={6}>
+              <span style={{ fontSize: 13, fontWeight: 600 }}>สถานะเคลมที่ยื่นไว้</span>
+              {V.genClaims.map((t) => (
+                <button key={t.id} onClick={t.open} style={{ border: 'none', background: 'var(--bg2)', borderRadius: 8, padding: '8px 10px', textAlign: 'left', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+                  <span style={{ fontSize: 12.5 }}>{t.title}</span>
+                  <span style={{ fontSize: 11.5, padding: '2px 8px', borderRadius: 99, background: t.statusBg, color: t.statusC, whiteSpace: 'nowrap' }}>{t.statusLabel}</span>
+                </button>
+              ))}
+            </Stack>
+          )}
+        </div>
+      ) : (
+        <span style={{ fontSize: 12.5, color: 'var(--muted)' }}>ยังไม่มีการนัดหมายหรือรายการที่เกี่ยวข้อง</span>
+      )}
     </Stack>
   );
 }
@@ -666,13 +676,13 @@ export function List({ V }) {
 }
 
 function TaskTip({ tip }) {
-  const { t, ghost, rect } = tip;
+  const { t, ghost, x, y } = tip;
   const W = 300;
-  const GAP = 10;
-  const fitsRight = rect.right + GAP + W <= window.innerWidth - 8;
-  const left = fitsRight ? rect.right + GAP : Math.max(8, rect.left - GAP - W);
+  const GAP = 16;
+  const fitsRight = x + GAP + W <= window.innerWidth - 8;
+  const left = fitsRight ? x + GAP : Math.max(8, x - GAP - W);
   const H = 200;
-  const top = Math.min(Math.max(8, rect.top), window.innerHeight - H - 8);
+  const top = Math.min(Math.max(8, y - 20), window.innerHeight - H - 8);
   const rows = [
     ['เวลา', `${t.timeRange} (${t.durLabel})`],
     ['ประเภท', t.type],
@@ -703,8 +713,10 @@ export function Calendar({ V }) {
   const [tip, setTip] = React.useState(null);
   const bind = (t, ghost) => ({
     onMouseEnter: (e) => {
-      const r = e.currentTarget.getBoundingClientRect();
-      setTip({ t: { ...t, isMeetingTip: t.type === 'ประชุม' && !!t.location }, ghost, rect: { left: r.left, right: r.right, top: r.top, bottom: r.bottom } });
+      setTip({ t: { ...t, isMeetingTip: t.type === 'ประชุม' && !!t.location }, ghost, x: e.clientX, y: e.clientY });
+    },
+    onMouseMove: (e) => {
+      setTip((prev) => (prev ? { ...prev, x: e.clientX, y: e.clientY } : prev));
     },
     onMouseLeave: () => setTip(null),
   });
