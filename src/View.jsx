@@ -129,6 +129,59 @@ function MobileTabs({ V }) {
   );
 }
 
+function InstallPrompt() {
+  const [deferred, setDeferred] = React.useState(null);
+  const [visible, setVisible] = React.useState(false);
+  const [isIOS, setIsIOS] = React.useState(false);
+
+  React.useEffect(() => {
+    let standalone = false;
+    try { standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true; } catch (e) {}
+    if (standalone) return;
+    let dismissed = false;
+    try { dismissed = localStorage.getItem('st_install_dismissed') === '1'; } catch (e) {}
+    if (dismissed) return;
+
+    const ios = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+    setIsIOS(ios);
+
+    const onPrompt = (e) => { e.preventDefault(); setDeferred(e); setVisible(true); };
+    window.addEventListener('beforeinstallprompt', onPrompt);
+
+    let t;
+    if (ios) t = setTimeout(() => setVisible(true), 1200);
+
+    return () => { window.removeEventListener('beforeinstallprompt', onPrompt); if (t) clearTimeout(t); };
+  }, []);
+
+  const dismiss = () => { setVisible(false); try { localStorage.setItem('st_install_dismissed', '1'); } catch (e) {} };
+
+  const install = async () => {
+    if (!deferred) return;
+    deferred.prompt();
+    try { await deferred.userChoice; } catch (e) {}
+    setDeferred(null);
+    dismiss();
+  };
+
+  if (!visible) return null;
+  return (
+    <div style={{ position: 'fixed', left: 14, right: 14, bottom: 14, zIndex: 80, maxWidth: 440, margin: '0 auto', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, boxShadow: '0 18px 40px rgba(11,22,54,0.22)', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
+      <div style={{ width: 40, height: 40, flex: 'none', borderRadius: 10, background: 'linear-gradient(145deg,#1e293b,#020617)', display: 'grid', placeItems: 'center', fontWeight: 900, fontSize: 15 }}>
+        <span><span style={{ color: '#fff' }}>S</span><span style={{ color: '#3b82f6' }}>T</span></span>
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 13.5, fontWeight: 600 }}>ติดตั้งแอปนี้ลงเครื่อง</div>
+        <div style={{ fontSize: 12, color: 'var(--muted)' }}>
+          {isIOS ? 'แตะปุ่มแชร์ แล้วเลือก "เพิ่มไปยังหน้าจอโฮม"' : 'ใช้งานได้เร็วและสะดวกขึ้น เหมือนแอปทั่วไป'}
+        </div>
+      </div>
+      {!isIOS && <button onClick={install} className="btn-grad" style={{ border: 'none', borderRadius: 10, padding: '8px 14px', fontSize: 13, fontWeight: 600, cursor: 'pointer', flex: 'none' }}>ติดตั้ง</button>}
+      <button onClick={dismiss} title="ปิด" style={{ border: 'none', background: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: 18, lineHeight: 1, flex: 'none', padding: 4 }}>×</button>
+    </div>
+  );
+}
+
 export default function View({ V }) {
   const fr = V.fr;
   return (
@@ -161,6 +214,7 @@ export default function View({ V }) {
         {V.showPwForm && <ChangePassword V={V} />}
         <Toasts V={V} />
       </div>
+      <InstallPrompt />
     </>
   );
 }
