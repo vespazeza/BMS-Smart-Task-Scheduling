@@ -136,7 +136,10 @@ function InstallPrompt() {
 
   React.useEffect(() => {
     let standalone = false;
-    try { standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true; } catch (e) {}
+    try {
+      standalone = ['standalone', 'minimal-ui', 'window-controls-overlay', 'fullscreen']
+        .some((mode) => window.matchMedia(`(display-mode: ${mode})`).matches) || window.navigator.standalone === true;
+    } catch (e) {}
     if (standalone) return;
     let dismissed = false;
     try { dismissed = localStorage.getItem('st_install_dismissed') === '1'; } catch (e) {}

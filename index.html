@@ -26,6 +26,12 @@
         window.__bipEvent = e;
         window.dispatchEvent(new CustomEvent('bip-ready'));
       });
+      // Once the browser confirms the app was actually installed, never ask again —
+      // belt-and-braces alongside the display-mode check (covers e.g. a device that
+      // installed it once but, on this particular launch, isn't reporting standalone).
+      window.addEventListener('appinstalled', () => {
+        try { localStorage.setItem('st_install_dismissed', '1'); } catch (e) {}
+      });
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js').catch(() => {}); });
       }
