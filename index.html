@@ -17,6 +17,15 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
     <script>
+      // Capture beforeinstallprompt as early as possible, before the React bundle
+      // loads/parses/mounts — otherwise the event can fire and be lost before any
+      // listener registered inside a React effect has a chance to attach.
+      window.__bipEvent = null;
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        window.__bipEvent = e;
+        window.dispatchEvent(new CustomEvent('bip-ready'));
+      });
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js').catch(() => {}); });
       }

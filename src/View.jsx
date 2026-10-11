@@ -145,13 +145,17 @@ function InstallPrompt() {
     const ios = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
     setIsIOS(ios);
 
-    const onPrompt = (e) => { e.preventDefault(); setDeferred(e); setVisible(true); };
-    window.addEventListener('beforeinstallprompt', onPrompt);
+    // The event is captured as early as possible in index.html (before this
+    // component even mounts) and stashed on window.__bipEvent, since the
+    // page-load race means it can fire before a React effect attaches.
+    const take = () => { if (window.__bipEvent) { setDeferred(window.__bipEvent); setVisible(true); } };
+    take();
+    window.addEventListener('bip-ready', take);
 
     let t;
     if (ios) t = setTimeout(() => setVisible(true), 1200);
 
-    return () => { window.removeEventListener('beforeinstallprompt', onPrompt); if (t) clearTimeout(t); };
+    return () => { window.removeEventListener('bip-ready', take); if (t) clearTimeout(t); };
   }, []);
 
   const dismiss = () => { setVisible(false); try { localStorage.setItem('st_install_dismissed', '1'); } catch (e) {} };
@@ -161,6 +165,7 @@ function InstallPrompt() {
     deferred.prompt();
     try { await deferred.userChoice; } catch (e) {}
     setDeferred(null);
+    window.__bipEvent = null;
     dismiss();
   };
 
