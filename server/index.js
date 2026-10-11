@@ -40,8 +40,9 @@ const db = {
 /** wraps an async Express handler/middleware so a rejected promise reaches the error middleware instead of hanging the request */
 const ah = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
+// WAL is a local-SQLite-file concept; Turso's hosted databases reject the pragma outright
 const SCHEMA_SQL = `
-PRAGMA journal_mode=WAL;
+${process.env.TURSO_URL ? '' : 'PRAGMA journal_mode=WAL;'}
 CREATE TABLE IF NOT EXISTS users(
   id TEXT PRIMARY KEY, username TEXT UNIQUE NOT NULL COLLATE NOCASE, name TEXT NOT NULL, role TEXT, short TEXT,
   rk TEXT NOT NULL, manages TEXT NOT NULL DEFAULT '[]', active INTEGER NOT NULL DEFAULT 1,
