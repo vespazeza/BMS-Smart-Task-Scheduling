@@ -19,6 +19,7 @@ function Sidebar({ V }) {
         <div style={{ minWidth: 0 }}>
           <div style={{ fontWeight: 700, fontSize: 13.5, lineHeight: 1.3, color: '#fff' }}>Smart Task Scheduling</div>
           <div style={{ fontSize: 11, color: '#A3B3D6', lineHeight: 1.4, marginTop: 1 }}>ระบบจัดตารางงาน &amp; แจ้งเตือนอัจฉริยะ</div>
+          <div style={{ fontSize: 10, color: '#6B7A9E', lineHeight: 1.4, marginTop: 2 }}>V.1.1</div>
         </div>
       </div>
       <nav style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: 4 }}>
