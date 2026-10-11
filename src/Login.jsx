@@ -126,7 +126,7 @@ export default function Login({ V }) {
         </div>
         <div style={{ textAlign: 'center', fontSize: 13, color: '#475569', lineHeight: 1.6, marginTop: 24 }}>
           <div>Smart Task System</div>
-          <div style={{ color: '#94a3b8' }}>version 1.0.0</div>
+          <div style={{ color: '#94a3b8' }}>V.1.1</div>
         </div>
       </div>
     </div>
