@@ -72,11 +72,12 @@ export function Chips({ items, pad = '6px 12px', radius = 99 }) {
 }
 
 export function Kpi({ s, size = 28, pad = '14px 16px' }) {
+  const Tag = s.onClick ? 'button' : 'div';
   return (
-    <div style={{ ...card, padding: pad, display: 'flex', flexDirection: 'column', gap: 6 }}>
+    <Tag onClick={s.onClick} style={{ ...card, padding: pad, display: 'flex', flexDirection: 'column', gap: 6, width: '100%', textAlign: 'left', font: 'inherit', cursor: s.onClick ? 'pointer' : 'default' }}>
       <span style={{ fontSize: 13, color: 'var(--muted)' }}>{s.label}</span>
       <span style={{ fontSize: size, fontWeight: 500, fontFamily: MONO, color: s.c, lineHeight: 1.1 }}>{s.value}</span>
-    </div>
+    </Tag>
   );
 }
 
